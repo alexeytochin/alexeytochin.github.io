@@ -1,0 +1,41 @@
+---
+title: "About"
+about:
+  template: trestles
+  links:
+    - icon: linkedin
+      text: LinkedIn
+      href: https://www.linkedin.com/in/alexey-tochin-40717989/?locale=en_US
+    - icon: github
+      text: GitHub
+      href: https://github.com/alexeytochin
+    - icon: telegram
+      text: Telegram
+      href: https://t.me/Alexey_Tochin
+    - icon: envelope
+      text: e-mail
+      href: mailto:Alexey.Tochin@gmail.com
+toc: false
+number-sections: false
+---
+
+## The blog
+
+In this blog, I'm gonna post my own thoughts on various topics from machine
+learning to mathematical physics.
+
+## The author
+
+I'm a mathematician and machine learning engineer.
+My Ph.D. in mathematics is made at University of Bergen and
+the alma mater is Saint-Petersburg State University where
+I studied quantum field theory.
+I'm excited about the relation between
+the mathematics of information theory and theoretical physics.
+
+## The website
+
+This website is built with [Quarto](https://quarto.org).
+Feel free to use
+[this forum](https://github.com/alexeytochin/alexeytochin.github.io/discussions/3)
+for website technical issues.

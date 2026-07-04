@@ -1,0 +1,68 @@
+project:
+  type: website
+  output-dir: docs
+  render:
+    - "*.qmd"
+    - "posts/**/*.qmd"
+    - "!posts/rnn_t/**"
+  post-render:
+    - touch docs/.nojekyll
+
+website:
+  title: "Alexey Tochin"
+  description: "Notes on machine learning and mathematical physics."
+  site-url: "https://alexeytochin.github.io"
+  repo-url: "https://github.com/alexeytochin/alexeytochin.github.io"
+  navbar:
+    pinned: true
+    left:
+      - text: "Home"
+        href: index.qmd
+      - text: "Machine Learning"
+        href: machine_learning.qmd
+      - text: "Other Topics"
+        href: other_topics.qmd
+      - text: "About"
+        href: about.qmd
+      - text: "References"
+        href: references.qmd
+    right:
+      - icon: github
+        href: "https://github.com/alexeytochin"
+        aria-label: GitHub
+  page-footer:
+    left: "© 2026 Alexey Tochin"
+    right:
+      - icon: linkedin
+        href: "https://www.linkedin.com/in/alexey-tochin-40717989/?locale=en_US"
+        aria-label: LinkedIn
+      - icon: github
+        href: "https://github.com/alexeytochin"
+        aria-label: GitHub
+      - icon: telegram
+        href: "https://t.me/Alexey_Tochin"
+        aria-label: Telegram
+      - icon: envelope
+        href: "mailto:Alexey.Tochin@gmail.com"
+        aria-label: e-mail
+
+format:
+  html:
+    theme:
+      - cosmo
+      - theme.scss
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    html-math-method: mathjax
+    link-external-newwindow: true
+    include-in-header:
+      text: |
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+        <script>
+          window.MathJax = {
+            tex: { tags: 'all' }
+          };
+        </script>

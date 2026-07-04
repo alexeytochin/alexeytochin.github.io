@@ -1,0 +1,16 @@
+---
+title: "All Articles"
+subtitle: "Notes on machine learning and mathematical physics."
+listing:
+  contents: posts
+  sort: "date desc"
+  type: default
+  categories: true
+  sort-ui: false
+  filter-ui: false
+  fields: [image, date, title, description, categories]
+page-layout: full
+title-block-banner: false
+toc: false
+number-sections: false
+---
