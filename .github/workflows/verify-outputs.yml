@@ -52,13 +52,40 @@ jobs:
           mv docs docs_committed
           quarto render
 
-      - name: Compare HTML & assets (byte-identical, ignoring sitemap + PDFs)
+      - name: Compare HTML content (normalized)
         run: |
-          if ! diff -r -x 'sitemap.xml' -x '*.pdf' docs_committed docs; then
-            echo "::error::Committed HTML/assets in docs/ are out of date. Run 'quarto render' and commit docs/."
-            exit 1
+          # Normalize environment-dependent bits that are NOT staleness:
+          #   * asset content-hashes (compiled theme differs per machine),
+          #   * timezone-dependent listing date sorts,
+          #   * .qmd file-mtime sort (git does not preserve mtimes).
+          norm() {
+            sed -E \
+              -e 's/-[0-9a-f]{32}(\.min\.(css|js))/-HASH\1/g' \
+              -e 's/ data-listing-date-sort="[0-9]+"//g' \
+              -e 's/ data-listing-date-modified-sort="[0-9]+"//g' \
+              -e 's/ data-listing-file-modified-sort="[0-9]+"//g' \
+              "$1"
+          }
+          fail=0
+          # same set of HTML pages?
+          if ! diff <(cd docs_committed && find . -name '*.html' | sort) \
+                    <(cd docs && find . -name '*.html' | sort) >/dev/null; then
+            echo "::error::The set of HTML pages changed. Run 'quarto render' and commit docs/."
+            diff <(cd docs_committed && find . -name '*.html' | sort) \
+                 <(cd docs && find . -name '*.html' | sort) || true
+            fail=1
           fi
-          echo "HTML/assets are up to date."
+          # content of each page (normalized)
+          while IFS= read -r f; do
+            rel="${f#docs/}"
+            if [ -f "docs_committed/$rel" ] && ! diff <(norm "docs_committed/$rel") <(norm "$f") >/dev/null; then
+              echo "::error::HTML content out of date: $rel (run 'quarto render' and commit docs/)."
+              diff <(norm "docs_committed/$rel") <(norm "$f") | head -40 || true
+              fail=1
+            fi
+          done < <(find docs -name '*.html' | sort)
+          if [ "$fail" -eq 0 ]; then echo "HTML content is up to date."; fi
+          exit $fail
 
       - name: Compare PDFs by text content
         run: |
