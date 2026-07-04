@@ -20,13 +20,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Quarto (+ TinyTeX for PDF)
+      - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           version: 1.9.38
-          tinytex: true
+
+      # Installs TinyTeX and puts tlmgr / lualatex on PATH (Quarto renders PDF with it).
+      - name: Set up TinyTeX
+        uses: r-lib/actions/setup-tinytex@v2
 
       - name: Install poppler-utils (pdftotext)
         run: sudo apt-get update && sudo apt-get install -y poppler-utils
@@ -36,6 +37,7 @@ jobs:
       # PDFs need by name (collections pull their dependencies) so no lookup happens.
       - name: Install LaTeX packages for the PDF
         run: |
+          tlmgr --version
           tlmgr update --self
           tlmgr install \
             collection-latexrecommended \
