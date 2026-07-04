@@ -31,6 +31,20 @@ jobs:
       - name: Install poppler-utils (pdftotext)
         run: sudo apt-get update && sudo apt-get install -y poppler-utils
 
+      # TinyTeX ships without the file->package index, so Quarto's filename-based
+      # auto-install can't resolve e.g. luatexbase.sty. Pre-install the packages the
+      # PDFs need by name (collections pull their dependencies) so no lookup happens.
+      - name: Install LaTeX packages for the PDF
+        run: |
+          tlmgr update --self
+          tlmgr install \
+            collection-latexrecommended \
+            collection-latexextra \
+            collection-fontsrecommended \
+            collection-luatex \
+            collection-mathscience \
+            fontawesome5
+
       - name: Snapshot committed outputs, then re-render
         run: |
           mv docs docs_committed
