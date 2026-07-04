@@ -1,0 +1,21 @@
+/*-- scss:defaults --*/
+
+$font-family-base: "EB Garamond", Georgia, "Times New Roman", serif;
+$headings-font-weight: 500;
+
+$navbar-bg: #7a1f1f;   // oxblood — matches link color
+
+$body-bg:          #fbfaf6;
+$body-color:       #2a2722;
+$link-color:       #7a1f1f;
+$link-hover-color: #561515;
+$border-color:     #e4ded0;
+$code-bg:          #f2ece0;
+$code-color:       #6a4a32;
+
+/*-- scss:rules --*/
+
+body { font-size: 1.05rem; line-height: 1.7; }
+
+main p { text-align: justify; hyphens: auto; }
+main   { max-width: 46rem; }

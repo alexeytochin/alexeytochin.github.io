@@ -1,0 +1,28 @@
+# Shared front-matter for all posts
+freeze: auto
+
+author: "Alexey Tochin"
+
+format:
+  html:
+    toc: true
+  pdf:
+    toc: true
+    number-sections: true
+    colorlinks: true
+    filters:
+      - ../../_filters/pdf-equations.lua
+
+# GitHub Discussions comments.
+# Enable the giscus app on the repo and turn on Discussions, then fill the
+# repo-id / category / category-id from https://giscus.app
+comments:
+  giscus:
+    repo: alexeytochin/alexeytochin.github.io
+    repo-id: ""            # TODO: from giscus.app
+    category: "General"
+    category-id: ""        # TODO: from giscus.app
+    mapping: pathname
+    reactions-enabled: true
+    theme: light
+    language: en

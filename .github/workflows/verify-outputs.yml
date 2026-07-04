@@ -1,0 +1,123 @@
+name: Verify rendered outputs
+
+# Fails if the committed docs/ (HTML + PDF) is out of sync with the .qmd sources.
+# HTML/assets are compared byte-for-byte (deterministic for a pinned Quarto version,
+# excluding the build-stamped sitemap.xml). PDFs embed a creation timestamp, so they
+# are compared by extracted text instead of raw bytes.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: 1.9.38
+
+      # Installs TinyTeX and puts tlmgr / lualatex on PATH (Quarto renders PDF with it).
+      - name: Set up TinyTeX
+        uses: r-lib/actions/setup-tinytex@v2
+
+      - name: Install poppler-utils (pdftotext)
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+
+      # TinyTeX ships without the file->package index, so Quarto's filename-based
+      # auto-install can't resolve e.g. luatexbase.sty. Pre-install the packages the
+      # PDFs need by name (collections pull their dependencies) so no lookup happens.
+      - name: Install LaTeX packages for the PDF
+        run: |
+          tlmgr --version
+          tlmgr update --self
+          tlmgr install \
+            collection-latexrecommended \
+            collection-latexextra \
+            collection-fontsrecommended \
+            collection-luatex \
+            collection-mathscience \
+            fontawesome5
+
+      - name: Snapshot committed outputs, then re-render
+        run: |
+          mv docs docs_committed
+          quarto render
+
+      - name: Compare HTML content (normalized)
+        run: |
+          # Normalize environment-dependent bits that are NOT staleness:
+          #   * asset content-hashes (compiled theme differs per machine),
+          #   * timezone-dependent listing date sorts,
+          #   * .qmd file-mtime sort (git does not preserve mtimes).
+          norm() {
+            sed -E \
+              -e 's/-[0-9a-f]{32}(\.min\.(css|js))/-HASH\1/g' \
+              -e 's/ data-listing-date-sort="[0-9]+"//g' \
+              -e 's/ data-listing-date-modified-sort="[0-9]+"//g' \
+              -e 's/ data-listing-file-modified-sort="[0-9]+"//g' \
+              "$1"
+          }
+          fail=0
+          # same set of HTML pages?
+          if ! diff <(cd docs_committed && find . -name '*.html' | sort) \
+                    <(cd docs && find . -name '*.html' | sort) >/dev/null; then
+            echo "::error::The set of HTML pages changed. Run 'quarto render' and commit docs/."
+            diff <(cd docs_committed && find . -name '*.html' | sort) \
+                 <(cd docs && find . -name '*.html' | sort) || true
+            fail=1
+          fi
+          # content of each page (normalized)
+          while IFS= read -r f; do
+            rel="${f#docs/}"
+            if [ -f "docs_committed/$rel" ] && ! diff <(norm "docs_committed/$rel") <(norm "$f") >/dev/null; then
+              echo "::error::HTML content out of date: $rel (run 'quarto render' and commit docs/)."
+              diff <(norm "docs_committed/$rel") <(norm "$f") | head -40 || true
+              fail=1
+            fi
+          done < <(find docs -name '*.html' | sort)
+          if [ "$fail" -eq 0 ]; then echo "HTML content is up to date."; fi
+          exit $fail
+
+      - name: Compare PDFs by text content
+        run: |
+          status=0
+          norm() { pdftotext "$1" - | tr -d '\f' | tr -s '[:space:]' ' '; }
+
+          # every freshly rendered PDF must exist in the commit and match by text
+          while IFS= read -r pdf; do
+            rel="${pdf#docs/}"
+            if [ ! -f "docs_committed/$rel" ]; then
+              echo "::error::New PDF not committed: docs/$rel (run 'quarto render' and commit docs/)."
+              status=1; continue
+            fi
+            if ! diff <(norm "docs_committed/$rel") <(norm "$pdf") >/dev/null; then
+              echo "::error::PDF text is out of date: docs/$rel (run 'quarto render' and commit docs/)."
+              status=1
+            fi
+            # guard against broken cross-references leaking into the PDF
+            if pdftotext "$pdf" - | grep -q '??'; then
+              echo "::error::Broken cross-reference ('??') found in docs/$rel."
+              status=1
+            fi
+          done < <(find docs -name '*.pdf')
+
+          # committed PDFs that are no longer produced (removed/renamed source)
+          while IFS= read -r pdf; do
+            rel="${pdf#docs_committed/}"
+            if [ ! -f "docs/$rel" ]; then
+              echo "::error::Committed PDF is no longer produced by a render: $rel"
+              status=1
+            fi
+          done < <(find docs_committed -name '*.pdf')
+
+          if [ "$status" -eq 0 ]; then echo "PDFs are up to date."; fi
+          exit $status

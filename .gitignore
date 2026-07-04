@@ -1,4 +1,10 @@
 .idea/*
+.claude/
 python/*
 **/latex/*
 **/temp_*
+
+/.quarto/
+**/*.quarto_ipynb
+/docs_committed/
+

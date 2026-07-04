@@ -1,0 +1,12 @@
+---
+title: "References"
+toc: false
+number-sections: false
+---
+
+## Similar blogs
+
+1. [Ro](https://rojefferson.blog)
+2. [Jaan Altosaar](https://jaan.io)
+3. [Kevin Shen](https://kevinshen-57148.medium.com)
+4. [Charles H Martin](https://calculatedcontent.com/)

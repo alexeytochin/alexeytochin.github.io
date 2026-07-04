@@ -1,0 +1,16 @@
+---
+title: "Machine Learning"
+listing:
+  contents: posts
+  sort: "date desc"
+  type: default
+  categories: false
+  sort-ui: false
+  filter-ui: false
+  include:
+    categories: "machine-learning"
+  fields: [image, date, title, description]
+page-layout: full
+toc: false
+number-sections: false
+---

@@ -1,0 +1,21 @@
+[
+  {
+    "listing": "/machine_learning.html",
+    "items": [
+      "/posts/batch_size_vs_momentum/index.html"
+    ]
+  },
+  {
+    "listing": "/index.html",
+    "items": [
+      "/posts/batch_size_vs_momentum/index.html",
+      "/posts/pearcey_basis/index.html"
+    ]
+  },
+  {
+    "listing": "/other_topics.html",
+    "items": [
+      "/posts/pearcey_basis/index.html"
+    ]
+  }
+]
