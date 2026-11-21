@@ -2,30 +2,30 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://alexeytochin.github.io/references.html</loc>
-    <lastmod>2026-07-04T09:59:27.691Z</lastmod>
+    <lastmod>2026-07-05T10:23:29.490Z</lastmod>
   </url>
   <url>
-    <loc>https://alexeytochin.github.io/posts/batch_size_vs_momentum/index.html</loc>
-    <lastmod>2026-07-04T09:52:26.992Z</lastmod>
+    <loc>https://alexeytochin.github.io/posts/is_batch_size_a_real_hyperparameter/index.html</loc>
+    <lastmod>2026-11-21T21:59:20.387Z</lastmod>
   </url>
   <url>
     <loc>https://alexeytochin.github.io/machine_learning.html</loc>
-    <lastmod>2026-07-04T09:59:15.731Z</lastmod>
+    <lastmod>2026-07-05T10:23:29.490Z</lastmod>
   </url>
   <url>
     <loc>https://alexeytochin.github.io/about.html</loc>
-    <lastmod>2026-07-04T09:59:25.763Z</lastmod>
+    <lastmod>2026-11-21T14:35:15.349Z</lastmod>
   </url>
   <url>
     <loc>https://alexeytochin.github.io/index.html</loc>
-    <lastmod>2026-07-04T09:59:10.563Z</lastmod>
+    <lastmod>2026-11-21T14:38:29.685Z</lastmod>
   </url>
   <url>
     <loc>https://alexeytochin.github.io/other_topics.html</loc>
-    <lastmod>2026-07-04T09:59:17.075Z</lastmod>
+    <lastmod>2026-07-05T10:23:29.490Z</lastmod>
   </url>
   <url>
     <loc>https://alexeytochin.github.io/posts/pearcey_basis/index.html</loc>
-    <lastmod>2026-07-04T10:25:49.696Z</lastmod>
+    <lastmod>2026-11-22T19:25:26.448Z</lastmod>
   </url>
 </urlset>

@@ -6,6 +6,7 @@ author: "Alexey Tochin"
 format:
   html:
     toc: true
+    lightbox: true   # click a figure to open it full-screen and zoom
   pdf:
     toc: true
     number-sections: true
@@ -13,15 +14,14 @@ format:
     filters:
       - ../../_filters/pdf-equations.lua
 
-# GitHub Discussions comments.
-# Enable the giscus app on the repo and turn on Discussions, then fill the
-# repo-id / category / category-id from https://giscus.app
+# GitHub Discussions comments (giscus). Ids from the GitHub GraphQL API:
+# repository.id and the discussion category's id. Needs a public repo.
 comments:
   giscus:
     repo: alexeytochin/alexeytochin.github.io
-    repo-id: ""            # TODO: from giscus.app
-    category: "General"
-    category-id: ""        # TODO: from giscus.app
+    repo-id: "MDEwOlJlcG9zaXRvcnkzMTQ3OTMzMDQ="
+    category: "Comments"
+    category-id: "DIC_kwDOEsNdWM4DLrgC"
     mapping: pathname
     reactions-enabled: true
     theme: light

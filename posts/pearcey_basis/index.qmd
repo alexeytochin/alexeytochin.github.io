@@ -6,232 +6,251 @@ description: >
   projectors in L₂. This post explores an extension of this topic: a basis for
   the Pearcey Kernel, found using third-order equations and biorthogonal bases.
 date: "2021-04-08"
-date-modified: "2024-06-24"
+date-modified: "2026-11-22"
 categories: [other-topics]
-image: images/eigenvalue_distribution_15_6.png
+image: images/thumbnail.png
 ---
 
-There is a well-known connection between orthogonal polynomials,
-second-order Sturm-Liouville differential equations, random matrices,
-and orthogonal projectors in $L_2$.
-This post explores an extension of this topic.
-We have identified a basis for the
-*Pearcey Kernel*,
-initially introduced by
-[Brezin and Hikami](https://arxiv.org/abs/cond-mat/9804024).
-To achieve this,
-we move beyond the traditional approach of second-order differential equations
-and orthogonal polynomials,
-employing third-order equations and biorthogonal bases instead.
+The *Pearcey kernel* was introduced by
+[Brézin and Hikami](https://arxiv.org/abs/cond-mat/9804023).
+It describes the eigenvalues of a large random Hermitian matrix
+shifted by a fixed matrix with eigenvalues $\pm a$,
+near the point where the two clusters of eigenvalues merge.
+We build a basis for this kernel
+following the Gaussian unitary ensemble,
+whose kernel is the projector onto the first $N$ Hermite functions.
 
-For readers who may not be familiar with this topic,
-we have prepared a [crash introduction](#crash-introduction) below.
-If you're already comfortable with concepts like the
-Circular Law for random matrices,
-the Airy kernel,
-and determinantal point processes,
-you can skip this section without missing any crucial information.
+For the shifted matrix at finite $N$,
+the kernel has no decomposition into an orthonormal basis.
+It does have a biorthogonal one:
+two families of functions, dual to each other,
+in which the kernel is the sum of the first $2N$ terms.
+In the scaling limit this basis becomes a continuous family
+indexed by $\lambda \in \mathbb{R}$,
+and $K^{\mathrm{Pear}}$ is its integral over $\lambda > 0$,
+as the Airy kernel is the integral of the shifted Airy functions over the half-line.
+At finite $N$ the proofs are complete;
+in the limit some steps are formal.
 
-## Crash Introduction {#crash-introduction}
+We assume familiarity with the Fourier transform,
+contour integrals and residues,
+linear differential equations
+and the Dirac delta function.
+@sec-crash-introduction is a short introduction to random matrices:
+the Gaussian unitary ensemble, determinantal point processes,
+and the sine and other kernels.
+Readers who know them can skim it,
+but the later sections follow its pattern and refer to its equations.
 
-### Orthogonal Matrix Ensemble {#sec-orthogonal-ensemble}
+## Crash Introduction {#sec-crash-introduction}
 
-Let $H$ be an $N \times N$ real-valued matrix.
-We define a probability measure for such matrices
-using the following probability density function:
+### Gaussian Unitary Ensemble {#sec-unitary-ensemble}
+
+Let $H$ be an $N \times N$ Hermitian matrix.
+We define a probability measure on such matrices
+by the density
 $$
-    \rho_N^{\mathrm{ort}}(H) := \mathcal{C}_N \, e^{-\frac12 \mathrm{Tr}\, H^2}.
+    \rho_N^{\mathrm{GUE}}(H) := Z_N^{-1} \, \mathrm{e}^{-\frac12 \mathrm{Tr}\, H^2},
 $$
-Here, $\mathcal{C}_N$
-is the normalization coefficient that depends solely on its indices
-and may vary from one equation to another.
-This probabilistic model is referred to as the
-*orthogonal matrix ensemble*
-because it remains invariant under the orthogonal matrix transformation
-$H \rightarrow O^{-1} H O$
-for any orthogonal matrix $O$.
+with respect to the Lebesgue measure on the $N^2$ real parameters of $H$:
+the diagonal entries and the real and imaginary parts of the entries above the diagonal.
+Here $Z_N$
+is a normalization constant that depends only on $N$
+and may differ from one equation to another.
+This model is called the
+*Gaussian unitary ensemble* (GUE),
+because the density is invariant under the transformation
+$H \rightarrow U^{-1} H U$
+for any unitary matrix $U$.
 
-It is possible to show (see, for example,
-[Mehta, Random Matrices,](https://books.google.ru/books/about/Random_Matrices.html?id=Kp3Nx03_gMwC&redir_esc=y)
-section 5.3)
-that the random law for the set of eigenvalues
+The eigenvalues
 $\{\lambda_i\}_{0 \leq i < N}$
 of $H$
-is given by the probability density function:
+then have the joint density
+(see, for example,
+[M. L. Mehta, *Random Matrices*, 3rd ed., Elsevier, 2004](https://books.google.com/books?id=Kp3Nx03_gMwC),
+the chapter on the joint probability density function for the eigenvalues)
 $$
-    \rho_N^{\mathrm{ort}}(\lambda_0, \lambda_1, \dotso \lambda_{N-1})
-    = \mathcal{C}_N
-    \prod_{0 \leq i < j < N} \left| \lambda_i - \lambda_j \right|
-    \prod_{0 \leq i < N} e^{-\frac{\lambda_i^2}{2}}
-    = \mathcal{C}_N \,
-    e^{ \sum_{0 \leq i < j < N} \log\left| \lambda_i - \lambda_j \right|
+    \rho_N^{\mathrm{GUE}}(\lambda_0, \lambda_1, \dotso \lambda_{N-1})
+    = Z_N^{-1}
+    \prod_{0 \leq i < j < N} \left| \lambda_i - \lambda_j \right|^2
+    \prod_{0 \leq i < N} \mathrm{e}^{-\frac{\lambda_i^2}{2}}
+    = Z_N^{-1} \,
+    \mathrm{e}^{ 2 \sum_{0 \leq i < j < N} \log\left| \lambda_i - \lambda_j \right|
     - \frac12 \sum_{0 \leq i < N} \lambda_i^2}.
 $$
-This probabilistic model can be easily interpreted physically.
-The expression above represents a Boltzmann distribution
-for a one-dimensional gas containing $N$
-particles, located in a stationary quadratic potential
-with a repulsive logarithmic potential between each pair of particles.
+This density is a Boltzmann distribution
+for a one-dimensional gas of $N$ particles
+in an external quadratic potential,
+with a logarithmic repulsion between each pair of particles,
+the pair energy being $E_{ij} = -2 \log \lvert \lambda_i - \lambda_j \rvert$.
 
 ![Samples of eigenvalues $\lambda$ for $N = 30$.
-Each of the 20 strings corresponds to a random sample of the set of $N$
-eigenvalues (particles) colored green.
-The blue curve is the average eigenvalue density function.](images/eigenvalue_distribution_30.png)
+Each of the 20 rows is one random sample of the $N$
+eigenvalues (particles), shown in green.
+The blue curve is the mean eigenvalue density.](images/eigenvalue_distribution_30.png)
 
 ### Determinantal Point Process
 
-The random law described in the previous subsection is an example of a
-*determinantal point process*.
-This is a type of random law on a collection of $N$
+The eigenvalue distribution of the previous subsection is an example of a
+*determinantal point process*,
+a random collection of $N$
 unordered real numbers
 $\{\lambda_i\}_{0 \leq i < N}$
-represented by the probability density function:
+with a joint density of the form
 $$
     \rho_N( \lambda_0, \lambda_1, \dotso \lambda_{N-1} )
-    := \mathcal{C}_N \, \det
+    := Z_N^{-1} \det
     \left[
         \left\{ K(\lambda_i, \lambda_j) \right\}_{0 \leq i,j < N}
     \right],
 $$
 where $K(x,y)$
 is a real-valued function of two arguments.
-This function can be understood as the kernel of a linear operator that is
+We read it as the kernel of the linear operator
 $$
-    K: \psi(x) \mapsto (K \psi)(x) := \int dy~ K(x,y) \psi(y).
+    K: f(x) \mapsto (K f)(x) := \int \mathrm{d}y~ K(x,y) f(y),
 $$
-This operator acts on a linear space of functions represented by $\psi(x)$.
-We assume the projection property:
+acting on functions $f(x)$ of one real variable.
+We assume that $K$ has the projection property
 $$
-    \int_{-\infty}^{+\infty} dy~ K(x, y) K(y, z) = K(x, z).
+    \int_{-\infty}^{+\infty} \mathrm{d}y~ K(x, y) K(y, z) = K(x, z),
     \label{eq:projection-property}
 $$
-for $K(x,y)$.
-
-It can be shown that the correlation functions for any subset of particles
-$\lambda$
-have the same form as $\rho_N$.
-Specifically:
+and that its trace is the number of particles:
 $$
-    C_{N,L} \, ( \lambda_0, \lambda_1, \dotso \lambda_{L-1} )
-    = \mathcal{C}_{N,L} \det
+    \int_{-\infty}^{+\infty} \mathrm{d}x~ K(x, x) = N.
+$$
+
+Under these two assumptions,
+the correlation functions of any $L$ of the particles
+have the same determinantal form as $\rho_N$
+(Gaudin's lemma, see
+[Mehta, Random Matrices](https://books.google.com/books?id=Kp3Nx03_gMwC)):
+$$
+    R_{N,L} \, ( \lambda_0, \lambda_1, \dotso \lambda_{L-1} )
+    = \det
     \left[
     \left\{ K(\lambda_i, \lambda_j) \right\}_{0 \leq i,j < L}
     \right], \quad
-    L=0,1,2,\dotso N
+    L=1,2,\dotso N
     \label{eq:dpp-correlation}
 $$
-In particular, the first correlation function:
+In particular, the first correlation function
 $$
-    C_{N,1}(\lambda) = K(\lambda, \lambda)^{-1}
+    R_{N,1}(\lambda) = K(\lambda, \lambda)
 $$
-is responsible for the mean density of the eigenvalues.
-The correlation between two eigenvalues is:
+gives the mean density of the eigenvalues.
+The two-point correlation function is
 $$
-    C_{N,2}(\lambda_0, \lambda_1)
+    R_{N,2}(\lambda_0, \lambda_1)
     = K(\lambda_0, \lambda_0) K(\lambda_1, \lambda_1) - K(\lambda_0, \lambda_1)^2.
     \label{eq:two-point-cor}
 $$
-It can be shown (see, for example,
-[Mehta, Random Matrices](https://books.google.ru/books/about/Random_Matrices.html?id=Kp3Nx03_gMwC&redir_esc=y))
-that the random law from the previous subsection
-is a determinantal point process with the kernel:
+The eigenvalue distribution of the previous subsection
+is a determinantal point process with the kernel
+(see, for example,
+[Mehta, Random Matrices](https://books.google.com/books?id=Kp3Nx03_gMwC))
 $$
-    K_N^{\mathrm{ort}}(x,y) = \sum_{0 \leq i < N} \psi_i(x) \psi_i(y).
+    K_N^{\mathrm{GUE}}(x,y) = \sum_{0 \leq i < N} \psi_i(x) \psi_i(y).
     \label{eq:kernel-decomposition}
 $$
-Here, we introduced the Hermite functions $\psi_i(x)$:
+Here $\psi_i(x)$ are the Hermite functions
 $$
-    \psi_i(x) := \frac{1}{(2 \pi)^{\frac14} n!^\frac12 } e^{\frac{x^2}{4}} \mathrm{He}_i(x), \quad
+    \psi_i(x) := \frac{1}{(2 \pi)^{\frac14} i!^\frac12 } \mathrm{e}^{-\frac{x^2}{4}} \mathrm{He}_i(x), \quad
     i = 0, 1, 2, \dotso,
 $$
 where $\mathrm{He}_i(x)$
 is the Hermite polynomial of order $i$.
-The Hermite functions form an orthogonal basis in
-$L_2(\mathbb{R})$,
-namely, the family is orthogonal:
+The Hermite functions form an orthonormal basis of
+$L_2(\mathbb{R})$:
+the family is orthonormal,
 $$
-    \int_{-\infty}^{+\infty} dx~ \psi_i(x) \psi_j(x) = \delta_{i,j}, \quad i,j=0,1,2,\dotso
+    \int_{-\infty}^{+\infty} \mathrm{d}x~ \psi_i(x) \psi_j(x) = \delta_{i,j}, \quad i,j=0,1,2,\dotso
     \label{eq:orthogonality}
 $$
-and complete:
+and complete,
 $$
     \sum_{i=0}^{+\infty} \psi_i(x) \psi_i(y) = \delta(x-y).
     \label{eq:completeness}
 $$
 
-::: {.callout-note collapse="true" title="Remark about Dirac delta Function"}
-To be mathematically rigorous,
-we have to specify the meaning of the delta function.
-Here and below,
-we choose the Schwartz linear space of smooth functions on $\mathbb{R}$
-that decrease faster than any polynomial,
-equipped with the topology of local uniform convergence
-of all derivatives.
-Let the Dirac delta functional be the identity linear functional
-on this space.
-We drop the convolution with the test function $f(x)$
-from this space for brevity.
-:::
+The identity $\eqref{eq:completeness}$ says that the integral operator
+with the kernel on its left-hand side is the identity operator:
+for every $f \in L_2(\mathbb{R})$,
+$$
+    f(x) = \sum_{i=0}^{+\infty} \psi_i(x) \int_{-\infty}^{+\infty} \mathrm{d}y~ \psi_i(y) f(y),
+$$
+with the series converging in $L_2(\mathbb{R})$.
+For $f$ in the Schwartz space,
+the smooth functions that decrease faster than any power of $x$
+together with all their derivatives,
+the series also converges uniformly in $x$.
+In this sense $\delta(x-y)$ is the kernel of the identity operator,
+and the delta functional takes $f$ to $f(0)$.
+Every identity with $\delta$ below is read the same way,
+after integration against a test function $f$,
+which we drop for brevity.
+The class of test functions matters:
+for the continuous basis of @sec-limit-basis the Schwartz space is too large,
+and we use a narrower class there.
 
-Thus, there is a relationship between the random law on the set of real numbers
-defined by the kernel $K_N(x,y)$
-and an orthogonal basis
+So the eigenvalue distribution,
+through its kernel $K_N^{\mathrm{GUE}}(x,y)$,
+is tied to the orthonormal basis
 $\{\psi_i(x)\}_{i=0}^{+\infty}$.
 
-Note that the Hermite functions $\psi_i$
-for $i = 0,1,2,\dotso$
-are the only solutions to the second-order differential equation:
+The Hermite functions also solve a second-order differential equation.
+For $i \in \mathbb{R}$, the equation
 $$
     \psi''(x) + \left( i + \frac12 - \frac{x^2}{4} \right) \psi(x) = 0
     \label{eq:hermite-dif}
 $$
-for $i \in \mathbb{R}$
-that are square-integrable on $\mathbb{R}$.
+has a nonzero solution square-integrable on $\mathbb{R}$
+only for $i = 0, 1, 2, \dotso$,
+and every such solution is a constant multiple of $\psi_i$.
 
-If we consider Hermitian matrices $H$
-from the very beginning instead of real ones
-(*unitary ensemble*),
-the only change in the random law for the eigenvalues is a rescaling factor
-$x \rightarrow 2^\frac12 x$.
+For real symmetric matrices with the same density
+(the *Gaussian orthogonal ensemble*),
+the factor $\lvert \lambda_i - \lambda_j \rvert^2$ above becomes $\lvert \lambda_i - \lambda_j \rvert$,
+and the eigenvalues form a Pfaffian point process rather than a determinantal one.
+We do not use it below.
 
 To summarize this subsection,
-we define a collection of random laws on the set of
+we have defined a family of distributions of
 $N = 0, 1, 2, \dotso$
 real numbers.
-This random law is related to a projection operator $K_N$
-that highlights an $N$-dimensional subspace
-$V_N^\mathrm{ort} \subset L_2(\mathbb{R})$.
-For these subspaces,
-we have a natural orthogonal basis
+Each of them comes from the projection operator $K_N^{\mathrm{GUE}}$
+onto an $N$-dimensional subspace
+$V_N^\mathrm{GUE} \subset L_2(\mathbb{R})$,
+and a single orthonormal basis
 $\{\psi_i\}_{i=0}^{+\infty}$
-such that:
+gives all these subspaces at once:
 $$
-    V_N^\mathrm{ort} = \mathrm{span} \{\psi_i\}_{i=0}^{N-1}, \quad N = 0, 1, 2, \dotso.
+    V_N^\mathrm{GUE} = \mathrm{span} \{\psi_i\}_{i=0}^{N-1}, \quad N = 0, 1, 2, \dotso.
 $$
 
 ### Scaling Limit
 
-In various fields,
-such as statistical physics, we frequently consider the limit as
+In statistical physics and elsewhere,
+we often take the limit
 $N \rightarrow +\infty$,
 where $N$
-could represent the number of particles, dimensions,
+is the number of particles, the dimension,
 or another discrete parameter.
-This limiting model can exhibit remarkable behavior,
-which is a subject of great interest.
-We will examine a few examples below and then return to the orthogonal ensemble.
+The limiting model can show remarkable behavior.
+We look at two examples below and then return to the GUE.
 
 One of the simplest examples is the
-Central Limit Theorem.
-This theorem in particular states that the sum of $N$
+central limit theorem.
+In particular, it states that if the
 independent, identically distributed random variables
-$\{X_i\}_{0 \leq i < N}$,
-divided by $\sqrt{N}$,
+$\{X_i\}_{0 \leq i < N}$
+have mean $0$
+and variance $1$,
+then their sum divided by $\sqrt{N}$
 approaches the standard normal distribution as
-$N \rightarrow +\infty$,
-provided that the expectation of $X_i$
-is $0$
-and the variance equals $1$.
+$N \rightarrow +\infty$:
 $$
     \mathrm{law}
     \left[
@@ -240,220 +259,226 @@ $$
     \quad \xrightarrow{N \rightarrow ~\infty} \quad
     \mathcal{N}(0, 1).
 $$
-We omit some technical details
-and do not specify how such a limit should be defined.
+The arrow means convergence in distribution:
+the distribution functions converge at every point.
 
-At least three important phenomena can be observed:
+We note three features of this limit:
 
-1. The limit random law exists with a certain rescaling,
-which in this case is the factor $N^{-\frac12}$.
+1. The limit law exists after a rescaling,
+here by the factor $N^{-\frac12}$.
 
-2. The limit law is universal.
-This means that regardless of the initial law with
+2. The limit law is universal:
+whatever the law of $X_i$ with
 mean $0$
-and variance $1$
-for $X$, the limit law is still the normal law.
+and variance $1$,
+the limit is the normal law.
 
-3. The limit law has a symmetry property that the initial laws may not possess.
-For example, the normal random law is symmetric
-with respect to the mirror reflection
+3. The limit law has a symmetry that the initial laws may lack.
+For example, the normal law is symmetric
+under the reflection
 $x \rightarrow -x$,
-which may not be true for the finite sum of $X_i$.
+while the law of a finite sum of the $X_i$ need not be.
 
-Another well-known and classical example of the
+Another classical example of a
 *scaling limit*
 is the
-*Ising Model*,
-a probability model on a finite,
-say square, lattice of size $N \times N$.
-Remarkably, a properly defined limit random law
-$N \rightarrow +\infty$
-exists, does not depend on the lattice type,
-is invariant with respect to angle-preserving spacial transforms,
-and exhibits new remarkable properties such as phase transition.
+*Ising model*,
+a probability model on a finite lattice,
+say a square one of size $N \times N$.
+As $N \rightarrow +\infty$,
+the model has a phase transition in the temperature.
+At the critical temperature,
+with the lattice spacing taken as $1/N$,
+the limit law is invariant under angle-preserving maps
+and does not depend on the lattice type,
+within a wide class of planar lattices.
+Both statements are theorems for the main observables of the model; see
+[Chelkak and Smirnov](https://arxiv.org/abs/0910.2045)
+and
+[Chelkak, Hongler and Izyurov](https://arxiv.org/abs/1202.2838).
 
-The random matrix model defined in the previous section
-would not be as interesting if we did not consider the limit as $N$
-tends to infinity
-and study the behavior of eigenvalues of an "infinite random matrix".
+Much of the interest of the random matrix model of @sec-unitary-ensemble
+lies in the limit as $N$
+tends to infinity,
+in the eigenvalues of an "infinite random matrix".
 
 ### Sine Process
 
 First, note that if
 $\{\psi_i(x)\}_{i=0}^{+\infty}$
-is an orthonormal basis in
+is an orthonormal basis of
 $L_2(\mathbb{R})$,
 then
 $$
-    \{A \cdot \psi_i(A x + B)\}_{i=0}^{+\infty}, \quad A \neq 0, \quad B \in \mathbb{R},
+    \{\lvert A \rvert^{\frac12} \psi_i(A x + B)\}_{i=0}^{+\infty}, \quad A \neq 0, \quad B \in \mathbb{R},
 $$
 is also an orthonormal basis.
 
-To establish a limit law for the eigenvalues of the orthogonal matrix ensemble,
-we consider the limit of its kernel function $K(x,y)$
-as follows:
+To find a limit law for the eigenvalues of the GUE,
+we take the limit of its kernel:
 $$
-    C_N \cdot K^{\mathrm{ort}}_N(N^{-\frac12} x, N^{-\frac12} y)
+    C_N \cdot K^{\mathrm{GUE}}_N(\pi N^{-\frac12} x, \pi N^{-\frac12} y)
     \quad
     \xrightarrow{N \rightarrow ~\infty}
     \quad
     K^{\mathrm{Sine}}(x,y)
     :=
-    \frac{\sin(x-y)}{\pi (x-y)}.
+    \frac{\sin \pi(x-y)}{\pi (x-y)}.
     \label{eq:sine-limit}
 $$
-Here, $C_N$
-is a normalization coefficient necessary to obtain a finite limit.
-For instance, we can set:
+Here
 $$
-    C_N = \frac{1}{\pi K^{\mathrm{ort}}_N(0, 0)}.
+    C_N = \pi N^{-\frac12}
 $$
-The limit $K^{\mathrm{Sine}}$,
-known as the
-*Sine-kernel*,
-defines a random law on an infinite countable set of real numbers
-with the correlation functions given in $\eqref{eq:dpp-correlation}$.
+is the Jacobian of the substitution,
+so $C_N K^{\mathrm{GUE}}_N$ is the kernel of the rescaled eigenvalues
+$\pi^{-1} N^{\frac12} \lambda_i$.
+The factor $\pi$ makes the mean spacing equal to $1$ near the origin,
+since the eigenvalue density of the GUE at $0$ is $\pi^{-1} N^{\frac12}$
+to leading order, so $K^{\mathrm{Sine}}(0, 0) = 1$.
+The alternative choice $C_N = 1 / K^{\mathrm{GUE}}_N(0, 0)$ differs from this one by a factor tending to $1$.
+The limit $K^{\mathrm{Sine}}$ is the
+*sine kernel*.
+It defines a point process, a random infinite countable set of real numbers,
+whose correlation functions are given by $\eqref{eq:dpp-correlation}$ with this kernel.
 
 ![An illustration of limit $\eqref{eq:sine-limit}$
 for different values of $x - y$
 with the restriction $x + y = 0$.
-The limit function coincides up to an additive constant
-with the two-point correlation function $\eqref{eq:two-point-cor}$
-between two eigenvalues $\lambda$
-as a function of their difference.](images/sine-kernel-limit.gif)
+By $\eqref{eq:two-point-cor}$, the two-point correlation function
+of the limit process is
+$R^{\mathrm{Sine}}_2(x, y) = 1 - K^{\mathrm{Sine}}(x, y)^2$,
+a function of the difference $x - y$.](images/sine-kernel-limit.gif)
 
 ![An illustration of limit $\eqref{eq:sine-limit}$
-for different values of $x + y$
-and $x = y$.
-This function represents the average density of the eigenvalues $\lambda$.](images/cor-1-limit.gif)
+on the diagonal $x = y$, as a function of $x$.
+On the diagonal the kernel is the mean density of the eigenvalues $\lambda$.](images/cor-1-limit.gif)
 
-Note that the sine random law is invariant with respect to translation
+The sine process is invariant under the translations
 $x \rightarrow x + c$
 for any real $c$,
-which is not true for its finite $N$
-analogs.
-The sine law has a physical interpretation
-as a one-dimensional gas of particles under a repulsive logarithmic potential,
-placed uniformly along the unbounded real line
-with an average particle density of $1$.
+while its finite-$N$
+analogues are not.
+Physically, the sine process is a one-dimensional gas of particles
+with logarithmic repulsion,
+spread uniformly over the whole real line
+with mean density $1$.
 
-To better understand this limit,
-consider that for any $\omega > 0$:
+To understand this limit,
+note that for any $\omega > 0$
 $$
-    \frac{\psi_i\left( N^{-\frac12} x \right)}
+    \frac{\psi_i\left( \pi N^{-\frac12} x \right)}
     {\psi_i(0)}
     \quad
     \xrightarrow[\frac{i}{N} \rightarrow ~ \omega^2]{N,~i \rightarrow ~\infty}
     \quad
-    \cos(\omega x),
+    \cos(\pi \omega x),
     \quad i = 2 k, \quad k = 0,1,2,\dotso,
 $$
 $$
-    \frac{\psi_i\left( N^{-\frac12} x \right)}
-    {{\psi}'_i(0)}
+    \frac{\psi_i\left( \pi N^{-\frac12} x \right)}
+    {i^{-\frac12} \psi'_i(0)}
     \quad
     \xrightarrow[\frac{i}{N} \rightarrow ~ \omega^2]{N,~i \rightarrow ~\infty}
     \quad
-    \sin(\omega x),
+    \sin(\pi \omega x),
     \quad i = 2 k + 1 , \quad k = 0,1,2,\dotso
     \label{eq:harmonic-limits}
 $$
 
 ![Illustration of the cosine limit above for $\omega = 1$.](images/cos-limit.gif)
 
-Now, decompose the left and right-hand sides of
-limit $\eqref{eq:sine-limit}$
-as follows:
+Now decompose both sides of
+limit $\eqref{eq:sine-limit}$:
 $$
-    K^{\mathrm{ort}}_N(N^{-\frac12} x, N^{-\frac12} y)
+    K^{\mathrm{GUE}}_N(\pi N^{-\frac12} x, \pi N^{-\frac12} y)
     = \sum_{0 \leq i < N}
-    \psi_i\left( N^{-\frac12} x \right)
-    \psi_i\left( N^{-\frac12} y \right).
+    \psi_i\left( \pi N^{-\frac12} x \right)
+    \psi_i\left( \pi N^{-\frac12} y \right).
 $$
 $$
     K^{\mathrm{Sine}}(x,y)
-    = \frac{1}{2 \pi} \int_{0}^{1} d\omega ~
+    = \int_{0}^{1} \mathrm{d}\omega ~
     \left(
-        \cos(\omega x)\cos(\omega y) + \sin(\omega x) \sin(\omega y)
+        \cos(\pi \omega x)\cos(\pi \omega y) + \sin(\pi \omega x) \sin(\pi \omega y)
     \right).
 $$
-We observe that the even and odd Hermite functions tend towards
+By $\eqref{eq:harmonic-limits}$,
+the rescaled even and odd Hermite functions tend to
 $\cos$
 and $\sin$
-functions, respectively, up to normalization coefficients.
-Furthermore, the values
+respectively, up to normalization.
+As $N \rightarrow +\infty$,
+the values
 $\left\{ \sqrt{\frac{i}{N}} \right\}_{0 \leq i < N}$
-densely populate the interval $[0,1]$,
-which is the range of $\omega$
-in $\eqref{eq:sine-limit}$,
-as $N \rightarrow +\infty$.
-Thus, heuristically,
-the discrete spectrum decomposition for the finite particle model
-approaches the continuous Fourier spectrum decomposition.
+fill the interval $[0,1]$ densely,
+and this interval is the range of $\omega$
+in the integral for $K^{\mathrm{Sine}}$ above.
+So, heuristically,
+the decomposition over the discrete spectrum at finite $N$
+approaches the decomposition over the continuous Fourier spectrum.
 
-Note that the Fourier basis is not a basis
-in the sense of a countable family of square-integrable functions
-like the Hermite functions.
-To define it rigorously, we need to introduce the concept of a
-*rigged Hilbert space*,
-as detailed in
-[Gelfand and Vilenkin: Generalized Functions](https://books.google.ru/books/about/Generalized_Functions_Vol_4.html?id=LE4HjwEACAAJ&redir_esc=y),
-Volume 4.
+The Fourier basis is not a basis
+in the sense of the Hermite functions:
+it is not a countable family of square-integrable functions.
+A rigorous definition needs a
+*rigged Hilbert space*;
+see
+[I. M. Gelfand and N. Ya. Vilenkin, *Generalized Functions*, Vol. 4: *Applications of Harmonic Analysis*, Academic Press, 1964](https://books.google.com/books?id=LE4HjwEACAAJ).
 
-Finally, consider the behavior of the differential equation
+Finally, consider the differential equation
 $\eqref{eq:hermite-dif}$.
-After substituting $x \rightarrow N^{-\frac12} x$,
-we obtain:
+The rescaled function $f(x) := \psi_i\left( \pi N^{-\frac12} x \right)$
+satisfies
 $$
-    N \psi''\left( N^{-\frac12} x \right)
-    + \left( i + \frac12 - \frac{x^2}{4 N} \right) \psi\left( N^{-\frac12} x \right) = 0.
+    \frac{N}{\pi^2} f''(x)
+    + \left( i + \frac12 - \frac{\pi^2 x^2}{4 N} \right) f(x) = 0.
 $$
-Dividing by $N$,
-this equation tends towards the differential equation for
-$\cos(\omega x)$
-and $\sin(\omega x)$:
+Multiplying by $\frac{\pi^2}{N}$
+and letting $N \rightarrow +\infty$ with $\frac{i}{N} \rightarrow \omega^2$,
+we obtain the differential equation for
+$\cos(\pi \omega x)$
+and $\sin(\pi \omega x)$:
 $$
-    \psi''\left( x \right) + \omega^2 \psi\left( x \right) = 0
+    f''(x) + \pi^2 \omega^2 f(x) = 0.
 $$
-with $\sqrt{\frac{i}{N}} \rightarrow \omega$
-and $N \rightarrow +\infty$.
 
-Thus, the scaling limit for the sine process reveals itself
-in at least four aspects:
+So the scaling limit to the sine process shows up
+in at least four ways:
 
-1. Limit of random laws on the set of points $\lambda$.
+1. Limit of the distributions of the points $\lambda$.
 
-2. Limit of kernels $K(x,y)$.
+2. Limit of the kernels $K(x,y)$.
 
-3. Limit of subspaces in $L_2(\mathbb{R})$
-defined by projection operators $K$.
-These subspaces can be defined with a properly rescaled orthonormal basis
+3. Limit of the subspaces of $L_2(\mathbb{R})$
+onto which the operators $K$ project.
+These subspaces can be described by a suitably rescaled orthonormal basis
 $\{ \psi_i\}_{i=0}^{+\infty}$.
 
-4. Limit of differential equations.
+4. Limit of the differential equations.
 
 The sine limit is not the only possibility.
 For example, a similar limit for the substitution
-$x \rightarrow 2 N + N^{-\frac16} x$
+$x \rightarrow 2 N^{\frac12} + N^{-\frac16} x$
 leads to the
 *Airy kernel*:
 $$
     K^{\mathrm{Airy}}(x,y) := \frac{\mathrm{Ai}(x)\mathrm{Ai}'(y)-\mathrm{Ai}'(x)\mathrm{Ai}(y)}{x-y}
-    = \int_0^{+\infty} d\lambda~ \mathrm{Ai}(\lambda + x) \mathrm{Ai}(\lambda + y),
+    = \int_0^{+\infty} \mathrm{d}\lambda~ \mathrm{Ai}(\lambda + x) \mathrm{Ai}(\lambda + y),
     \label{eq:airy-kernel}
 $$
 where $\mathrm{Ai}$
-is the Airy function, which forms an orthogonal basis in the sense that:
+is the Airy function, whose shifts form an orthogonal basis in the sense that
 $$
-    \int_{-\infty}^{+\infty} d\lambda~ \mathrm{Ai}(\lambda + x) \mathrm{Ai}(\lambda + y)
+    \int_{-\infty}^{+\infty} \mathrm{d}\lambda~ \mathrm{Ai}(\lambda + x) \mathrm{Ai}(\lambda + y)
     = \delta(x-y).
 $$
-Another example, as detailed in
-[this paper](https://arxiv.org/abs/hep-th/9304063),
-is based on the Laguerre polynomials defined on the half-axis
+Another example comes from the Laguerre polynomials,
+orthogonal on the half-axis
 $(0, +\infty)$,
-leading to the
-*Bessel kernel*:
+and leads to the
+*Bessel kernel*
+(see [Tracy and Widom](https://arxiv.org/abs/hep-th/9304063)):
 $$
     K^{\mathrm{Bessel}}(x,y) :=
     \frac{
@@ -465,170 +490,217 @@ $$
 $$
 Almost all such limits can be understood in terms of orthonormal bases,
 linear subspaces of $L_2$,
-and related well-studied second-order differential equations.
-However, this structure is violated by the model considered in the next section.
+and the well-studied second-order differential equations behind them.
+The model of the next section does not fit this structure.
 
-## Pearcey Kernel
+## Pearcey Kernel {#sec-pearcey-kernel}
 
-### Biased Unitary Ensemble
+### Biased Unitary Ensemble {#sec-biased-ensemble}
 
-[Brezin and Hikami](https://arxiv.org/abs/cond-mat/9804023)
-considered a unique random matrix model,
-known as the biased unitary ensemble.
-Here's the setup: Let $H$
+[Brézin and Hikami](https://arxiv.org/abs/cond-mat/9804023)
+considered the following random matrix model,
+the GUE with an external source,
+which we call the biased unitary ensemble.
+Let $H$
 be a $2N \times 2N$
-Hermitian matrix. Additionally, let $H_a$
+Hermitian matrix, and let $H_a$
 be a fixed $2N \times 2N$
-matrix with only two distinct eigenvalues,
+Hermitian matrix with only two distinct eigenvalues,
 $a$ and $-a$
 (with $a > 0$),
-each having multiplicity $N$.
+each of multiplicity $N$.
 
-The probability density function defining the random law
-on these Hermitian matrices $H$
-is given by:
+The distribution of $H$
+has the density
 $$
-    \rho_N^a(H) := \left( Z_N^a \right)^{-1} e^{-\frac12 \mathrm{Tr} (H + H_a)^2},
+    \rho_N^a(H) := \left( Z_N^a \right)^{-1} \mathrm{e}^{-\frac12 \mathrm{Tr} (H + H_a)^2},
 $$
 where $Z_N^a$
 is a normalization constant.
-This framework yields a determinantal point process
-governing the eigenvalues of $H$,
-with the kernel:
+The eigenvalues of $H$ then form a determinantal point process
+with the kernel
 $$
     K^a_N(x,y) :=
-    \frac{-1}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{\infty} dt~ \oint_{\pm a} du~
+    \frac{-1}{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{\infty} \mathrm{d}t~ \oint_{\pm a} \mathrm{d}u~
     \left( \frac{a^2+t^2}{a^2-u^2} \right)^N
-    \frac{1}{u-it}\,
-    e^{-\frac{t^2}{2}-\frac{u^2}{2} - i t x + u y}.
+    \frac{1}{u-\mathrm{i}t}\,
+    \mathrm{e}^{-\frac{t^2}{2}-\frac{u^2}{2} - \mathrm{i} t x + u y}.
 $$
-Here, $\oint_{\pm a} du$
-denotes the Cauchy integral around the singular points
-$u = a$ and $u = -a$
-on the complex plane.
+Here $\oint_{\pm a} \mathrm{d}u$
+denotes the Cauchy integral in the complex plane,
+counterclockwise around the poles
+$u = a$ and $u = -a$.
 
 ![Samples of eigenvalues $\lambda$ for $N = 15$ and $a = 6$.
-Each of the $20$ strings corresponds to a sample consisting of
+Each of the $20$ rows is one random sample of the
 $15 \times 2 = 30$
-eigenvalues (particles) colored green.
-It can be observed that
-there are two slightly joined clusters on the real line.](images/eigenvalue_distribution_15_6.png)
+eigenvalues (particles), shown in green.
+The eigenvalues form two clusters on the real line
+that are barely joined.](images/eigenvalue_distribution_15_6.png)
 
-Notably,
-the kernel $K^a_N$
-is not symmetric with respect to permutation of its arguments.
-Furthermore, transforming the kernel via:
+The kernel $K^a_N$
+is not symmetric in its arguments.
+A transformation
 $$
     K(x,y) \rightarrow \frac{f(x)}{f(y)} K(x,y)
 $$
-for any function $f$
-preserves the determinantal probability law.
-However, even with such a transformation,
-the kernel $K^a_N$
-cannot be symmetrized.
-This indicates that the decomposition into an orthogonal basis,
-as described in $\eqref{eq:kernel-decomposition}$,
-is not feasible.
+with any function $f$
+preserves the determinantal law,
+but no kernel of this process,
+obtained by such a transformation or in any other way,
+is real symmetric or Hermitian.
+For any kernel $K$ of a determinantal point process,
+$$
+    R_{N,2}(x, y) - R_{N,1}(x)\, R_{N,1}(y) = -K(x, y)\, K(y, x),
+$$
+and the left-hand side depends on the process alone.
+A real symmetric or Hermitian kernel makes it nonpositive.
+For $K^a_N$ it is positive at some points:
+eigenvalues in the two clusters are slightly positively correlated.
+For example, for $N = 1$, $a = 2$, $x = -3$ and $y = 1.2$,
+we find numerically $R_{N,2}(x, y) - R_{N,1}(x)\, R_{N,1}(y) \approx 0.003$.
+Hence a decomposition into an orthogonal basis,
+as in $\eqref{eq:kernel-decomposition}$,
+is impossible.
 
-Despite this,
-the projection property described in $\eqref{eq:projection-property}$
-holds true.
-This means there exists a linear space of functions that
-remain unchanged when convolved with the integral operator $K^a_N$.
+The projection property $\eqref{eq:projection-property}$
+still holds,
+so there is a linear space of functions
+that the integral operator $K^a_N$ leaves unchanged.
 
 ### Pearcey Scaling Limit
 
-For small values of $a$,
-the random law approximates the form described in @sec-orthogonal-ensemble,
-where all eigenvalues form a single cluster.
+For small $a$,
+the distribution is close to the one of @sec-unitary-ensemble,
+with all eigenvalues in a single cluster.
 As $a$
-increases, the two clusters of eigenvalues become more distinct.
+grows, the eigenvalues split into two clusters
+that separate more and more.
 Following
-[Brezin and Hikami](https://arxiv.org/abs/cond-mat/9804023),
-we consider the limit $a \rightarrow N^{\frac12}$
-and $x \rightarrow N^{-\frac14} x$,
-for $N \rightarrow +\infty$.
-This limit corresponds to the scenario where the two clusters of eigenvalues
-are exactly on the edge of being separated and merged.
+[Brézin and Hikami](https://arxiv.org/abs/cond-mat/9804023),
+we set $a = (2N)^{\frac12}$,
+rescale $x \rightarrow (2N)^{-\frac14} x$
+and let $N \rightarrow +\infty$.
+At this value of $a$ the two clusters are exactly
+at the transition between merged and separated.
 The limit
 $$
     K^{\text{Pear}}(x,y) :=
-    \lim_{N\rightarrow +\infty} C_N \cdot K^{(2N)^{\frac12}}_N
+    \lim_{N\rightarrow +\infty} (2N)^{-\frac14} K^{(2N)^{\frac12}}_N
     \left(
         (2N)^{-\frac14}x, (2N)^{-\frac14}y
     \right)
 $$
-is known as the
+is called the
 *Pearcey kernel*.
-It can be reformulated as follows:
+The factor $(2N)^{-\frac14}$ is the Jacobian of the rescaling.
+The limit exists for all real $x, y$,
+as [Bleher and Kuijlaars](https://arxiv.org/abs/math-ph/0602064)
+prove (Theorem 1.1 with $b = 0$,
+for matrices of size $2N$ rescaled by $(2N)^{-\frac12}$).
+[Tracy and Widom](https://arxiv.org/abs/math/0412005)
+prove that the convergence to $K^{\mathrm{Pear}}$ is uniform on bounded sets
+in a model of non-intersecting Brownian motions,
+whose positions at a fixed time have,
+up to a constant scale factor, the law of the eigenvalues here.
+
+The Pearcey kernel can be written in terms of two functions $\phi$ and $\psi$
+([Brézin and Hikami](https://arxiv.org/abs/cond-mat/9804023), eqs. (3.7), (3.13) and (3.21)):
 $$
     K^{\mathrm{Pear}}(x,y) = \frac{\phi'(x)\psi'(y)-\phi''(x)\psi(y)-\phi(x)\psi''(y) }{x-y},
 $$
 where
 $$
-    \phi(x) := \frac{1}{\pi} \int\limits_{0}^{+\infty} dt~ e^{-\frac{t^4}{4}} \cos(tx),
+    \phi(x) := \frac{1}{\pi} \int\limits_{0}^{+\infty} \mathrm{d}t~ \mathrm{e}^{-\frac{t^4}{4}} \cos(tx),
 $$
 $$
     \psi(x) := - \frac{1}{\pi}
-    \mathrm{Im} \left[\omega \int\limits_0^{+\infty} du\, e^{-\frac{u^4}{4}}
-    \left( e^{\omega x u} - e^{-\omega x u} \right)\right], \quad
-    \omega:= e^{\frac{i \pi}{4}}.
+    \mathrm{Im} \left[\omega \int\limits_0^{+\infty} \mathrm{d}u\, \mathrm{e}^{-\frac{u^4}{4}}
+    \left( \mathrm{e}^{\omega x u} - \mathrm{e}^{-\omega x u} \right)\right], \quad
+    \omega:= \mathrm{e}^{\frac{\mathrm{i} \pi}{4}}.
 $$
-The Pearcey kernel is notable for its asymmetry and
-the inclusion of second derivatives of the functions
+
+::: {.callout-note collapse="true" title="Continuity on the diagonal"}
+The formula for $K^{\mathrm{Pear}}$ makes sense only for $x \neq y$,
+and we extend $K^{\mathrm{Pear}}$ to the diagonal $x = y$ by continuity.
+The extension exists and is a smooth function on the whole plane,
+because the numerator
+$$
+    N(x,y) := \phi'(x)\psi'(y) - \phi''(x)\psi(y) - \phi(x)\psi''(y)
+$$
+is smooth and vanishes on the diagonal.
+It is smooth because the integrals defining $\phi$ and $\psi$ converge absolutely,
+together with all their derivatives in $x$, locally uniformly in $x$.
+It vanishes on the diagonal by
+[Brézin and Hikami](https://arxiv.org/abs/cond-mat/9804023)
+(Appendix B, eqs. (B8)–(B9)).
+The value on the diagonal,
+$$
+    K^{\mathrm{Pear}}(x,x) = \partial_x N(x,y)\big|_{y=x}
+    = \phi''(x)\psi'(x) - \phi'(x)\psi''(x) - x\,\phi(x)\psi(x),
+$$
+is the density of the Pearcey process (Brézin and Hikami, eq. (3.22)).
+:::
+
+The Pearcey kernel is not symmetric,
+and it contains second derivatives of the functions
 $\phi$ and $\psi$.
-This kernel describes the critical behavior of eigenvalues
-as they transition between forming a single cluster and two distinct clusters.
 
 ### Pearcey Basis
 
-In this section, we derive the basis for the Pearcey Kernel,
-which is the central problem of this article.
+This section builds a basis for the Pearcey kernel,
+first at finite $N$ and then in the scaling limit.
 
-#### Finite $N$ Basis
+#### Finite $N$ Basis {#sec-finite-n-basis}
 
-Due to the asymmetric nature of the kernel,
-finding an orthonormal basis is impossible.
-However, we can still work with a
+As @sec-biased-ensemble shows,
+the kernel $K^a_N$ has no decomposition into an orthonormal basis.
+We can still work with a
 [biorthogonal basis](https://arxiv.org/abs/math/9804027),
-which is a relaxed version of an orthonormal basis.
-To achieve this, we consider two different collections of functions on $\mathbb{R}$:
+a relaxed version of an orthonormal one.
+It consists of two families of functions on $\mathbb{R}$
+instead of one,
 $\{e_{i}\}_{i=0}^{+\infty}$
 and
 $\{e^\dagger_{i}\}_{i=0}^{+\infty}$,
-instead of one, and require
+with
 $$
-    \int_{-\infty}^{+\infty} dx~ e^\dagger_i(x) e_j(x) = \delta_{i,j}, \quad i,j=0,1,2,\dotso
+    \int_{-\infty}^{+\infty} \mathrm{d}x~ e^\dagger_i(x) e_j(x) = \delta_{i,j}, \quad i,j=0,1,2,\dotso
     \label{eq:biorthogonality}
 $$
 and
 $$
-    \sum\limits_{i=0}^{\infty}  e_i(x) e^{\dagger}_i(y) = \delta(x-y).
+    \sum\limits_{i=0}^{\infty}  e_i(x) e^{\dagger}_i(y) = \delta(x-y),
 $$
 instead of $\eqref{eq:orthogonality}$
 and $\eqref{eq:completeness}$.
-This approach is less restrictive. Specifically, after the transformation
+This is less restrictive: after the transformation
 $$
     e^\dagger_i(x),~e_i(x) \rightarrow f(x) \cdot e^\dagger_i(x),~
     \frac{e_i(x)}{f(x)}
 $$
-we still have a biorthogonal basis for any function $f$
-that is non-zero at almost all points on $\mathbb{R}$.
-Recall that the only freedom for an orthogonal real function basis is
-the choice of sign for each function.
+we still have a biorthogonal basis,
+for any function $f$ that is nonzero almost everywhere on $\mathbb{R}$.
+For a real orthonormal basis,
+where $e^\dagger_i = e_i$,
+the same transformation keeps the basis orthonormal only if
+$f(x)^2 = 1$ almost everywhere.
 
-Our first step to obtain the Pearcey basis is to define the functions
+To build the basis, we first define the functions
 $$
-    \phi_n^a(x) := \frac{1}{\sqrt2\pi} \int\limits_{-\infty}^{\infty} dt~
-    (t^2+a^2)^n e^{-\frac{t^2}{2}-i t x},\quad n=0,1,2,3,\dotso,
+    \phi_n^a(x) := \frac{1}{\sqrt2\pi} \int\limits_{-\infty}^{\infty} \mathrm{d}t~
+    (t^2+a^2)^n \mathrm{e}^{-\frac{t^2}{2}-\mathrm{i} t x},\quad n=0,1,2,3,\dotso,
 $$
 $$
-    \psi_n^a(x) := \frac{1}{\sqrt2\pi i} \oint_{\pm a} du~
-    \frac{e^{-\frac{u^2}{2} + u y}}{(a^2-u^2)^{n+1}},\quad n=0,1,2,3,\dotso.
+    \psi_n^a(x) := \frac{1}{\sqrt2\pi \mathrm{i}} \oint_{\pm a} \mathrm{d}u~
+    \frac{\mathrm{e}^{-\frac{u^2}{2} + u x}}{(a^2-u^2)^{n+1}},\quad n=0,1,2,3,\dotso.
 $$
-These functions are eigenfunctions of the
-*third order*
+They are closely related to the multiple Hermite polynomials of the external source model
+([Bleher and Kuijlaars, 2005](https://arxiv.org/abs/math/0406616));
+the note at the end of this subsection gives the exact correspondence.
+These functions solve the
+*third-order*
 differential eigenvalue equations
 $$
     (a^2-\partial_x^2) (\partial_x + x) \phi^a_n(x) = 2 n~ \partial_x \phi^a_n(x),\quad n=0,1,2,\dotso,
@@ -638,13 +710,14 @@ $$
     (\partial_x - x) (a^2-\partial_x^2)  \psi^a_n(x) = 2 n~  \partial_x \psi^a_n(x), \quad n=0,1,2,\dotso
 $$
 respectively. For example, for $n=0,1$
-we have
 $$
-    \phi_0^a(x) = \frac{1}{\sqrt{\pi}} e^{-\frac{x^2}{2}}, \quad
-    \phi_1^a(x) = \frac{1}{\sqrt{\pi}} (1+a^2-x^2) e^{-\frac{x^2}{2}},\\
-    \psi_0^a(x) = -\sqrt2 \frac{e^{-\frac{a^2}{2}}}{a} \mathrm{sh}(ax), \quad
-    \psi_1^a(x) = \frac{e^{-\frac{a^2}{2}}}{\sqrt2 a^3}
-    \left( ax \,\mathrm{ch}(ax) - (1+a^2)~\mathrm{sh}(ax) \right),
+\begin{gathered}
+    \phi_0^a(x) = \frac{1}{\sqrt{\pi}} \mathrm{e}^{-\frac{x^2}{2}}, \quad
+    \phi_1^a(x) = \frac{1}{\sqrt{\pi}} (1+a^2-x^2) \mathrm{e}^{-\frac{x^2}{2}},\\
+    \psi_0^a(x) = -\sqrt2 \frac{\mathrm{e}^{-\frac{a^2}{2}}}{a} \sinh(ax), \quad
+    \psi_1^a(x) = \frac{\mathrm{e}^{-\frac{a^2}{2}}}{\sqrt2 a^3}
+    \left( ax \cosh(ax) - (1+a^2) \sinh(ax) \right).
+\end{gathered}
 $$
 We define the biorthogonal basis by
 $$
@@ -655,9 +728,58 @@ $$
     {e^{\dagger}}_{2n}^a(x) := -2^{-\frac12} \psi_n^a{}'(x),\quad
     {e^{\dagger}}_{2n+1}^a(x) := 2^{-\frac12} \psi_n^a(x),\quad n=0,1,2,3,\dotso.
 $$
-It is straightforward to check the
+
+The biorthogonality has a structural reason.
+Let $\mathcal{L} := (a^2-\partial_x^2)(\partial_x + x)$ and $\mathcal{D} := \partial_x$,
+with formal adjoints
+$\mathcal{L}^* = (x - \partial_x)(a^2-\partial_x^2)$ and $\mathcal{D}^* = -\partial_x$.
+Then the two eigenvalue equations above read
+$$
+    \mathcal{L} \phi^a_n = 2n\, \mathcal{D} \phi^a_n, \quad
+    \mathcal{L}^* \psi^a_n = 2n\, \mathcal{D}^* \psi^a_n,
+$$
+so $\phi^a_n$ and $\psi^a_n$ are the right and left eigenfunctions
+of the operator pencil $\mathcal{L} - \nu \mathcal{D}$ for the same eigenvalue $\nu = 2n$.
+Integrating by parts,
+which is allowed because $\phi^a_n$ decays like a Gaussian
+while $\psi^a_n$ grows at most exponentially, we get
+$$
+    2n \int\limits_{-\infty}^{\infty} \mathrm{d}x~ \psi^a_m \mathcal{D} \phi^a_n
+    = \int\limits_{-\infty}^{\infty} \mathrm{d}x~ \psi^a_m \mathcal{L} \phi^a_n
+    = \int\limits_{-\infty}^{\infty} \mathrm{d}x~ \left( \mathcal{L}^* \psi^a_m \right) \phi^a_n
+    = 2m \int\limits_{-\infty}^{\infty} \mathrm{d}x~ \psi^a_m \mathcal{D} \phi^a_n,
+$$
+hence $\int \mathrm{d}x~ \psi^a_m \phi^a_n{}' = 0$ for $m \neq n$.
+The remaining pairings vanish by parity, since $\phi^a_n$ is even and $\psi^a_n$ is odd.
+In the Hermite case a single symmetric operator gives orthogonality.
+Here the operators are not formally self-adjoint,
+and the eigenfunctions of the pencil and of its adjoint form two different families.
+Each eigenvalue $2n$ contributes two basis functions,
+the even $\phi^a_n$ and the odd $\mathcal{D}\phi^a_n$,
+with the duals $\mathcal{D}^*\psi^a_n$ and $\psi^a_n$ of the same parity;
+the proof below computes their normalization.
+The limit equations of @sec-limit-basis have the same form
+with $\mathcal{L} = \partial_x^3 - x$,
+but there this argument is only formal, for the reason given there.
+
+The real Fourier basis also pairs an even and an odd function,
+$\cos(\lambda x)$ and $\sin(\lambda x)$,
+with $\partial_x \cos(\lambda x) = -\lambda \sin(\lambda x)$.
+There both are eigenfunctions of $\partial_x^2$ with the eigenvalue $-\lambda^2$;
+here only $\phi^a_n$ is an eigenfunction of the pencil, and $\mathcal{D}\phi^a_n$ is not.
+
+In the completeness relation we read $\delta(x-y)$ as for $\eqref{eq:completeness}$,
+after integration against a test function $f$.
+Here the test functions are $f(x) = p(x)\, \mathrm{e}^{-\frac{x^2}{2}}$ with a polynomial $p$.
+They are dense in $L_2(\mathbb{R})$,
+for them the series has finitely many nonzero terms,
+and the relation holds exactly.
+We do not claim it for a general $f \in L_2(\mathbb{R})$;
+the proofs below give the details.
+
+A direct computation, given below, checks the
 biorthogonality $\eqref{eq:biorthogonality}$
-as well as the decomposition
+and the decomposition
 $$
     K_N^a(x,y) =
     \sum\limits_{i=0}^{2 N-1} e_i^a(x) {e^{\dagger}}^a_i(y)
@@ -669,180 +791,291 @@ $$
     \right).
 $$
 
-::: {.callout-note collapse="true" title="Details and proofs"}
-For odd $n$
-and even $m$
-we calculate
+::: {.callout-note collapse="true" title="Details and proofs: biorthogonality and completeness"}
+For all $n, m$ we calculate
 $$
 \begin{aligned}
-    \int\limits_{-\infty}^{\infty} dx~
-    \psi^a_n{}'(x) \phi^a_m(x) =
-    \frac{2}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{\infty} dt~
-    \oint du~
-    \int\limits_{-\infty}^{\infty} dx~
-    u\frac{(t^2+a^2)^m }{(u^2-a^2)^{n+1}}
-    e^{-\frac{u^2}{2} + u x -\frac{t^2}{2}-i t x}
-    = \dotso
-\end{aligned}
-$$
-after the change of variables $t\rightarrow t - i u$
-we have
-$$
-\begin{aligned}
-    \dotso =&
-    \frac{2}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{\infty} dt~
-    \oint_{\pm a} du~
-    \int\limits_{-\infty}^{\infty} dx~
+    \int\limits_{-\infty}^{\infty} \mathrm{d}x~
+    \psi^a_n{}'(x) \phi^a_m(x) &=
+    \frac{2}{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{\infty} \mathrm{d}t~
+    \oint_{\pm a} \mathrm{d}u~
+    \int\limits_{-\infty}^{\infty} \mathrm{d}x~
     u\frac{(a^2+t^2)^m }{(a^2-u^2)^{n+1}}
-    e^{-\frac{u^2}{2} + u x -\frac{t^2}{2}-i t x}
-    =\\=&
-    \frac{2}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{\infty} dt~
-    \oint_{\pm a} du~
-    u\frac{(a^2+(t-iu)^2)^m }{(a^2-u^2)^{n+1}}
-    e^{-\frac{u^2}{2} - \frac{(t-iu)^2}{2}}
-    \int\limits_{-\infty}^{\infty} dx~
-    e^{-i t x}
-    =\\=&
+    \mathrm{e}^{-\frac{u^2}{2} + u x -\frac{t^2}{2}-\mathrm{i} t x}
+    \\ &=
+    \frac{2}{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{\infty} \mathrm{d}t~
+    \oint_{\pm a} \mathrm{d}u~
+    u\frac{(a^2+(t-\mathrm{i}u)^2)^m }{(a^2-u^2)^{n+1}}
+    \mathrm{e}^{-\frac{u^2}{2} - \frac{(t-\mathrm{i}u)^2}{2}}
+    \int\limits_{-\infty}^{\infty} \mathrm{d}x~
+    \mathrm{e}^{-\mathrm{i} t x}
+    \\ &=
     \left.
-    \frac{2}{(2\pi) i}
-    \int\limits_{-\infty}^{\infty} dt~
-    \oint_{\pm a} du~
-    u\frac{(a^2+(t-iu)^2)^m }{(a^2-u^2)^{n+1}}
-    e^{-\frac{u^2}{2} - \frac{(t-iu)^2}{2}}
+    \frac{2}{2\pi \mathrm{i}}
+    \oint_{\pm a} \mathrm{d}u~
+    u\frac{(a^2+(t-\mathrm{i}u)^2)^m }{(a^2-u^2)^{n+1}}
+    \mathrm{e}^{-\frac{u^2}{2} - \frac{(t-\mathrm{i}u)^2}{2}}
     \right|_{t=0}
-    =\\=&
-    \frac{2}{2\pi i}
-    \int\limits_{-\infty}^{\infty} dt~
-    \oint_{\pm a} du~
-    u~ (a^2-u^2)^{m-n-1} = -\delta_{n,m}.
+    \\ &=
+    \frac{2}{2\pi \mathrm{i}}
+    \oint_{\pm a} \mathrm{d}u~
+    u~ (a^2-u^2)^{m-n-1} = -2\delta_{n,m},
 \end{aligned}
 $$
+where the second step is the change of variables $t \rightarrow t - \mathrm{i}u$.
+The last integral vanishes for $m > n$, where the integrand is a polynomial,
+and for $m < n$, where it is a derivative:
+$u (a^2-u^2)^{m-n-1} = -\frac{1}{2(m-n)} \partial_u (a^2-u^2)^{m-n}$.
+For $m = n$ both residues at $u = \pm a$ are equal to $-\frac12$.
 The identities
 $$
-    \int\limits_{-\infty}^{\infty} dx~
+    \int\limits_{-\infty}^{\infty} \mathrm{d}x~
     \psi^a_n{}'(x) \phi^a_m{}'(x) = 0,\quad
-    \int\limits_{-\infty}^{\infty} dx~
+    \int\limits_{-\infty}^{\infty} \mathrm{d}x~
     \psi^a_n(x) \phi^a_m(x) = 0, \quad
-    \int\limits_{-\infty}^{\infty} dx~
-    \psi^a_n(x) \phi^a_m{}'(x) = 2\delta_{n,m}.
+    \int\limits_{-\infty}^{\infty} \mathrm{d}x~
+    \psi^a_n(x) \phi^a_m{}'(x) = 2\delta_{n,m}
 $$
-can be shown analogously. The next formula can be proved as follows
+follow: the first two by parity, since $\phi^a_m$ is even and $\psi^a_n$ is odd,
+and the third from the computation above by integration by parts.
+The completeness relation is proved as follows.
+At the step where we sum the geometric series in $n$,
+we enlarge, for each $t$, the contour around $\pm a$
+to the circle $\lvert u \rvert = R_t$ with
+$$
+    R_t > \sqrt{t^2 + 2a^2}.
+$$
+The integrals do not change, since every term is singular only at $u = \pm a$.
+On this circle $\lvert a^2 - u^2 \rvert \geq R_t^2 - a^2 > a^2 + t^2$,
+so the series converges uniformly in $u$,
+and the circle encloses the pole $u = \mathrm{i}t$ of its sum.
 $$
 \begin{aligned}
     &\sum\limits_{i=0}^{\infty} e_i(x) e^{\dagger}_i(y) =
-    \sum\limits_{n=0}^{\infty}
+    \frac12 \sum\limits_{n=0}^{\infty}
+    \left(
     \phi_n{}'(x) \psi_n(y)
     -\phi_n(x) \psi_n{}'(y)
-    =\\=&
-    \frac{1}{(2\pi)^2 i} \int\limits_{-\infty}^{\infty} dt~ \oint du~
+    \right)
+    \\ &=
+    \frac{1}{(2\pi)^2 \mathrm{i}} \int\limits_{-\infty}^{\infty} \mathrm{d}t~ \oint \mathrm{d}u~
     \sum\limits_{n=0}^{\infty}
-    (-it)\frac{(a^2+t^2)^n}{(a^2-u^2)^{n+1}}
-    e^{-\frac{t^2}{2}-i t x -\frac{u^2}{2} + u y}
-    -\\-&
-    \frac{1}{(2\pi)^2 i} \int\limits_{-\infty}^{\infty} dt~ \oint du~
+    (-\mathrm{i}t)\frac{(a^2+t^2)^n}{(a^2-u^2)^{n+1}}
+    \mathrm{e}^{-\frac{t^2}{2}-\mathrm{i} t x -\frac{u^2}{2} + u y}
+    \\ &\quad -
+    \frac{1}{(2\pi)^2 \mathrm{i}} \int\limits_{-\infty}^{\infty} \mathrm{d}t~ \oint \mathrm{d}u~
     \sum\limits_{n=0}^{\infty}
     u\frac{(a^2+t^2)^n}{(a^2-u^2)^{n+1}}
-    e^{-\frac{t^2}{2}-i t x -\frac{u^2}{2} + u y}
-    =\\=&
-    \frac{-1}{(2\pi)^2 i} \int\limits_{-\infty}^{\infty} dt~ \oint du~
+    \mathrm{e}^{-\frac{t^2}{2}-\mathrm{i} t x -\frac{u^2}{2} + u y}
+    \\ &=
+    \frac{-1}{(2\pi)^2 \mathrm{i}} \int\limits_{-\infty}^{\infty} \mathrm{d}t~ \oint \mathrm{d}u~
     \sum\limits_{n=0}^{\infty}
-    (u+it)\frac{(a^2+t^2)^n}{(a^2-u^2)^{n+1}}
-    e^{-\frac{t^2}{2}-i t x -\frac{u^2}{2} + u y}
-    =\\=&
-    \frac{-1}{(2\pi)^2 i} \int\limits_{-\infty}^{\infty} dt~ \oint\limits_{|u|=|t|+\varepsilon} du~
-    \frac{u+it}{a^2-u^2 - (a^2 + t^2) }
-    e^{-\frac{t^2}{2}-i t x -\frac{u^2}{2} + u y}
-    =\\=&
-    \frac{1}{(2\pi)^2 i} \int\limits_{-\infty}^{\infty} dt~ \oint\limits_{|u|=|t|+\varepsilon} du~
-    \frac{u+it}{u^2 + t^2}
-    e^{-\frac{t^2}{2}-i t x -\frac{u^2}{2} + u y}
-    =\\=&
-    \frac{1}{(2\pi)^2 i} \int\limits_{-\infty}^{\infty} dt~ \oint\limits_{|u|=|t|+\varepsilon} du~
-    \frac{1}{u - it}
-    e^{-\frac{t^2}{2}-i t x -\frac{u^2}{2} + u y}
-    =\\=&
-    \frac{1}{2\pi} \int\limits_{-\infty}^{\infty} dt~
+    (u+\mathrm{i}t)\frac{(a^2+t^2)^n}{(a^2-u^2)^{n+1}}
+    \mathrm{e}^{-\frac{t^2}{2}-\mathrm{i} t x -\frac{u^2}{2} + u y}
+    \\ &=
+    \frac{-1}{(2\pi)^2 \mathrm{i}} \int\limits_{-\infty}^{\infty} \mathrm{d}t~ \oint\limits_{|u|=R_t} \mathrm{d}u~
+    \frac{u+\mathrm{i}t}{a^2-u^2 - (a^2 + t^2) }
+    \mathrm{e}^{-\frac{t^2}{2}-\mathrm{i} t x -\frac{u^2}{2} + u y}
+    \\ &=
+    \frac{1}{(2\pi)^2 \mathrm{i}} \int\limits_{-\infty}^{\infty} \mathrm{d}t~ \oint\limits_{|u|=R_t} \mathrm{d}u~
+    \frac{u+\mathrm{i}t}{u^2 + t^2}
+    \mathrm{e}^{-\frac{t^2}{2}-\mathrm{i} t x -\frac{u^2}{2} + u y}
+    \\ &=
+    \frac{1}{(2\pi)^2 \mathrm{i}} \int\limits_{-\infty}^{\infty} \mathrm{d}t~ \oint\limits_{|u|=R_t} \mathrm{d}u~
+    \frac{1}{u - \mathrm{i}t}
+    \mathrm{e}^{-\frac{t^2}{2}-\mathrm{i} t x -\frac{u^2}{2} + u y}
+    \\ &=
+    \frac{1}{2\pi} \int\limits_{-\infty}^{\infty} \mathrm{d}t~
     \left.
-    e^{-\frac{t^2}{2}-i t x -\frac{u^2}{2} + u y}
-    \right|_{u=it}
+    \mathrm{e}^{-\frac{t^2}{2}-\mathrm{i} t x -\frac{u^2}{2} + u y}
+    \right|_{u=\mathrm{i}t}
     =
-    \frac{1}{2\pi} \int\limits_{-\infty}^{\infty} dt~
-    e^{-i t x  + i t  y} = \delta(x-y).
+    \frac{1}{2\pi} \int\limits_{-\infty}^{\infty} \mathrm{d}t~
+    \mathrm{e}^{-\mathrm{i} t x  + \mathrm{i} t  y} = \delta(x-y).
 \end{aligned}
 $$
-We find now the kernel decomposition
+This computation is formal:
+on the enlarged circle the factor $\mathrm{e}^{-\frac{t^2}{2}-\frac{u^2}{2}}$
+does not decay as $t \rightarrow \pm\infty$,
+so the interchange of the sum with the integral over $t$
+and the last step are not justified as written.
+
+In which sense, then, is this a basis?
+A basis of $L_2(\mathbb{R})$ would give the expansion
+$$
+    f(x) = \sum_{i=0}^{+\infty} e^a_i(x) \int_{-\infty}^{+\infty} \mathrm{d}y~ {e^\dagger}^a_i(y) f(y)
+$$
+for every $f \in L_2(\mathbb{R})$.
+We do not claim this:
+the functions ${e^\dagger}^a_{2n}$ and ${e^\dagger}^a_{2n+1}$ grow like
+$\lvert x \rvert^n \mathrm{e}^{a \lvert x \rvert}$,
+so for a general $f$ the coefficients need not even be defined.
+The expansion does hold, with finitely many terms,
+on the functions $f(x) = p(x)\, \mathrm{e}^{-\frac{x^2}{2}}$ with a polynomial $p$,
+which are dense in $L_2(\mathbb{R})$.
+Indeed, $\phi^a_n$ is an even polynomial of degree $2n$ times $\mathrm{e}^{-\frac{x^2}{2}}$
+and $\phi^a_n{}'$ an odd one of degree $2n+1$,
+so $e^a_0, \dotso, e^a_{2k-1}$ span these $f$ with $\deg p < 2k$.
+Writing $f = \sum_{j<2k} c_j e^a_j$,
+the pairings with ${e^\dagger}^a_i$ converge,
+since a Gaussian beats exponential growth,
+and $\eqref{eq:biorthogonality}$ gives
+$$
+    \int_{-\infty}^{+\infty} \mathrm{d}y~ {e^\dagger}^a_i(y) f(y)
+    = \begin{cases} c_i, & i < 2k, \\ 0, & i \geq 2k, \end{cases}
+$$
+so the series above is the finite sum that defines $f$.
+:::
+
+::: {.callout-note collapse="true" title="Details and proofs: the kernel decomposition"}
+The kernel decomposition needs only a finite sum, so its proof is not formal.
+Let the contours around $\pm a$ be circles of radius less than $a$.
+They do not enclose $u = \mathrm{i}t$, since $\lvert \mathrm{i}t \mp a \rvert \geq a$.
+By the finite geometric sum,
 $$
 \begin{aligned}
-    &\sum\limits_{i=0}^{2(N-1)} e_i(x) e^{\dagger}_i(y) =
-    \sum\limits_{i=0}^{\infty} e_i(x) e^{\dagger}_i(y) -
-    \sum\limits_{i=2N}^{\infty} e_i(x) e^{\dagger}_i(y)
-    =\\=&
-    \frac{1}{(2\pi)^2 i} \int\limits_{-\infty}^{\infty} dt~ \oint\limits_{|u|=|t|+\varepsilon} du~
-    \frac{1}{u - it}
-    e^{-\frac{t^2}{2}-i t x -\frac{u^2}{2} + u y}
-    -\\-&
-    \frac{1}{(2\pi)^2 i} \int\limits_{-\infty}^{\infty} dt~
-    \oint\limits_{|u|=|t|+|a|+\varepsilon} du~
+    &\sum\limits_{i=0}^{2N-1} e_i(x) e^{\dagger}_i(y) =
+    \frac12 \sum\limits_{n=0}^{N-1}
+    \left(
+    \phi_n{}'(x) \psi_n(y)
+    -\phi_n(x) \psi_n{}'(y)
+    \right)
+    \\ &=
+    \frac{-1}{(2\pi)^2 \mathrm{i}} \int\limits_{-\infty}^{\infty} \mathrm{d}t~ \oint_{\pm a} \mathrm{d}u~
+    \sum\limits_{n=0}^{N-1}
+    (u+\mathrm{i}t)\frac{(a^2+t^2)^n}{(a^2-u^2)^{n+1}}
+    \mathrm{e}^{-\frac{t^2}{2}-\mathrm{i} t x -\frac{u^2}{2} + u y}
+    \\ &=
+    \frac{1}{(2\pi)^2 \mathrm{i}} \int\limits_{-\infty}^{\infty} \mathrm{d}t~ \oint_{\pm a} \mathrm{d}u~
+    \left( 1 - \left( \frac{a^2+t^2}{a^2-u^2} \right)^N \right)
+    \frac{1}{u - \mathrm{i}t}
+    \mathrm{e}^{-\frac{t^2}{2}-\mathrm{i} t x -\frac{u^2}{2} + u y}
+    \\ &=
+    \frac{-1}{(2\pi)^2 \mathrm{i}} \int\limits_{-\infty}^{\infty} \mathrm{d}t~
+    \oint_{\pm a} \mathrm{d}u~
     \left( \frac{a^2+t^2}{a^2-u^2} \right)^N
-    \frac{1}{u - it}
-    e^{-\frac{t^2}{2}-i t x -\frac{u^2}{2} + u y}
-    =\\=&
-    \frac{-1}{(2\pi)^2 i} \int\limits_{-\infty}^{\infty} dt~
-    \oint_{\pm a} du~
-    \left( \frac{a^2+t^2}{a^2-u^2} \right)^N
-    \frac{1}{u - it}
-    e^{-\frac{t^2}{2}-i t x -\frac{u^2}{2} + u y}
-    =\\=&
+    \frac{1}{u - \mathrm{i}t}
+    \mathrm{e}^{-\frac{t^2}{2}-\mathrm{i} t x -\frac{u^2}{2} + u y}
+    \\ &=
     K_N^a(x,y).
 \end{aligned}
 $$
+The term with $1$ vanishes,
+because its integrand is analytic inside the circles around $\pm a$.
 :::
 
-#### Limit basis
+::: {.callout-note collapse="true" title="Connection with the literature"}
+The basis above is a form of the multiple Hermite polynomials,
+the multiple orthogonal polynomials of the external source model
+([Bleher and Kuijlaars, 2004](https://arxiv.org/abs/math-ph/0307055)).
+Let $P_{n_1, n_2}$ be the type II multiple Hermite polynomial
+and $Q_{n_1, n_2}$ the type I function
+for the two weights $\mathrm{e}^{-\frac{x^2}{2} \pm a x}$,
+in the integral representations of
+[Bleher and Kuijlaars, 2005](https://arxiv.org/abs/math/0406616) (eqs. (2.2) and (2.9)).
+Up to constant factors,
+$$
+    \phi_n^a(x) \propto \mathrm{e}^{-\frac{x^2}{2}} P_{n, n}(x), \quad
+    \phi_n^a{}'(x) \propto \mathrm{e}^{-\frac{x^2}{2}} \left( P_{n+1, n}(x) + P_{n, n+1}(x) \right),
+$$
+$$
+    \psi_n^a(x) \propto \mathrm{e}^{\frac{x^2}{2}} Q_{n+1, n+1}(x), \quad
+    \psi_n^a{}'(x) \propto \mathrm{e}^{\frac{x^2}{2}} \left( Q_{n+1, n}(x) + Q_{n, n+1}(x) \right).
+$$
+The standard construction (eq. (1.10) there) runs along a single path of multi-indices,
+such as $(n, n) \to (n+1, n) \to (n+1, n+1)$.
+Ours takes the symmetric combination at the odd levels instead,
+so that every basis function is even or odd,
+and is conjugated by $\mathrm{e}^{\mp \frac{x^2}{2}}$,
+which is the freedom $K(x,y) \rightarrow \frac{f(x)}{f(y)} K(x,y)$ above.
+The third-order equation for $\phi_n^a$ is the case $n_1 = n_2 = n$
+of the equation for type II multiple Hermite polynomials
+in [Filipuk, Van Assche and Zhang](https://arxiv.org/abs/1204.5058) (§5.1).
+For symmetric weights and equal indices, $n$ enters that equation linearly,
+which is what makes it an eigenvalue equation.
+:::
 
-We consider now the analogous of
+#### Limit basis {#sec-limit-basis}
+
+The proofs in this section are formal computations, given for illustration;
+we say where each one is not justified.
+
+We now take the analogue of the
 scaling limits $\eqref{eq:harmonic-limits}$.
 Let $N,n \rightarrow +\infty$ such that
 $$
     \frac{2^{\frac12}\left(	N - n - 1	\right)}{N^{\frac12}} \rightarrow \lambda
 $$
 for some fixed $\lambda \in \mathbb{R}$.
-By the saddle point method it can be shown that
+After the substitution $t = (2N)^{\frac14} s$,
+the integrand of $\phi_n^{(2N)^{\frac12}}$ converges pointwise:
 $$
-    \mathcal{C}_N \, (2N)^{\frac14-n} \, \phi_n^{(2N)^{\frac12}} \left((2N)^{-\frac14} x\right)
+    (2N)^{-n} \left( t^2 + 2N \right)^n \mathrm{e}^{-\frac{t^2}{2}}
+    = \mathrm{e}^{\, n \log\left( 1 + (2N)^{-\frac12} s^2 \right) - \frac{(2N)^{\frac12} s^2}{2}}
+    \quad \longrightarrow \quad
+    \mathrm{e}^{-\frac{s^4}{4} - \frac{\lambda s^2}{2}},
+$$
+and the substitution $u = (2N)^{\frac14} v$ does the same for $\psi_n^{(2N)^{\frac12}}$.
+Passing to the limit under the integral,
+and for $\psi_n$ moving the contour from the contours around $\pm a$ to $\mathcal{C}$ below,
+is formal here.
+Numerically, the ratio of the two sides of the limits below tends to $1$
+with an error of order $N^{-\frac12}$.
+We obtain, for each fixed $x$,
+$$
+    2^{-\frac12} (2N)^{-n-\frac14} \, \phi_n^{(2N)^{\frac12}} \left((2N)^{-\frac14} x\right)
     \quad \longrightarrow \quad
     \phi_{\lambda} (x),
 $$
 $$
-    \mathcal{C}_N \, (2N)^{\frac14+n} \, \psi_n^{(2N)^{\frac12}} \left((2N)^{-\frac14} x\right)
+    2^{-\frac12} (2N)^{n+\frac34} \, \psi_n^{(2N)^{\frac12}} \left((2N)^{-\frac14} x\right)
     \quad \longrightarrow \quad
     \psi_{\lambda} (x),
 $$
 where
 $$
-    \phi_{\lambda}(x) := \frac{1}{2\pi} \int\limits_{-\infty}^{+\infty} dt\,
-    e^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - i t x},
+    \phi_{\lambda}(x) := \frac{1}{2\pi} \int\limits_{-\infty}^{+\infty} \mathrm{d}t\,
+    \mathrm{e}^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - \mathrm{i} t x},
 $$
 $$
-    \psi_{\lambda}(x) := \frac{1}{2\pi i} \int\limits_{\mathcal{C}} du\,
-    e^{\frac{u^4}{4} - \frac{\lambda u^2}{2} + u x}.
+    \psi_{\lambda}(x) := \frac{1}{2\pi \mathrm{i}} \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \mathrm{e}^{\frac{u^4}{4} - \frac{\lambda u^2}{2} + u x}.
 $$
-Here and below, the integral
-"$\int\limits_{\mathcal{C}}$"
-is over the union of two infinite paths on the complex plane. The first one is from
-$+\infty \cdot e^{i \frac34 \pi}$
+Here and below,
+$\int\limits_{\mathcal{C}}$
+is the integral over the union of two infinite paths in the complex plane:
+one from
+$+\infty \cdot \mathrm{e}^{\mathrm{i} \frac14 \pi}$
 to
-$+\infty \cdot e^{i \frac14 \pi}$
-and the second one is from
-$+\infty \cdot e^{-i \frac14 \pi}$
+$+\infty \cdot \mathrm{e}^{\mathrm{i} \frac34 \pi}$,
+the other from
+$+\infty \cdot \mathrm{e}^{-\mathrm{i} \frac34 \pi}$
 to
-$+\infty \cdot e^{- i \frac34 \pi}$.
+$+\infty \cdot \mathrm{e}^{- \mathrm{i} \frac14 \pi}$.
+Up to a change of variables,
+$\phi_\lambda$ and $\psi_\lambda$ are the Pearcey integrals of
+[Bleher and Kuijlaars](https://arxiv.org/abs/math-ph/0602064);
+the note after the asymptotics below gives the details.
+
+![Illustration of the limit of $\phi_n$ above for $\lambda = -4$.
+The blue curve is the rescaled $\phi_n$ for the $N$ shown in the legend,
+with $n = \mathrm{round}\left( N - 1 - \lambda (N/2)^{\frac12} \right)$,
+chosen so that the ratio in the condition above equals $\lambda$ up to rounding;
+the orange curve is $\phi_\lambda$.
+A negative $\lambda$ gives $n > N - 1$,
+so these functions do not enter the kernel $K^a_N$,
+and in the limit $\phi_\lambda$ does not enter $K^{\mathrm{Pear}}$, which is the part $\lambda > 0$.
+We show them because at $\lambda < 0$ the functions oscillate
+and the convergence is easier to see.](images/phi-lambda-limit.gif)
+
+![The same for the limit of $\psi_n$, with $\psi_\lambda$ in orange.
+For small $N$ the blue curve leaves the frame.](images/psi-lambda-limit.gif)
+
 The functions $\phi_{\lambda}$
 and $\psi_{\lambda}$
-are solutions to the third order differential eigenequations
+solve the third-order differential eigenvalue equations
 $$
     \left( \partial_x^3 -  x \right)
     \phi_{\lambda}( x) = \lambda~  \partial_x \phi_{\lambda}( x),
@@ -852,14 +1085,10 @@ $$
     \psi_{\lambda}(x) = \lambda~  \partial_x \psi_{\lambda}(x)
 $$
 for $\lambda\in\mathbb{R}$.
-It is is also true that
-$$
-    \phi_0(x) = \phi(x), \quad \psi_0(x) = \psi(x).
-$$
 
-::: {.callout-note collapse="true" title="Details and proofs"}
-The eigenequation for $\phi^a_N$
-for  becomes
+::: {.callout-note collapse="true" title="Details and proofs: the limit equations"}
+After the substitution $a = (2N)^{\frac12}$, $x \rightarrow (2N)^{-\frac14} x$,
+the eigenvalue equation for $\phi^a_n$ becomes
 $$
 \begin{aligned}
     &\left(
@@ -869,18 +1098,18 @@ $$
     \phi^{(2N)^{\frac12}}_n((2N)^{-\frac14} x)
     =
     (2N)^{\frac14}2(n+1) \partial_{x} \phi^{(2N)^{\frac12}}_n((2N)^{-\frac14} x)
-    \quad \Leftrightarrow \\ \Leftrightarrow \quad &
-    \left(\partial_{ x}^3 - x - 2^{-\frac12} N^{-\frac12} x \partial_{x}^2 \right)
+    \\ \Leftrightarrow \quad &
+    \left(\partial_{ x}^3 - x + 2^{-\frac12} N^{-\frac12} x \partial_{x}^2 \right)
     \phi_n^{(2N)^{\frac12}} ((2N)^{-\frac14} x)
     =
     \frac{2^{\frac12}\left(	N - n - 1	\right)}{N^{\frac12}}
-    \phi_n^{(2N)^{\frac12}} \left((2N)^{-\frac14} x\right)
-    \quad \longrightarrow \\ \longrightarrow \quad &
+    \partial_{x} \phi_n^{(2N)^{\frac12}} \left((2N)^{-\frac14} x\right)
+    \\ \longrightarrow \quad &
     \left(\partial_{x}^3 - x \right)
     \phi_{\lambda}( x) = \lambda  \partial_{ x} \phi_{\lambda}( x).
 \end{aligned}
 $$
-For $\psi^a_N$
+For $\psi^a_n$
 we have analogously
 $$
 \begin{aligned}
@@ -891,26 +1120,63 @@ $$
     \psi^{(2N)^{\frac12}}_n((2N)^{-\frac14} x)
     =
     (2N)^{\frac14}2(n+1) \partial_{x} \psi^{(2N)^{\frac12}}_n((2N)^{-\frac14} x)
-    \quad \Leftrightarrow \\ \Leftrightarrow \quad &
+    \\ \Leftrightarrow \quad &
     \left(\partial_{x}^3 + x - 2^{-\frac12} N^{-\frac12} \partial_{x}^2 x \right)
-    \psi_n^{N^{\frac12}} ((2N)^{-\frac14} x)
+    \psi_n^{(2N)^{\frac12}} ((2N)^{-\frac14} x)
     =
     \frac{2^{\frac12}\left(	N - n - 1 \right)}{N^{\frac12}}
-    \psi_n^{(2N)^{\frac12}} ((2N)^{-\frac14}x)
-    \quad \longrightarrow \\ \longrightarrow \quad &
+    \partial_{x} \psi_n^{(2N)^{\frac12}} ((2N)^{-\frac14}x)
+    \\ \longrightarrow \quad &
     \left(\partial_{x}^3 + x \right)
     \psi_{\lambda}(x) = \lambda \partial_{x} \psi_{\lambda}(x).
 \end{aligned}
 $$
 :::
 
-We now define a two-fold real continuous biorthogonal basis.
-Specifically, for each fixed $\lambda \in \mathbb{R}$,
+At $\lambda = 0$ they are the functions of the Pearcey kernel:
+$$
+    \phi_0(x) = \phi(x), \quad \psi_0(x) = \psi(x).
+$$
+As $\lvert x \rvert \to \infty$ with $\lambda$ fixed, steepest descent gives
+$$
+    \phi_\lambda(x) = \sqrt{\tfrac{2}{3\pi}}\, \lvert x \rvert^{-\frac13}\,
+    \mathrm{e}^{\frac{\lambda^2}{6} - \frac38 \lvert x \rvert^{4/3} - \frac{\lambda}{4} \lvert x \rvert^{2/3}}
+    \Big( \cos\big( \tfrac{3\sqrt3}{8} \lvert x \rvert^{4/3} - \tfrac{\sqrt3}{4} \lambda \lvert x \rvert^{2/3} - \tfrac{\pi}{6} \big)
+    + O\big(\lvert x \rvert^{-2/3}\big) \Big),
+    \label{eq:phi-asym}
+$$
+$$
+    \psi_\lambda(x) = \operatorname{sgn}(x)\, \sqrt{\tfrac{2}{3\pi}}\, \lvert x \rvert^{-\frac13}\,
+    \mathrm{e}^{-\frac{\lambda^2}{6} + \frac38 \lvert x \rvert^{4/3} + \frac{\lambda}{4} \lvert x \rvert^{2/3}}
+    \Big( \cos\big( \tfrac{3\sqrt3}{8} \lvert x \rvert^{4/3} - \tfrac{\sqrt3}{4} \lambda \lvert x \rvert^{2/3} + \tfrac{2\pi}{3} \big)
+    + O\big(\lvert x \rvert^{-2/3}\big) \Big).
+    \label{eq:psi-asym}
+$$
+
+::: {.callout-note collapse="true" title="Connection with the literature"}
+Up to a change of variables,
+$\phi_\lambda$ and $\psi_\lambda$ are the Pearcey integrals $p$ and $q$ of
+[Bleher and Kuijlaars](https://arxiv.org/abs/math-ph/0602064) (eqs. (1.6)–(1.8)) with $b = \lambda$,
+and the eigenvalue equations above are their third-order equations.
+There $b$ labels a family of Pearcey kernels with $K^{\mathrm{Pear}}$ at $b = 0$,
+and [Tracy and Widom](https://arxiv.org/abs/math/0412005) (eq. (1.1))
+use the same parameter as the time of the extended Pearcey kernel.
+The asymptotics $\eqref{eq:phi-asym}$ and $\eqref{eq:psi-asym}$
+follow from Lemma 8.1 of Bleher and Kuijlaars;
+for $\phi_\lambda$ the complete expansion is eq. (10) of [López and Pagola](https://arxiv.org/abs/1511.05323).
+The decomposition of $K^{\mathrm{Pear}}$ at the end of this section
+integrates over $\lambda > 0$ the derivative of the Pearcey kernel in this parameter
+([Adler, Orantin and van Moerbeke](https://arxiv.org/abs/0901.4520), eq. (1.6)).
+:::
+
+We now define a two-fold real continuous biorthogonal basis:
+for each fixed $\lambda \in \mathbb{R}$,
 there are two left basis functions $e^\dagger_\lambda$
-and two right basis functions $e_\lambda$.
-This is analogous to the real Fourier continuous orthogonal basis,
-where for each $\lambda \in \mathbb{R}$,
-we have two real basis functions
+and two right basis functions $e_\lambda$,
+one even and one odd in each pair.
+The real Fourier basis is the orthogonal analogue:
+for each $\lambda \in \mathbb{R}$,
+it has two real basis functions
 $\{ \sin(\lambda x), \cos(\lambda x) \}$.
 
 The pair of collections
@@ -918,155 +1184,162 @@ $$
     \{-2^{-\frac12} \psi_{\lambda}', 2^{-\frac12} \psi_{\lambda}\}_{\lambda\in\mathbb{R}}, \quad
     \{2^{-\frac12} \phi_{\lambda}, 2^{-\frac12} \phi_{\lambda}' \}_{\lambda\in\mathbb{R}}
 $$
-is a biorthogonal basis on
-$L_2(\mathbb{R})$,
-namely
+is a biorthogonal basis in the sense described below:
 $$
-    \int\limits_{-\infty}^{+\infty} dx\,
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}x\,
     \psi_{\lambda}'(x)
     \phi_{\mu}(x) =
     -2\,\delta(\lambda-\mu),
 $$
 $$
-    \int\limits_{-\infty}^{+\infty} dx\,
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}x\,
     \psi_{\lambda}'(x)
     \phi_{\mu}'(x) = 0,
 $$
 $$
-    \int\limits_{-\infty}^{+\infty} dx\,
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}x\,
     \psi_{\lambda}(x)
-    \phi_{\mu}(x) = 0
+    \phi_{\mu}(x) = 0,
 $$
 $$
-    \int\limits_{-\infty}^{+\infty} dx\,
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}x\,
     \psi_{\lambda}(x)
     \phi_{\mu}'(x) =
     2\,\delta(\lambda-\mu),
 $$
 and
 $$
-    \frac12 \int\limits_{-\infty}^{+\infty} d\lambda
+    \frac12 \int\limits_{-\infty}^{+\infty} \mathrm{d}\lambda
     \left(
     \phi_{\lambda}{}'(x) \psi_{\lambda}(y)
     - \phi_{\lambda}(x) \psi_{\lambda}{}'(y)
     \right)
-    = \delta(x-y)
+    = \delta(x-y).
 $$
-where $\delta$
-is the Dirac delta function.
+
+Here the delta function needs more care than in the orthogonal case.
+By $\eqref{eq:phi-asym}$ and $\eqref{eq:psi-asym}$,
+the functions $\phi_\lambda$ lie in $L_2(\mathbb{R})$ and the functions $\psi_\lambda$ do not.
+In each pairing the leading exponents $\pm\frac38 \lvert x \rvert^{4/3}$ cancel, and the next ones do not:
+for $\mu < \lambda$ the integral over $x$ in the first identity diverges,
+since its integrand grows like $\mathrm{e}^{\frac{\lambda-\mu}{4}\lvert x \rvert^{2/3}}$.
+Schwartz test functions do not repair this:
+$\phi_\mu(0)$ grows like $\mathrm{e}^{\mu^2/4}$ as $\mu \to -\infty$,
+so $\int \mathrm{d}\mu\, g(\mu)\, \phi_\mu(x)$ diverges for a general Schwartz function $g$.
+A class that works is the span of the Gaussians
+$$
+    g_m(\mu) = \mathrm{e}^{-\frac{(\mu-m)^2}{3}}, \quad m \in \mathbb{R}.
+$$
+Tested against them, the four identities hold;
+the first one, for instance, reads
+$$
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}x\, \psi_{\lambda}'(x)
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}\mu\, g_m(\mu)\, \phi_\mu(x)
+    = -2\, g_m(\lambda).
+$$
+The completeness relation holds in the form
+$$
+    f(x) = \lim_{\Lambda \to +\infty} \int\limits_{-\infty}^{+\infty} \mathrm{d}y\, f(y)\,
+    \frac12 \int\limits_{-\Lambda}^{+\infty} \mathrm{d}\lambda
+    \left( \phi_\lambda'(x) \psi_\lambda(y) - \phi_\lambda(x) \psi_\lambda'(y) \right)
+$$
+for continuously differentiable $f$ with compact support;
+Schwartz functions are again too many, since $\psi_\lambda$ grows.
+We prove it only formally.
 
 ::: {.callout-note collapse="true" title="Details and proofs"}
+For the Gaussian $g_m$ the integral over $\mu$ is Gaussian too:
+$$
+    G_m(x) := \int\limits_{-\infty}^{+\infty} \mathrm{d}\mu\, g_m(\mu)\, \phi_\mu(x)
+    = \sqrt{6\pi}\, \phi_{2m}\big(\sqrt2\, x\big).
+$$
+By $\eqref{eq:phi-asym}$ it decays like $\mathrm{e}^{-\frac38 2^{2/3} \lvert x \rvert^{4/3}}$,
+fast enough to integrate over $x$ before $u$, with $\mathcal{C}$ the rays through the origin:
+$$
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}x\, \psi_{\lambda}'(x)\, G_m(x)
+    = \frac{\sqrt{3\pi}}{2\pi \mathrm{i}} \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    u\, \mathrm{e}^{\frac{3u^4}{16} + \frac{(m-\lambda)u^2}{2}}
+    = -2\, g_m(\lambda),
+$$
+a Gaussian integral in $\frac{u^2}{2} \in \mathrm{i}\mathbb{R}$.
+In the other three identities, with $G_m'$ in place of $G_m$ where $\phi_\mu'$ appears,
+the factor $u$ becomes $-u^2$, $1$ and $-u$;
+the first two integrals vanish, since $u \mapsto -u$ maps $\mathcal{C}$ onto itself with its orientation.
+The span of the $g_m$ is dense in $L_2(\mathbb{R})$ and in the Schwartz space,
+so these test functions determine the delta function uniquely.
+
+The proof of the last identity is formal:
+it changes the order of integration, and two more steps are not justified.
+Here $\mathcal{C}$ consists of the rays $\arg u = \pm\frac{\pi}{4}, \pm\frac{3\pi}{4}$ through the origin,
+since the factor $(u - \mathrm{i}t)^{-1}$ has poles on the imaginary axis.
+The integral over $\lambda$ diverges at $\lambda \to -\infty$,
+so we cut it at $-\Lambda$ and let $\Lambda \to +\infty$ at the end,
+and we do not prove that the remaining contour integral vanishes in this limit:
 $$
 \begin{aligned}
-    &\int\limits_{-\infty}^{+\infty} dx\,
-    \psi_{\lambda}'(x) \phi_{\mu}(x)
-    =\\=&
-    \frac{1}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du
-    \int\limits_{-\infty}^{+\infty} dx\,
-    u \,e^{ \frac{u^4}{4} - \frac{\lambda u^2}{2} + u x
-    - \frac{t^4}{4} - \frac{\mu t^2}{2} - itx}
-    =\\=&
-    \frac{1}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    u \,e^{ \frac{u^4}{4} - \frac{\lambda u^2}{2}
-    - \frac{(t-iu )^4}{4} - \frac{\mu (t-iu)^2}{2} }
-    \int\limits_{-\infty}^{+\infty} dx\,
-    e^{-i t x}
-    =\\=&
-    \frac{1}{2\pi i}
-    \int\limits_{\mathcal{C}} du
-    \left.
-    u \,e^{ \frac{u^4}{4} - \frac{\lambda u^2}{2}
-    - \frac{(t-iu )^4}{4} - \frac{\mu (t-iu)^2}{2} }
-    \right|_{t=0}
-    =\\=&
-    \frac{1}{2\pi i}
-    \int\limits_{\mathcal{C}} du\,
-    u \,e^{  - \frac{\lambda u^2}{2}
-    + \frac{\mu u^2}{2} }
-    =\\=&
-    \frac{1}{2\pi i}
-    \int\limits_{\mathcal{C}} d\frac{u^2}{2}\,
-    e^{ - \frac{\lambda u^2}{2}
-    + \frac{\mu u^2}{2} }
-    =\\=&
-    \frac{-2}{2\pi }
-    \int\limits_{-\infty}^{\infty} d  t \,
-    e^{ - i \lambda t + i \mu t}
-    =\\=&
-    -2\,\delta(\lambda-\mu).
-\end{aligned}
-$$
-Other 3 statements can be show in the same manner.
-The last identity can be proved as follows
-$$
-\begin{aligned}
-    &\frac12 \int\limits_{-\infty}^{+\infty} d\lambda
+    &\frac12 \int\limits_{-\infty}^{+\infty} \mathrm{d}\lambda
     \left(
     \phi_{\lambda}{}'(x) \psi_{\lambda}(y)
     - \phi_{\lambda}(x) \psi_{\lambda}{}'(y)
     \right)
-    =\\=&
-    \int\limits_{-\infty}^{+\infty} d\lambda
-    \frac{1}{2(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    (-it-u)
-    e^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - itx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
-    =\\=&
-    \frac{-1}{2(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    \int\limits_{-\infty}^{+\infty} d\lambda
-    \frac{u^2+t^2}{u-it}
-    e^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - itx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
-    =\\=&
-    -\frac{ \lim_{\Lambda \to +\infty} }{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    \int\limits_{-\Lambda}^{+\infty} d\lambda
-    \frac{-\partial_{\lambda}}{u-it}
-    e^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - itx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
-    =\\=&
-    \frac{ \lim_{\Lambda \to +\infty} }{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    \frac{e^{-\frac{t^4}{4} - itx + \frac{u^4}{4} + u y + \frac{\Lambda}{2} (t^2+u^2)}}{u-it}
-    =\\=&
+    \\ &=
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}\lambda
+    \frac{1}{2(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    (-\mathrm{i}t-u)
+    \mathrm{e}^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - \mathrm{i}tx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
+    \\ &=
+    \frac{-1}{2(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}\lambda
+    \frac{u^2+t^2}{u-\mathrm{i}t}
+    \mathrm{e}^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - \mathrm{i}tx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
+    \\ &=
+    -\frac{ \lim_{\Lambda \to +\infty} }{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \int\limits_{-\Lambda}^{+\infty} \mathrm{d}\lambda
+    \frac{-\partial_{\lambda}}{u-\mathrm{i}t}
+    \mathrm{e}^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - \mathrm{i}tx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
+    \\ &=
+    -\frac{ \lim_{\Lambda \to +\infty} }{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \frac{\mathrm{e}^{-\frac{t^4}{4} - \mathrm{i}tx + \frac{u^4}{4} + u y + \frac{\Lambda}{2} (t^2+u^2)}}{u-\mathrm{i}t}
+    \\ &=
     \frac{ \lim_{\Lambda \to +\infty} }{2\pi}
-    \int\limits_{-\infty}^{+\infty} dt
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
     \left.
-    e^{-\frac{t^4}{4} - itx + \frac{u^4}{4} + u y + \frac{\Lambda}{2} (t^2+u^2)}
-    \right|_{u=it}
-    +\\+&
-    \frac{ \lim_{\Lambda \to +\infty} }{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}'} du\,
-    \frac{e^{-\frac{t^4}{4} - itx + \frac{u^4}{4} + u y + \frac{\Lambda}{2} (t^2+u^2)}}{u-it}.
+    \mathrm{e}^{-\frac{t^4}{4} - \mathrm{i}tx + \frac{u^4}{4} + u y + \frac{\Lambda}{2} (t^2+u^2)}
+    \right|_{u=\mathrm{i}t}
+    \\ &\quad -
+    \frac{ \lim_{\Lambda \to +\infty} }{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}'} \mathrm{d}u\,
+    \frac{\mathrm{e}^{-\frac{t^4}{4} - \mathrm{i}tx + \frac{u^4}{4} + u y + \frac{\Lambda}{2} (t^2+u^2)}}{u-\mathrm{i}t}.
 \end{aligned}
 $$
-The first term in the last expression results from
-the contour integration by $u$
-around $u = it$.
-In the second integral, the contour $\mathcal{C}'$
-is the remaining part of $\mathcal{C}$.
-It tends to zero as $\Lambda$
-approaches infinity. Continuing the calculation, we have
+The first term is the residue at $u = \mathrm{i}t$,
+picked up when $\mathcal{C}$ is deformed across the pole into a contour $\mathcal{C}'$
+on which $\mathrm{Re}\,(t^2 + u^2) < 0$.
+With the orientation of $\mathcal{C}$ the pole lies to the right of the path,
+so the residue enters with the factor $-2\pi \mathrm{i}$.
+We assume, without proof, that the integral over $\mathcal{C}'$
+tends to zero as $\Lambda \to +\infty$. Then
 $$
     \dotso = \frac{ \lim_{\Lambda \to +\infty} }{2\pi}
-    \int\limits_{-\infty}^{+\infty} dt\,
-    e^{ - itx  + i t y + \frac{\Lambda}{2}\cdot 0} =
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t\,
+    \mathrm{e}^{ - \mathrm{i}tx  + \mathrm{i} t y + \frac{\Lambda}{2}\cdot 0} =
     \delta(x-y).
 $$
 :::
 
-The Pearcey kernel can thus be decomposed as follows
+The Pearcey kernel has the decomposition
 $$
     K^{\mathrm{Pear}}(x,y) =
-    \frac12 \int\limits_0^{+\infty} d\lambda
+    \frac12 \int\limits_0^{+\infty} \mathrm{d}\lambda
     \left(
     \phi_{\lambda}'(x) \psi_{\lambda}(y)
     - \phi_{\lambda}(x) \psi_{\lambda}'(y)
@@ -1074,86 +1347,165 @@ $$
 $$
 
 ::: {.callout-note collapse="true" title="Details and proofs"}
+We compute the right-hand side with the opposite sign,
+with $\mathcal{C}$ the rays through the origin, as in the proof of completeness above.
 $$
 \begin{aligned}
-    &\frac12 \int\limits_{0}^{+\infty} d\lambda
+    &\frac12 \int\limits_{0}^{+\infty} \mathrm{d}\lambda
     \left(
     \phi_{\lambda}(x) \psi_{\lambda}'(y)
-    - \phi_{\lambda}(x)' \psi_{\lambda}(y)
+    - \phi_{\lambda}'(x) \psi_{\lambda}(y)
     \right)
-    =\\=&
-    \int\limits_{0}^{+\infty} d\lambda
-    \frac{1}{2(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    (u+it)
-    e^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - itx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
-    =\\=&
-    \frac{1}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    \int\limits_{0}^{+\infty} d\lambda
-    \frac{u^2+t^2}{u-it}
-    e^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - itx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
-    =\\=&
-    \frac{1}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    \int\limits_{0}^{+\infty} d\lambda
-    \frac{-\partial_{\lambda}}{u-it}
-    e^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - itx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
-    =\\=&
-    \frac{1}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    \frac{e^{-\frac{t^4}{4} - itx + \frac{u^4}{4} + u y }}{u-it}
-    =\\=&
-    \frac{1}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    \frac{e^{-\frac{t^4}{4} + \frac{u^4}{4} }}{(u-it)(x-y)}
-    (i\partial_t-\partial_u)
-    e^{ - itx +  u y}
-    =\\=&
-    \frac{1}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    e^{ - itx +  u y}
-    (i\partial_t-\partial_u)
-    \frac{e^{-\frac{t^4}{4} + \frac{u^4}{4} }}{(u-it)(x-y)}
-    =\\=&
-    \frac{1}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    e^{ - itx +  u y}
-    \frac{ (-i t^3 - u^3 ) e^{-\frac{t^4}{4} + \frac{u^4}{4} }}{(u-it)(x-y)}
-    =\\=&
-    \frac{1}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    \frac{ ( t^2 - itu - u^2 ) e^{-\frac{t^4}{4} + \frac{u^4}{4}  - itx +  u y } }{x-y}
-    =\\=&
-    \frac{1}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    \frac{ ( -\partial_x^2 + \partial_x \partial_y - \partial_y ^2 ) e^{-\frac{t^4}{4} + \frac{u^4}{4}  - itx +  u y } }{x-y}
-    =\\=&
-    \frac{\phi'(x)\psi'(y)-\phi''(x)\psi(y)-\phi(x)\psi''(y) }{x-y}
-    =K(x,y).
+    \\ &=
+    \int\limits_{0}^{+\infty} \mathrm{d}\lambda
+    \frac{1}{2(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    (u+\mathrm{i}t)
+    \mathrm{e}^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - \mathrm{i}tx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
+    \\ &=
+    \frac{1}{2(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \int\limits_{0}^{+\infty} \mathrm{d}\lambda
+    \frac{u^2+t^2}{u-\mathrm{i}t}
+    \mathrm{e}^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - \mathrm{i}tx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
+    \\ &=
+    \frac{1}{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \int\limits_{0}^{+\infty} \mathrm{d}\lambda
+    \frac{-\partial_{\lambda}}{u-\mathrm{i}t}
+    \mathrm{e}^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - \mathrm{i}tx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
+    \\ &=
+    \frac{1}{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \frac{\mathrm{e}^{-\frac{t^4}{4} - \mathrm{i}tx + \frac{u^4}{4} + u y }}{u-\mathrm{i}t}
+    \\ &=
+    \frac{1}{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \frac{\mathrm{e}^{-\frac{t^4}{4} + \frac{u^4}{4} }}{(u-\mathrm{i}t)(x-y)}
+    (\mathrm{i}\partial_t-\partial_u)
+    \mathrm{e}^{ - \mathrm{i}tx +  u y}
+    \\ &=
+    -\frac{1}{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \mathrm{e}^{ - \mathrm{i}tx +  u y}
+    (\mathrm{i}\partial_t-\partial_u)
+    \frac{\mathrm{e}^{-\frac{t^4}{4} + \frac{u^4}{4} }}{(u-\mathrm{i}t)(x-y)}
+    \\ &=
+    -\frac{1}{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \mathrm{e}^{ - \mathrm{i}tx +  u y}
+    \frac{ (-\mathrm{i} t^3 - u^3 ) \mathrm{e}^{-\frac{t^4}{4} + \frac{u^4}{4} }}{(u-\mathrm{i}t)(x-y)}
+    \\ &=
+    -\frac{1}{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \frac{ ( t^2 - \mathrm{i}tu - u^2 ) \mathrm{e}^{-\frac{t^4}{4} + \frac{u^4}{4}  - \mathrm{i}tx +  u y } }{x-y}
+    \\ &=
+    -\frac{1}{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \frac{ ( -\partial_x^2 + \partial_x \partial_y - \partial_y ^2 ) \mathrm{e}^{-\frac{t^4}{4} + \frac{u^4}{4}  - \mathrm{i}tx +  u y } }{x-y}
+    \\ &=
+    -\frac{\phi'(x)\psi'(y)-\phi''(x)\psi(y)-\phi(x)\psi''(y) }{x-y}
+    =-K(x,y).
 \end{aligned}
 $$
+This computation is formal.
+The integral over $\lambda$ is exchanged with the double integral
+without absolute convergence,
+the boundary term at $\lambda = +\infty$ is dropped,
+and the integration by parts passes the pole $u = \mathrm{i}t$ without justification.
 :::
 
-This is similar to the
+As in the
 Airy kernel decomposition $\eqref{eq:airy-kernel}$,
-where the kernel projects onto the positive half of the spectrum.
+the kernel projects onto the positive half of the spectrum.
 
-## Conclusion
+## Acknowledgements
 
 The author is grateful to
 [Alexander Bufetov](http://www.mathnet.ru/eng/person9066)
 for setting this problem and for valuable discussions.
-The basis was found in Spring 2016 and published first here.
+The author found this basis in spring 2016 as a solution to that problem.
+
+*Revised in 2026 with Claude Code: language, review, checking of the mathematics and the
+citations, drafting from the author's notes. The results
+are the author's.*
+
+## References {.unnumbered}
+
+Mark Adler, Nicolas Orantin, Pierre van Moerbeke,
+[*Universality of the Pearcey process*](https://arxiv.org/abs/0901.4520),
+Physica D **239**, 924–941 (2010), arXiv:0901.4520.
+
+Pavel M. Bleher, Arno B. J. Kuijlaars,
+[*Random matrices with external source and multiple orthogonal
+polynomials*](https://arxiv.org/abs/math-ph/0307055),
+International Mathematics Research Notices **2004**, 109–129 (2004),
+arXiv:math-ph/0307055.
+
+Pavel M. Bleher, Arno B. J. Kuijlaars,
+[*Integral representations for multiple Hermite and multiple Laguerre
+polynomials*](https://arxiv.org/abs/math/0406616),
+Annales de l'Institut Fourier **55**, 2001–2014 (2005), arXiv:math/0406616.
+
+Pavel M. Bleher, Arno B. J. Kuijlaars,
+[*Large n limit of Gaussian random matrices with external source, Part III: Double
+scaling limit*](https://arxiv.org/abs/math-ph/0602064),
+Communications in Mathematical Physics **270**, 481–517 (2007), arXiv:math-ph/0602064.
+
+Alexei Borodin,
+[*Biorthogonal ensembles*](https://arxiv.org/abs/math/9804027),
+Nuclear Physics B **536**, 704–732 (1998), arXiv:math/9804027.
+
+Édouard Brézin, Shinobu Hikami,
+[*Universal singularity at the closure of a gap in a random matrix
+theory*](https://arxiv.org/abs/cond-mat/9804023),
+Physical Review E **57**, 4140–4149 (1998), arXiv:cond-mat/9804023.
+
+Dmitry Chelkak, Clément Hongler, Konstantin Izyurov,
+[*Conformal invariance of spin correlations in the planar Ising
+model*](https://arxiv.org/abs/1202.2838),
+arXiv:1202.2838 (2012).
+
+Dmitry Chelkak, Stanislav Smirnov,
+[*Universality in the 2D Ising model and conformal invariance of fermionic
+observables*](https://arxiv.org/abs/0910.2045),
+arXiv:0910.2045 (2009).
+
+Galina Filipuk, Walter Van Assche, Lun Zhang,
+[*Ladder operators and differential equations for multiple orthogonal
+polynomials*](https://arxiv.org/abs/1204.5058),
+Journal of Physics A **46**, 205204 (2013), arXiv:1204.5058.
+
+Israel M. Gelfand, Naum Ya. Vilenkin,
+[*Generalized Functions*, Vol. 4: *Applications of Harmonic
+Analysis*](https://books.google.com/books?id=LE4HjwEACAAJ),
+Academic Press (1964).
+
+José L. López, Pedro Pagola,
+[*The Pearcey integral in the highly oscillatory
+region*](https://arxiv.org/abs/1511.05323),
+arXiv:1511.05323 (2015).
+
+Madan Lal Mehta,
+[*Random Matrices*, 3rd ed.](https://books.google.com/books?id=Kp3Nx03_gMwC),
+Elsevier (2004).
+
+Craig A. Tracy, Harold Widom,
+[*Level-spacing distributions and the Bessel kernel*](https://arxiv.org/abs/hep-th/9304063),
+Communications in Mathematical Physics **161**, 289–310 (1994), arXiv:hep-th/9304063.
+
+Craig A. Tracy, Harold Widom,
+[*The Pearcey process*](https://arxiv.org/abs/math/0412005),
+Communications in Mathematical Physics **263**, 381–400 (2006), arXiv:math/0412005.
 
 ------------------------------------------------------------------------
 

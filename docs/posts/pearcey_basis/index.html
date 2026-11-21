@@ -44,7 +44,10 @@ ul.task-list li input[type="checkbox"] {
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-ee075cc6cae44f5928a8092fb7663854.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-320d2b4c3cef225b279c4a145f2ecf77.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -173,20 +176,25 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#crash-introduction" id="toc-crash-introduction" class="nav-link active" data-scroll-target="#crash-introduction"><span class="header-section-number">1</span> Crash Introduction</a>
-  <ul class="collapse">
-  <li><a href="#sec-orthogonal-ensemble" id="toc-sec-orthogonal-ensemble" class="nav-link" data-scroll-target="#sec-orthogonal-ensemble"><span class="header-section-number">1.1</span> Orthogonal Matrix Ensemble</a></li>
+  <li><a href="#sec-crash-introduction" id="toc-sec-crash-introduction" class="nav-link active" data-scroll-target="#sec-crash-introduction"><span class="header-section-number">1</span> Crash Introduction</a>
+  <ul>
+  <li><a href="#sec-unitary-ensemble" id="toc-sec-unitary-ensemble" class="nav-link" data-scroll-target="#sec-unitary-ensemble"><span class="header-section-number">1.1</span> Gaussian Unitary Ensemble</a></li>
   <li><a href="#determinantal-point-process" id="toc-determinantal-point-process" class="nav-link" data-scroll-target="#determinantal-point-process"><span class="header-section-number">1.2</span> Determinantal Point Process</a></li>
   <li><a href="#scaling-limit" id="toc-scaling-limit" class="nav-link" data-scroll-target="#scaling-limit"><span class="header-section-number">1.3</span> Scaling Limit</a></li>
   <li><a href="#sine-process" id="toc-sine-process" class="nav-link" data-scroll-target="#sine-process"><span class="header-section-number">1.4</span> Sine Process</a></li>
   </ul></li>
-  <li><a href="#pearcey-kernel" id="toc-pearcey-kernel" class="nav-link" data-scroll-target="#pearcey-kernel"><span class="header-section-number">2</span> Pearcey Kernel</a>
-  <ul class="collapse">
-  <li><a href="#biased-unitary-ensemble" id="toc-biased-unitary-ensemble" class="nav-link" data-scroll-target="#biased-unitary-ensemble"><span class="header-section-number">2.1</span> Biased Unitary Ensemble</a></li>
+  <li><a href="#sec-pearcey-kernel" id="toc-sec-pearcey-kernel" class="nav-link" data-scroll-target="#sec-pearcey-kernel"><span class="header-section-number">2</span> Pearcey Kernel</a>
+  <ul>
+  <li><a href="#sec-biased-ensemble" id="toc-sec-biased-ensemble" class="nav-link" data-scroll-target="#sec-biased-ensemble"><span class="header-section-number">2.1</span> Biased Unitary Ensemble</a></li>
   <li><a href="#pearcey-scaling-limit" id="toc-pearcey-scaling-limit" class="nav-link" data-scroll-target="#pearcey-scaling-limit"><span class="header-section-number">2.2</span> Pearcey Scaling Limit</a></li>
-  <li><a href="#pearcey-basis" id="toc-pearcey-basis" class="nav-link" data-scroll-target="#pearcey-basis"><span class="header-section-number">2.3</span> Pearcey Basis</a></li>
+  <li><a href="#pearcey-basis" id="toc-pearcey-basis" class="nav-link" data-scroll-target="#pearcey-basis"><span class="header-section-number">2.3</span> Pearcey Basis</a>
+  <ul class="collapse">
+  <li><a href="#sec-finite-n-basis" id="toc-sec-finite-n-basis" class="nav-link" data-scroll-target="#sec-finite-n-basis"><span class="header-section-number">2.3.1</span> Finite <span class="math inline">\(N\)</span> Basis</a></li>
+  <li><a href="#sec-limit-basis" id="toc-sec-limit-basis" class="nav-link" data-scroll-target="#sec-limit-basis"><span class="header-section-number">2.3.2</span> Limit basis</a></li>
   </ul></li>
-  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">3</span> Conclusion</a></li>
+  </ul></li>
+  <li><a href="#acknowledgements" id="toc-acknowledgements" class="nav-link" data-scroll-target="#acknowledgements"><span class="header-section-number">3</span> Acknowledgements</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 <div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="index.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
     </div>
@@ -225,9 +233,9 @@ window.Quarto = {
   </div>
   
     <div>
-    <div class="quarto-title-meta-heading">Modified</div>
+    <div class="quarto-title-meta-heading">Last modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">June 24, 2024</p>
+      <p class="date-modified">November 22, 2026</p>
     </div>
   </div>
     
@@ -238,206 +246,196 @@ window.Quarto = {
 </header>
 
 
-<p>There is a well-known connection between orthogonal polynomials, second-order Sturm-Liouville differential equations, random matrices, and orthogonal projectors in <span class="math inline">\(L_2\)</span>. This post explores an extension of this topic. We have identified a basis for the <em>Pearcey Kernel</em>, initially introduced by <a href="https://arxiv.org/abs/cond-mat/9804024">Brezin and Hikami</a>. To achieve this, we move beyond the traditional approach of second-order differential equations and orthogonal polynomials, employing third-order equations and biorthogonal bases instead.</p>
-<p>For readers who may not be familiar with this topic, we have prepared a <a href="#crash-introduction">crash introduction</a> below. If you’re already comfortable with concepts like the Circular Law for random matrices, the Airy kernel, and determinantal point processes, you can skip this section without missing any crucial information.</p>
-<section id="crash-introduction" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="crash-introduction"><span class="header-section-number">1</span> Crash Introduction</h2>
-<section id="sec-orthogonal-ensemble" class="level3" data-number="1.1">
-<h3 data-number="1.1" class="anchored" data-anchor-id="sec-orthogonal-ensemble"><span class="header-section-number">1.1</span> Orthogonal Matrix Ensemble</h3>
-<p>Let <span class="math inline">\(H\)</span> be an <span class="math inline">\(N \times N\)</span> real-valued matrix. We define a probability measure for such matrices using the following probability density function: <span class="math display">\[
-    \rho_N^{\mathrm{ort}}(H) := \mathcal{C}_N \, e^{-\frac12 \mathrm{Tr}\, H^2}.
-\]</span> Here, <span class="math inline">\(\mathcal{C}_N\)</span> is the normalization coefficient that depends solely on its indices and may vary from one equation to another. This probabilistic model is referred to as the <em>orthogonal matrix ensemble</em> because it remains invariant under the orthogonal matrix transformation <span class="math inline">\(H \rightarrow O^{-1} H O\)</span> for any orthogonal matrix <span class="math inline">\(O\)</span>.</p>
-<p>It is possible to show (see, for example, <a href="https://books.google.ru/books/about/Random_Matrices.html?id=Kp3Nx03_gMwC&amp;redir_esc=y">Mehta, Random Matrices,</a> section 5.3) that the random law for the set of eigenvalues <span class="math inline">\(\{\lambda_i\}_{0 \leq i &lt; N}\)</span> of <span class="math inline">\(H\)</span> is given by the probability density function: <span class="math display">\[
-    \rho_N^{\mathrm{ort}}(\lambda_0, \lambda_1, \dotso \lambda_{N-1})
-    = \mathcal{C}_N
-    \prod_{0 \leq i &lt; j &lt; N} \left| \lambda_i - \lambda_j \right|
-    \prod_{0 \leq i &lt; N} e^{-\frac{\lambda_i^2}{2}}
-    = \mathcal{C}_N \,
-    e^{ \sum_{0 \leq i &lt; j &lt; N} \log\left| \lambda_i - \lambda_j \right|
+<p>The <em>Pearcey kernel</em> was introduced by <a href="https://arxiv.org/abs/cond-mat/9804023">Brézin and Hikami</a>. It describes the eigenvalues of a large random Hermitian matrix shifted by a fixed matrix with eigenvalues <span class="math inline">\(\pm a\)</span>, near the point where the two clusters of eigenvalues merge. We build a basis for this kernel following the Gaussian unitary ensemble, whose kernel is the projector onto the first <span class="math inline">\(N\)</span> Hermite functions.</p>
+<p>For the shifted matrix at finite <span class="math inline">\(N\)</span>, the kernel has no decomposition into an orthonormal basis. It does have a biorthogonal one: two families of functions, dual to each other, in which the kernel is the sum of the first <span class="math inline">\(2N\)</span> terms. In the scaling limit this basis becomes a continuous family indexed by <span class="math inline">\(\lambda \in \mathbb{R}\)</span>, and <span class="math inline">\(K^{\mathrm{Pear}}\)</span> is its integral over <span class="math inline">\(\lambda &gt; 0\)</span>, as the Airy kernel is the integral of the shifted Airy functions over the half-line. At finite <span class="math inline">\(N\)</span> the proofs are complete; in the limit some steps are formal.</p>
+<p>We assume familiarity with the Fourier transform, contour integrals and residues, linear differential equations and the Dirac delta function. <a href="#sec-crash-introduction" class="quarto-xref">Section&nbsp;1</a> is a short introduction to random matrices: the Gaussian unitary ensemble, determinantal point processes, and the sine and other kernels. Readers who know them can skim it, but the later sections follow its pattern and refer to its equations.</p>
+<section id="sec-crash-introduction" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="sec-crash-introduction"><span class="header-section-number">1</span> Crash Introduction</h2>
+<section id="sec-unitary-ensemble" class="level3" data-number="1.1">
+<h3 data-number="1.1" class="anchored" data-anchor-id="sec-unitary-ensemble"><span class="header-section-number">1.1</span> Gaussian Unitary Ensemble</h3>
+<p>Let <span class="math inline">\(H\)</span> be an <span class="math inline">\(N \times N\)</span> Hermitian matrix. We define a probability measure on such matrices by the density <span class="math display">\[
+    \rho_N^{\mathrm{GUE}}(H) := Z_N^{-1} \, \mathrm{e}^{-\frac12 \mathrm{Tr}\, H^2},
+\]</span> with respect to the Lebesgue measure on the <span class="math inline">\(N^2\)</span> real parameters of <span class="math inline">\(H\)</span>: the diagonal entries and the real and imaginary parts of the entries above the diagonal. Here <span class="math inline">\(Z_N\)</span> is a normalization constant that depends only on <span class="math inline">\(N\)</span> and may differ from one equation to another. This model is called the <em>Gaussian unitary ensemble</em> (GUE), because the density is invariant under the transformation <span class="math inline">\(H \rightarrow U^{-1} H U\)</span> for any unitary matrix <span class="math inline">\(U\)</span>.</p>
+<p>The eigenvalues <span class="math inline">\(\{\lambda_i\}_{0 \leq i &lt; N}\)</span> of <span class="math inline">\(H\)</span> then have the joint density (see, for example, <a href="https://books.google.com/books?id=Kp3Nx03_gMwC">M. L. Mehta, <em>Random Matrices</em>, 3rd ed., Elsevier, 2004</a>, the chapter on the joint probability density function for the eigenvalues) <span class="math display">\[
+    \rho_N^{\mathrm{GUE}}(\lambda_0, \lambda_1, \dotso \lambda_{N-1})
+    = Z_N^{-1}
+    \prod_{0 \leq i &lt; j &lt; N} \left| \lambda_i - \lambda_j \right|^2
+    \prod_{0 \leq i &lt; N} \mathrm{e}^{-\frac{\lambda_i^2}{2}}
+    = Z_N^{-1} \,
+    \mathrm{e}^{ 2 \sum_{0 \leq i &lt; j &lt; N} \log\left| \lambda_i - \lambda_j \right|
     - \frac12 \sum_{0 \leq i &lt; N} \lambda_i^2}.
-\]</span> This probabilistic model can be easily interpreted physically. The expression above represents a Boltzmann distribution for a one-dimensional gas containing <span class="math inline">\(N\)</span> particles, located in a stationary quadratic potential with a repulsive logarithmic potential between each pair of particles.</p>
+\]</span> This density is a Boltzmann distribution for a one-dimensional gas of <span class="math inline">\(N\)</span> particles in an external quadratic potential, with a logarithmic repulsion between each pair of particles, the pair energy being <span class="math inline">\(E_{ij} = -2 \log \lvert \lambda_i - \lambda_j \rvert\)</span>.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="images/eigenvalue_distribution_30.png" class="img-fluid figure-img"></p>
-<figcaption>Samples of eigenvalues <span class="math inline">\(\lambda\)</span> for <span class="math inline">\(N = 30\)</span>. Each of the 20 strings corresponds to a random sample of the set of <span class="math inline">\(N\)</span> eigenvalues (particles) colored green. The blue curve is the average eigenvalue density function.</figcaption>
+<p><a href="images/eigenvalue_distribution_30.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Samples of eigenvalues \lambda for N = 30. Each of the 20 rows is one random sample of the N eigenvalues (particles), shown in green. The blue curve is the mean eigenvalue density."><img src="images/eigenvalue_distribution_30.png" class="img-fluid figure-img" alt="Samples of eigenvalues \lambda for N = 30. Each of the 20 rows is one random sample of the N eigenvalues (particles), shown in green. The blue curve is the mean eigenvalue density."></a></p>
+<figcaption>Samples of eigenvalues <span class="math inline">\(\lambda\)</span> for <span class="math inline">\(N = 30\)</span>. Each of the 20 rows is one random sample of the <span class="math inline">\(N\)</span> eigenvalues (particles), shown in green. The blue curve is the mean eigenvalue density.</figcaption>
 </figure>
 </div>
 </section>
 <section id="determinantal-point-process" class="level3" data-number="1.2">
 <h3 data-number="1.2" class="anchored" data-anchor-id="determinantal-point-process"><span class="header-section-number">1.2</span> Determinantal Point Process</h3>
-<p>The random law described in the previous subsection is an example of a <em>determinantal point process</em>. This is a type of random law on a collection of <span class="math inline">\(N\)</span> unordered real numbers <span class="math inline">\(\{\lambda_i\}_{0 \leq i &lt; N}\)</span> represented by the probability density function: <span class="math display">\[
+<p>The eigenvalue distribution of the previous subsection is an example of a <em>determinantal point process</em>, a random collection of <span class="math inline">\(N\)</span> unordered real numbers <span class="math inline">\(\{\lambda_i\}_{0 \leq i &lt; N}\)</span> with a joint density of the form <span class="math display">\[
     \rho_N( \lambda_0, \lambda_1, \dotso \lambda_{N-1} )
-    := \mathcal{C}_N \, \det
+    := Z_N^{-1} \det
     \left[
         \left\{ K(\lambda_i, \lambda_j) \right\}_{0 \leq i,j &lt; N}
     \right],
-\]</span> where <span class="math inline">\(K(x,y)\)</span> is a real-valued function of two arguments. This function can be understood as the kernel of a linear operator that is <span class="math display">\[
-    K: \psi(x) \mapsto (K \psi)(x) := \int dy~ K(x,y) \psi(y).
-\]</span> This operator acts on a linear space of functions represented by <span class="math inline">\(\psi(x)\)</span>. We assume the projection property: <span class="math display">\[
-    \int_{-\infty}^{+\infty} dy~ K(x, y) K(y, z) = K(x, z).
+\]</span> where <span class="math inline">\(K(x,y)\)</span> is a real-valued function of two arguments. We read it as the kernel of the linear operator <span class="math display">\[
+    K: f(x) \mapsto (K f)(x) := \int \mathrm{d}y~ K(x,y) f(y),
+\]</span> acting on functions <span class="math inline">\(f(x)\)</span> of one real variable. We assume that <span class="math inline">\(K\)</span> has the projection property <span class="math display">\[
+    \int_{-\infty}^{+\infty} \mathrm{d}y~ K(x, y) K(y, z) = K(x, z),
     \label{eq:projection-property}
-\]</span> for <span class="math inline">\(K(x,y)\)</span>.</p>
-<p>It can be shown that the correlation functions for any subset of particles <span class="math inline">\(\lambda\)</span> have the same form as <span class="math inline">\(\rho_N\)</span>. Specifically: <span class="math display">\[
-    C_{N,L} \, ( \lambda_0, \lambda_1, \dotso \lambda_{L-1} )
-    = \mathcal{C}_{N,L} \det
+\]</span> and that its trace is the number of particles: <span class="math display">\[
+    \int_{-\infty}^{+\infty} \mathrm{d}x~ K(x, x) = N.
+\]</span></p>
+<p>Under these two assumptions, the correlation functions of any <span class="math inline">\(L\)</span> of the particles have the same determinantal form as <span class="math inline">\(\rho_N\)</span> (Gaudin’s lemma, see <a href="https://books.google.com/books?id=Kp3Nx03_gMwC">Mehta, Random Matrices</a>): <span class="math display">\[
+    R_{N,L} \, ( \lambda_0, \lambda_1, \dotso \lambda_{L-1} )
+    = \det
     \left[
     \left\{ K(\lambda_i, \lambda_j) \right\}_{0 \leq i,j &lt; L}
     \right], \quad
-    L=0,1,2,\dotso N
+    L=1,2,\dotso N
     \label{eq:dpp-correlation}
-\]</span> In particular, the first correlation function: <span class="math display">\[
-    C_{N,1}(\lambda) = K(\lambda, \lambda)^{-1}
-\]</span> is responsible for the mean density of the eigenvalues. The correlation between two eigenvalues is: <span class="math display">\[
-    C_{N,2}(\lambda_0, \lambda_1)
+\]</span> In particular, the first correlation function <span class="math display">\[
+    R_{N,1}(\lambda) = K(\lambda, \lambda)
+\]</span> gives the mean density of the eigenvalues. The two-point correlation function is <span class="math display">\[
+    R_{N,2}(\lambda_0, \lambda_1)
     = K(\lambda_0, \lambda_0) K(\lambda_1, \lambda_1) - K(\lambda_0, \lambda_1)^2.
     \label{eq:two-point-cor}
-\]</span> It can be shown (see, for example, <a href="https://books.google.ru/books/about/Random_Matrices.html?id=Kp3Nx03_gMwC&amp;redir_esc=y">Mehta, Random Matrices</a>) that the random law from the previous subsection is a determinantal point process with the kernel: <span class="math display">\[
-    K_N^{\mathrm{ort}}(x,y) = \sum_{0 \leq i &lt; N} \psi_i(x) \psi_i(y).
+\]</span> The eigenvalue distribution of the previous subsection is a determinantal point process with the kernel (see, for example, <a href="https://books.google.com/books?id=Kp3Nx03_gMwC">Mehta, Random Matrices</a>) <span class="math display">\[
+    K_N^{\mathrm{GUE}}(x,y) = \sum_{0 \leq i &lt; N} \psi_i(x) \psi_i(y).
     \label{eq:kernel-decomposition}
-\]</span> Here, we introduced the Hermite functions <span class="math inline">\(\psi_i(x)\)</span>: <span class="math display">\[
-    \psi_i(x) := \frac{1}{(2 \pi)^{\frac14} n!^\frac12 } e^{\frac{x^2}{4}} \mathrm{He}_i(x), \quad
+\]</span> Here <span class="math inline">\(\psi_i(x)\)</span> are the Hermite functions <span class="math display">\[
+    \psi_i(x) := \frac{1}{(2 \pi)^{\frac14} i!^\frac12 } \mathrm{e}^{-\frac{x^2}{4}} \mathrm{He}_i(x), \quad
     i = 0, 1, 2, \dotso,
-\]</span> where <span class="math inline">\(\mathrm{He}_i(x)\)</span> is the Hermite polynomial of order <span class="math inline">\(i\)</span>. The Hermite functions form an orthogonal basis in <span class="math inline">\(L_2(\mathbb{R})\)</span>, namely, the family is orthogonal: <span class="math display">\[
-    \int_{-\infty}^{+\infty} dx~ \psi_i(x) \psi_j(x) = \delta_{i,j}, \quad i,j=0,1,2,\dotso
+\]</span> where <span class="math inline">\(\mathrm{He}_i(x)\)</span> is the Hermite polynomial of order <span class="math inline">\(i\)</span>. The Hermite functions form an orthonormal basis of <span class="math inline">\(L_2(\mathbb{R})\)</span>: the family is orthonormal, <span class="math display">\[
+    \int_{-\infty}^{+\infty} \mathrm{d}x~ \psi_i(x) \psi_j(x) = \delta_{i,j}, \quad i,j=0,1,2,\dotso
     \label{eq:orthogonality}
-\]</span> and complete: <span class="math display">\[
+\]</span> and complete, <span class="math display">\[
     \sum_{i=0}^{+\infty} \psi_i(x) \psi_i(y) = \delta(x-y).
     \label{eq:completeness}
 \]</span></p>
-<div class="callout callout-style-default callout-note callout-titled" title="Remark about Dirac delta Function">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Remark about Dirac delta Function
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-1" class="callout-1-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<p>To be mathematically rigorous, we have to specify the meaning of the delta function. Here and below, we choose the Schwartz linear space of smooth functions on <span class="math inline">\(\mathbb{R}\)</span> that decrease faster than any polynomial, equipped with the topology of local uniform convergence of all derivatives. Let the Dirac delta functional be the identity linear functional on this space. We drop the convolution with the test function <span class="math inline">\(f(x)\)</span> from this space for brevity.</p>
-</div>
-</div>
-</div>
-<p>Thus, there is a relationship between the random law on the set of real numbers defined by the kernel <span class="math inline">\(K_N(x,y)\)</span> and an orthogonal basis <span class="math inline">\(\{\psi_i(x)\}_{i=0}^{+\infty}\)</span>.</p>
-<p>Note that the Hermite functions <span class="math inline">\(\psi_i\)</span> for <span class="math inline">\(i = 0,1,2,\dotso\)</span> are the only solutions to the second-order differential equation: <span class="math display">\[
+<p>The identity <span class="math inline">\(\eqref{eq:completeness}\)</span> says that the integral operator with the kernel on its left-hand side is the identity operator: for every <span class="math inline">\(f \in L_2(\mathbb{R})\)</span>, <span class="math display">\[
+    f(x) = \sum_{i=0}^{+\infty} \psi_i(x) \int_{-\infty}^{+\infty} \mathrm{d}y~ \psi_i(y) f(y),
+\]</span> with the series converging in <span class="math inline">\(L_2(\mathbb{R})\)</span>. For <span class="math inline">\(f\)</span> in the Schwartz space, the smooth functions that decrease faster than any power of <span class="math inline">\(x\)</span> together with all their derivatives, the series also converges uniformly in <span class="math inline">\(x\)</span>. In this sense <span class="math inline">\(\delta(x-y)\)</span> is the kernel of the identity operator, and the delta functional takes <span class="math inline">\(f\)</span> to <span class="math inline">\(f(0)\)</span>. Every identity with <span class="math inline">\(\delta\)</span> below is read the same way, after integration against a test function <span class="math inline">\(f\)</span>, which we drop for brevity. The class of test functions matters: for the continuous basis of <a href="#sec-limit-basis" class="quarto-xref">Section&nbsp;2.3.2</a> the Schwartz space is too large, and we use a narrower class there.</p>
+<p>So the eigenvalue distribution, through its kernel <span class="math inline">\(K_N^{\mathrm{GUE}}(x,y)\)</span>, is tied to the orthonormal basis <span class="math inline">\(\{\psi_i(x)\}_{i=0}^{+\infty}\)</span>.</p>
+<p>The Hermite functions also solve a second-order differential equation. For <span class="math inline">\(i \in \mathbb{R}\)</span>, the equation <span class="math display">\[
     \psi''(x) + \left( i + \frac12 - \frac{x^2}{4} \right) \psi(x) = 0
     \label{eq:hermite-dif}
-\]</span> for <span class="math inline">\(i \in \mathbb{R}\)</span> that are square-integrable on <span class="math inline">\(\mathbb{R}\)</span>.</p>
-<p>If we consider Hermitian matrices <span class="math inline">\(H\)</span> from the very beginning instead of real ones (<em>unitary ensemble</em>), the only change in the random law for the eigenvalues is a rescaling factor <span class="math inline">\(x \rightarrow 2^\frac12 x\)</span>.</p>
-<p>To summarize this subsection, we define a collection of random laws on the set of <span class="math inline">\(N = 0, 1, 2, \dotso\)</span> real numbers. This random law is related to a projection operator <span class="math inline">\(K_N\)</span> that highlights an <span class="math inline">\(N\)</span>-dimensional subspace <span class="math inline">\(V_N^\mathrm{ort} \subset L_2(\mathbb{R})\)</span>. For these subspaces, we have a natural orthogonal basis <span class="math inline">\(\{\psi_i\}_{i=0}^{+\infty}\)</span> such that: <span class="math display">\[
-    V_N^\mathrm{ort} = \mathrm{span} \{\psi_i\}_{i=0}^{N-1}, \quad N = 0, 1, 2, \dotso.
+\]</span> has a nonzero solution square-integrable on <span class="math inline">\(\mathbb{R}\)</span> only for <span class="math inline">\(i = 0, 1, 2, \dotso\)</span>, and every such solution is a constant multiple of <span class="math inline">\(\psi_i\)</span>.</p>
+<p>For real symmetric matrices with the same density (the <em>Gaussian orthogonal ensemble</em>), the factor <span class="math inline">\(\lvert \lambda_i - \lambda_j \rvert^2\)</span> above becomes <span class="math inline">\(\lvert \lambda_i - \lambda_j \rvert\)</span>, and the eigenvalues form a Pfaffian point process rather than a determinantal one. We do not use it below.</p>
+<p>To summarize this subsection, we have defined a family of distributions of <span class="math inline">\(N = 0, 1, 2, \dotso\)</span> real numbers. Each of them comes from the projection operator <span class="math inline">\(K_N^{\mathrm{GUE}}\)</span> onto an <span class="math inline">\(N\)</span>-dimensional subspace <span class="math inline">\(V_N^\mathrm{GUE} \subset L_2(\mathbb{R})\)</span>, and a single orthonormal basis <span class="math inline">\(\{\psi_i\}_{i=0}^{+\infty}\)</span> gives all these subspaces at once: <span class="math display">\[
+    V_N^\mathrm{GUE} = \mathrm{span} \{\psi_i\}_{i=0}^{N-1}, \quad N = 0, 1, 2, \dotso.
 \]</span></p>
 </section>
 <section id="scaling-limit" class="level3" data-number="1.3">
 <h3 data-number="1.3" class="anchored" data-anchor-id="scaling-limit"><span class="header-section-number">1.3</span> Scaling Limit</h3>
-<p>In various fields, such as statistical physics, we frequently consider the limit as <span class="math inline">\(N \rightarrow +\infty\)</span>, where <span class="math inline">\(N\)</span> could represent the number of particles, dimensions, or another discrete parameter. This limiting model can exhibit remarkable behavior, which is a subject of great interest. We will examine a few examples below and then return to the orthogonal ensemble.</p>
-<p>One of the simplest examples is the Central Limit Theorem. This theorem in particular states that the sum of <span class="math inline">\(N\)</span> independent, identically distributed random variables <span class="math inline">\(\{X_i\}_{0 \leq i &lt; N}\)</span>, divided by <span class="math inline">\(\sqrt{N}\)</span>, approaches the standard normal distribution as <span class="math inline">\(N \rightarrow +\infty\)</span>, provided that the expectation of <span class="math inline">\(X_i\)</span> is <span class="math inline">\(0\)</span> and the variance equals <span class="math inline">\(1\)</span>. <span class="math display">\[
+<p>In statistical physics and elsewhere, we often take the limit <span class="math inline">\(N \rightarrow +\infty\)</span>, where <span class="math inline">\(N\)</span> is the number of particles, the dimension, or another discrete parameter. The limiting model can show remarkable behavior. We look at two examples below and then return to the GUE.</p>
+<p>One of the simplest examples is the central limit theorem. In particular, it states that if the independent, identically distributed random variables <span class="math inline">\(\{X_i\}_{0 \leq i &lt; N}\)</span> have mean <span class="math inline">\(0\)</span> and variance <span class="math inline">\(1\)</span>, then their sum divided by <span class="math inline">\(\sqrt{N}\)</span> approaches the standard normal distribution as <span class="math inline">\(N \rightarrow +\infty\)</span>: <span class="math display">\[
     \mathrm{law}
     \left[
         \frac{\sum_{0 \leq i &lt; N} X_i}{\sqrt N}
     \right]
     \quad \xrightarrow{N \rightarrow ~\infty} \quad
     \mathcal{N}(0, 1).
-\]</span> We omit some technical details and do not specify how such a limit should be defined.</p>
-<p>At least three important phenomena can be observed:</p>
+\]</span> The arrow means convergence in distribution: the distribution functions converge at every point.</p>
+<p>We note three features of this limit:</p>
 <ol type="1">
-<li><p>The limit random law exists with a certain rescaling, which in this case is the factor <span class="math inline">\(N^{-\frac12}\)</span>.</p></li>
-<li><p>The limit law is universal. This means that regardless of the initial law with mean <span class="math inline">\(0\)</span> and variance <span class="math inline">\(1\)</span> for <span class="math inline">\(X\)</span>, the limit law is still the normal law.</p></li>
-<li><p>The limit law has a symmetry property that the initial laws may not possess. For example, the normal random law is symmetric with respect to the mirror reflection <span class="math inline">\(x \rightarrow -x\)</span>, which may not be true for the finite sum of <span class="math inline">\(X_i\)</span>.</p></li>
+<li><p>The limit law exists after a rescaling, here by the factor <span class="math inline">\(N^{-\frac12}\)</span>.</p></li>
+<li><p>The limit law is universal: whatever the law of <span class="math inline">\(X_i\)</span> with mean <span class="math inline">\(0\)</span> and variance <span class="math inline">\(1\)</span>, the limit is the normal law.</p></li>
+<li><p>The limit law has a symmetry that the initial laws may lack. For example, the normal law is symmetric under the reflection <span class="math inline">\(x \rightarrow -x\)</span>, while the law of a finite sum of the <span class="math inline">\(X_i\)</span> need not be.</p></li>
 </ol>
-<p>Another well-known and classical example of the <em>scaling limit</em> is the <em>Ising Model</em>, a probability model on a finite, say square, lattice of size <span class="math inline">\(N \times N\)</span>. Remarkably, a properly defined limit random law <span class="math inline">\(N \rightarrow +\infty\)</span> exists, does not depend on the lattice type, is invariant with respect to angle-preserving spacial transforms, and exhibits new remarkable properties such as phase transition.</p>
-<p>The random matrix model defined in the previous section would not be as interesting if we did not consider the limit as <span class="math inline">\(N\)</span> tends to infinity and study the behavior of eigenvalues of an “infinite random matrix”.</p>
+<p>Another classical example of a <em>scaling limit</em> is the <em>Ising model</em>, a probability model on a finite lattice, say a square one of size <span class="math inline">\(N \times N\)</span>. As <span class="math inline">\(N \rightarrow +\infty\)</span>, the model has a phase transition in the temperature. At the critical temperature, with the lattice spacing taken as <span class="math inline">\(1/N\)</span>, the limit law is invariant under angle-preserving maps and does not depend on the lattice type, within a wide class of planar lattices. Both statements are theorems for the main observables of the model; see <a href="https://arxiv.org/abs/0910.2045">Chelkak and Smirnov</a> and <a href="https://arxiv.org/abs/1202.2838">Chelkak, Hongler and Izyurov</a>.</p>
+<p>Much of the interest of the random matrix model of <a href="#sec-unitary-ensemble" class="quarto-xref">Section&nbsp;1.1</a> lies in the limit as <span class="math inline">\(N\)</span> tends to infinity, in the eigenvalues of an “infinite random matrix”.</p>
 </section>
 <section id="sine-process" class="level3" data-number="1.4">
 <h3 data-number="1.4" class="anchored" data-anchor-id="sine-process"><span class="header-section-number">1.4</span> Sine Process</h3>
-<p>First, note that if <span class="math inline">\(\{\psi_i(x)\}_{i=0}^{+\infty}\)</span> is an orthonormal basis in <span class="math inline">\(L_2(\mathbb{R})\)</span>, then <span class="math display">\[
-    \{A \cdot \psi_i(A x + B)\}_{i=0}^{+\infty}, \quad A \neq 0, \quad B \in \mathbb{R},
+<p>First, note that if <span class="math inline">\(\{\psi_i(x)\}_{i=0}^{+\infty}\)</span> is an orthonormal basis of <span class="math inline">\(L_2(\mathbb{R})\)</span>, then <span class="math display">\[
+    \{\lvert A \rvert^{\frac12} \psi_i(A x + B)\}_{i=0}^{+\infty}, \quad A \neq 0, \quad B \in \mathbb{R},
 \]</span> is also an orthonormal basis.</p>
-<p>To establish a limit law for the eigenvalues of the orthogonal matrix ensemble, we consider the limit of its kernel function <span class="math inline">\(K(x,y)\)</span> as follows: <span class="math display">\[
-    C_N \cdot K^{\mathrm{ort}}_N(N^{-\frac12} x, N^{-\frac12} y)
+<p>To find a limit law for the eigenvalues of the GUE, we take the limit of its kernel: <span class="math display">\[
+    C_N \cdot K^{\mathrm{GUE}}_N(\pi N^{-\frac12} x, \pi N^{-\frac12} y)
     \quad
     \xrightarrow{N \rightarrow ~\infty}
     \quad
     K^{\mathrm{Sine}}(x,y)
     :=
-    \frac{\sin(x-y)}{\pi (x-y)}.
+    \frac{\sin \pi(x-y)}{\pi (x-y)}.
     \label{eq:sine-limit}
-\]</span> Here, <span class="math inline">\(C_N\)</span> is a normalization coefficient necessary to obtain a finite limit. For instance, we can set: <span class="math display">\[
-    C_N = \frac{1}{\pi K^{\mathrm{ort}}_N(0, 0)}.
-\]</span> The limit <span class="math inline">\(K^{\mathrm{Sine}}\)</span>, known as the <em>Sine-kernel</em>, defines a random law on an infinite countable set of real numbers with the correlation functions given in <span class="math inline">\(\eqref{eq:dpp-correlation}\)</span>.</p>
+\]</span> Here <span class="math display">\[
+    C_N = \pi N^{-\frac12}
+\]</span> is the Jacobian of the substitution, so <span class="math inline">\(C_N K^{\mathrm{GUE}}_N\)</span> is the kernel of the rescaled eigenvalues <span class="math inline">\(\pi^{-1} N^{\frac12} \lambda_i\)</span>. The factor <span class="math inline">\(\pi\)</span> makes the mean spacing equal to <span class="math inline">\(1\)</span> near the origin, since the eigenvalue density of the GUE at <span class="math inline">\(0\)</span> is <span class="math inline">\(\pi^{-1} N^{\frac12}\)</span> to leading order, so <span class="math inline">\(K^{\mathrm{Sine}}(0, 0) = 1\)</span>. The alternative choice <span class="math inline">\(C_N = 1 / K^{\mathrm{GUE}}_N(0, 0)\)</span> differs from this one by a factor tending to <span class="math inline">\(1\)</span>. The limit <span class="math inline">\(K^{\mathrm{Sine}}\)</span> is the <em>sine kernel</em>. It defines a point process, a random infinite countable set of real numbers, whose correlation functions are given by <span class="math inline">\(\eqref{eq:dpp-correlation}\)</span> with this kernel.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="images/sine-kernel-limit.gif" class="img-fluid figure-img"></p>
-<figcaption>An illustration of limit <span class="math inline">\(\eqref{eq:sine-limit}\)</span> for different values of <span class="math inline">\(x - y\)</span> with the restriction <span class="math inline">\(x + y = 0\)</span>. The limit function coincides up to an additive constant with the two-point correlation function <span class="math inline">\(\eqref{eq:two-point-cor}\)</span> between two eigenvalues <span class="math inline">\(\lambda\)</span> as a function of their difference.</figcaption>
+<p><a href="images/sine-kernel-limit.gif" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="An illustration of limit \eqref{eq:sine-limit} for different values of x - y with the restriction x + y = 0. By \eqref{eq:two-point-cor}, the two-point correlation function of the limit process is R^{\mathrm{Sine}}_2(x, y) = 1 - K^{\mathrm{Sine}}(x, y)^2, a function of the difference x - y."><img src="images/sine-kernel-limit.gif" class="img-fluid figure-img" alt="An illustration of limit \eqref{eq:sine-limit} for different values of x - y with the restriction x + y = 0. By \eqref{eq:two-point-cor}, the two-point correlation function of the limit process is R^{\mathrm{Sine}}_2(x, y) = 1 - K^{\mathrm{Sine}}(x, y)^2, a function of the difference x - y."></a></p>
+<figcaption>An illustration of limit <span class="math inline">\(\eqref{eq:sine-limit}\)</span> for different values of <span class="math inline">\(x - y\)</span> with the restriction <span class="math inline">\(x + y = 0\)</span>. By <span class="math inline">\(\eqref{eq:two-point-cor}\)</span>, the two-point correlation function of the limit process is <span class="math inline">\(R^{\mathrm{Sine}}_2(x, y) = 1 - K^{\mathrm{Sine}}(x, y)^2\)</span>, a function of the difference <span class="math inline">\(x - y\)</span>.</figcaption>
 </figure>
 </div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="images/cor-1-limit.gif" class="img-fluid figure-img"></p>
-<figcaption>An illustration of limit <span class="math inline">\(\eqref{eq:sine-limit}\)</span> for different values of <span class="math inline">\(x + y\)</span> and <span class="math inline">\(x = y\)</span>. This function represents the average density of the eigenvalues <span class="math inline">\(\lambda\)</span>.</figcaption>
+<p><a href="images/cor-1-limit.gif" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="An illustration of limit \eqref{eq:sine-limit} on the diagonal x = y, as a function of x. On the diagonal the kernel is the mean density of the eigenvalues \lambda."><img src="images/cor-1-limit.gif" class="img-fluid figure-img" alt="An illustration of limit \eqref{eq:sine-limit} on the diagonal x = y, as a function of x. On the diagonal the kernel is the mean density of the eigenvalues \lambda."></a></p>
+<figcaption>An illustration of limit <span class="math inline">\(\eqref{eq:sine-limit}\)</span> on the diagonal <span class="math inline">\(x = y\)</span>, as a function of <span class="math inline">\(x\)</span>. On the diagonal the kernel is the mean density of the eigenvalues <span class="math inline">\(\lambda\)</span>.</figcaption>
 </figure>
 </div>
-<p>Note that the sine random law is invariant with respect to translation <span class="math inline">\(x \rightarrow x + c\)</span> for any real <span class="math inline">\(c\)</span>, which is not true for its finite <span class="math inline">\(N\)</span> analogs. The sine law has a physical interpretation as a one-dimensional gas of particles under a repulsive logarithmic potential, placed uniformly along the unbounded real line with an average particle density of <span class="math inline">\(1\)</span>.</p>
-<p>To better understand this limit, consider that for any <span class="math inline">\(\omega &gt; 0\)</span>: <span class="math display">\[
-    \frac{\psi_i\left( N^{-\frac12} x \right)}
+<p>The sine process is invariant under the translations <span class="math inline">\(x \rightarrow x + c\)</span> for any real <span class="math inline">\(c\)</span>, while its finite-<span class="math inline">\(N\)</span> analogues are not. Physically, the sine process is a one-dimensional gas of particles with logarithmic repulsion, spread uniformly over the whole real line with mean density <span class="math inline">\(1\)</span>.</p>
+<p>To understand this limit, note that for any <span class="math inline">\(\omega &gt; 0\)</span> <span class="math display">\[
+    \frac{\psi_i\left( \pi N^{-\frac12} x \right)}
     {\psi_i(0)}
     \quad
     \xrightarrow[\frac{i}{N} \rightarrow ~ \omega^2]{N,~i \rightarrow ~\infty}
     \quad
-    \cos(\omega x),
+    \cos(\pi \omega x),
     \quad i = 2 k, \quad k = 0,1,2,\dotso,
 \]</span> <span class="math display">\[
-    \frac{\psi_i\left( N^{-\frac12} x \right)}
-    {{\psi}'_i(0)}
+    \frac{\psi_i\left( \pi N^{-\frac12} x \right)}
+    {i^{-\frac12} \psi'_i(0)}
     \quad
     \xrightarrow[\frac{i}{N} \rightarrow ~ \omega^2]{N,~i \rightarrow ~\infty}
     \quad
-    \sin(\omega x),
+    \sin(\pi \omega x),
     \quad i = 2 k + 1 , \quad k = 0,1,2,\dotso
     \label{eq:harmonic-limits}
 \]</span></p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="images/cos-limit.gif" class="img-fluid figure-img"></p>
+<p><a href="images/cos-limit.gif" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Illustration of the cosine limit above for \omega = 1."><img src="images/cos-limit.gif" class="img-fluid figure-img" alt="Illustration of the cosine limit above for \omega = 1."></a></p>
 <figcaption>Illustration of the cosine limit above for <span class="math inline">\(\omega = 1\)</span>.</figcaption>
 </figure>
 </div>
-<p>Now, decompose the left and right-hand sides of limit <span class="math inline">\(\eqref{eq:sine-limit}\)</span> as follows: <span class="math display">\[
-    K^{\mathrm{ort}}_N(N^{-\frac12} x, N^{-\frac12} y)
+<p>Now decompose both sides of limit <span class="math inline">\(\eqref{eq:sine-limit}\)</span>: <span class="math display">\[
+    K^{\mathrm{GUE}}_N(\pi N^{-\frac12} x, \pi N^{-\frac12} y)
     = \sum_{0 \leq i &lt; N}
-    \psi_i\left( N^{-\frac12} x \right)
-    \psi_i\left( N^{-\frac12} y \right).
+    \psi_i\left( \pi N^{-\frac12} x \right)
+    \psi_i\left( \pi N^{-\frac12} y \right).
 \]</span> <span class="math display">\[
     K^{\mathrm{Sine}}(x,y)
-    = \frac{1}{2 \pi} \int_{0}^{1} d\omega ~
+    = \int_{0}^{1} \mathrm{d}\omega ~
     \left(
-        \cos(\omega x)\cos(\omega y) + \sin(\omega x) \sin(\omega y)
+        \cos(\pi \omega x)\cos(\pi \omega y) + \sin(\pi \omega x) \sin(\pi \omega y)
     \right).
-\]</span> We observe that the even and odd Hermite functions tend towards <span class="math inline">\(\cos\)</span> and <span class="math inline">\(\sin\)</span> functions, respectively, up to normalization coefficients. Furthermore, the values <span class="math inline">\(\left\{ \sqrt{\frac{i}{N}} \right\}_{0 \leq i &lt; N}\)</span> densely populate the interval <span class="math inline">\([0,1]\)</span>, which is the range of <span class="math inline">\(\omega\)</span> in <span class="math inline">\(\eqref{eq:sine-limit}\)</span>, as <span class="math inline">\(N \rightarrow +\infty\)</span>. Thus, heuristically, the discrete spectrum decomposition for the finite particle model approaches the continuous Fourier spectrum decomposition.</p>
-<p>Note that the Fourier basis is not a basis in the sense of a countable family of square-integrable functions like the Hermite functions. To define it rigorously, we need to introduce the concept of a <em>rigged Hilbert space</em>, as detailed in <a href="https://books.google.ru/books/about/Generalized_Functions_Vol_4.html?id=LE4HjwEACAAJ&amp;redir_esc=y">Gelfand and Vilenkin: Generalized Functions</a>, Volume 4.</p>
-<p>Finally, consider the behavior of the differential equation <span class="math inline">\(\eqref{eq:hermite-dif}\)</span>. After substituting <span class="math inline">\(x \rightarrow N^{-\frac12} x\)</span>, we obtain: <span class="math display">\[
-    N \psi''\left( N^{-\frac12} x \right)
-    + \left( i + \frac12 - \frac{x^2}{4 N} \right) \psi\left( N^{-\frac12} x \right) = 0.
-\]</span> Dividing by <span class="math inline">\(N\)</span>, this equation tends towards the differential equation for <span class="math inline">\(\cos(\omega x)\)</span> and <span class="math inline">\(\sin(\omega x)\)</span>: <span class="math display">\[
-    \psi''\left( x \right) + \omega^2 \psi\left( x \right) = 0
-\]</span> with <span class="math inline">\(\sqrt{\frac{i}{N}} \rightarrow \omega\)</span> and <span class="math inline">\(N \rightarrow +\infty\)</span>.</p>
-<p>Thus, the scaling limit for the sine process reveals itself in at least four aspects:</p>
+\]</span> By <span class="math inline">\(\eqref{eq:harmonic-limits}\)</span>, the rescaled even and odd Hermite functions tend to <span class="math inline">\(\cos\)</span> and <span class="math inline">\(\sin\)</span> respectively, up to normalization. As <span class="math inline">\(N \rightarrow +\infty\)</span>, the values <span class="math inline">\(\left\{ \sqrt{\frac{i}{N}} \right\}_{0 \leq i &lt; N}\)</span> fill the interval <span class="math inline">\([0,1]\)</span> densely, and this interval is the range of <span class="math inline">\(\omega\)</span> in the integral for <span class="math inline">\(K^{\mathrm{Sine}}\)</span> above. So, heuristically, the decomposition over the discrete spectrum at finite <span class="math inline">\(N\)</span> approaches the decomposition over the continuous Fourier spectrum.</p>
+<p>The Fourier basis is not a basis in the sense of the Hermite functions: it is not a countable family of square-integrable functions. A rigorous definition needs a <em>rigged Hilbert space</em>; see <a href="https://books.google.com/books?id=LE4HjwEACAAJ">I. M. Gelfand and N. Ya. Vilenkin, <em>Generalized Functions</em>, Vol. 4: <em>Applications of Harmonic Analysis</em>, Academic Press, 1964</a>.</p>
+<p>Finally, consider the differential equation <span class="math inline">\(\eqref{eq:hermite-dif}\)</span>. The rescaled function <span class="math inline">\(f(x) := \psi_i\left( \pi N^{-\frac12} x \right)\)</span> satisfies <span class="math display">\[
+    \frac{N}{\pi^2} f''(x)
+    + \left( i + \frac12 - \frac{\pi^2 x^2}{4 N} \right) f(x) = 0.
+\]</span> Multiplying by <span class="math inline">\(\frac{\pi^2}{N}\)</span> and letting <span class="math inline">\(N \rightarrow +\infty\)</span> with <span class="math inline">\(\frac{i}{N} \rightarrow \omega^2\)</span>, we obtain the differential equation for <span class="math inline">\(\cos(\pi \omega x)\)</span> and <span class="math inline">\(\sin(\pi \omega x)\)</span>: <span class="math display">\[
+    f''(x) + \pi^2 \omega^2 f(x) = 0.
+\]</span></p>
+<p>So the scaling limit to the sine process shows up in at least four ways:</p>
 <ol type="1">
-<li><p>Limit of random laws on the set of points <span class="math inline">\(\lambda\)</span>.</p></li>
-<li><p>Limit of kernels <span class="math inline">\(K(x,y)\)</span>.</p></li>
-<li><p>Limit of subspaces in <span class="math inline">\(L_2(\mathbb{R})\)</span> defined by projection operators <span class="math inline">\(K\)</span>. These subspaces can be defined with a properly rescaled orthonormal basis <span class="math inline">\(\{ \psi_i\}_{i=0}^{+\infty}\)</span>.</p></li>
-<li><p>Limit of differential equations.</p></li>
+<li><p>Limit of the distributions of the points <span class="math inline">\(\lambda\)</span>.</p></li>
+<li><p>Limit of the kernels <span class="math inline">\(K(x,y)\)</span>.</p></li>
+<li><p>Limit of the subspaces of <span class="math inline">\(L_2(\mathbb{R})\)</span> onto which the operators <span class="math inline">\(K\)</span> project. These subspaces can be described by a suitably rescaled orthonormal basis <span class="math inline">\(\{ \psi_i\}_{i=0}^{+\infty}\)</span>.</p></li>
+<li><p>Limit of the differential equations.</p></li>
 </ol>
-<p>The sine limit is not the only possibility. For example, a similar limit for the substitution <span class="math inline">\(x \rightarrow 2 N + N^{-\frac16} x\)</span> leads to the <em>Airy kernel</em>: <span class="math display">\[
+<p>The sine limit is not the only possibility. For example, a similar limit for the substitution <span class="math inline">\(x \rightarrow 2 N^{\frac12} + N^{-\frac16} x\)</span> leads to the <em>Airy kernel</em>: <span class="math display">\[
     K^{\mathrm{Airy}}(x,y) := \frac{\mathrm{Ai}(x)\mathrm{Ai}'(y)-\mathrm{Ai}'(x)\mathrm{Ai}(y)}{x-y}
-    = \int_0^{+\infty} d\lambda~ \mathrm{Ai}(\lambda + x) \mathrm{Ai}(\lambda + y),
+    = \int_0^{+\infty} \mathrm{d}\lambda~ \mathrm{Ai}(\lambda + x) \mathrm{Ai}(\lambda + y),
     \label{eq:airy-kernel}
-\]</span> where <span class="math inline">\(\mathrm{Ai}\)</span> is the Airy function, which forms an orthogonal basis in the sense that: <span class="math display">\[
-    \int_{-\infty}^{+\infty} d\lambda~ \mathrm{Ai}(\lambda + x) \mathrm{Ai}(\lambda + y)
+\]</span> where <span class="math inline">\(\mathrm{Ai}\)</span> is the Airy function, whose shifts form an orthogonal basis in the sense that <span class="math display">\[
+    \int_{-\infty}^{+\infty} \mathrm{d}\lambda~ \mathrm{Ai}(\lambda + x) \mathrm{Ai}(\lambda + y)
     = \delta(x-y).
-\]</span> Another example, as detailed in <a href="https://arxiv.org/abs/hep-th/9304063">this paper</a>, is based on the Laguerre polynomials defined on the half-axis <span class="math inline">\((0, +\infty)\)</span>, leading to the <em>Bessel kernel</em>: <span class="math display">\[
+\]</span> Another example comes from the Laguerre polynomials, orthogonal on the half-axis <span class="math inline">\((0, +\infty)\)</span>, and leads to the <em>Bessel kernel</em> (see <a href="https://arxiv.org/abs/hep-th/9304063">Tracy and Widom</a>): <span class="math display">\[
     K^{\mathrm{Bessel}}(x,y) :=
     \frac{
         J_{\alpha}(x^\frac12) y^\frac12 J'_{\alpha}(y^\frac12)
@@ -445,91 +443,130 @@ window.Quarto = {
     }{
         2(x-y)
     }, \quad x,y&gt;0
-\]</span> Almost all such limits can be understood in terms of orthonormal bases, linear subspaces of <span class="math inline">\(L_2\)</span>, and related well-studied second-order differential equations. However, this structure is violated by the model considered in the next section.</p>
+\]</span> Almost all such limits can be understood in terms of orthonormal bases, linear subspaces of <span class="math inline">\(L_2\)</span>, and the well-studied second-order differential equations behind them. The model of the next section does not fit this structure.</p>
 </section>
 </section>
-<section id="pearcey-kernel" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="pearcey-kernel"><span class="header-section-number">2</span> Pearcey Kernel</h2>
-<section id="biased-unitary-ensemble" class="level3" data-number="2.1">
-<h3 data-number="2.1" class="anchored" data-anchor-id="biased-unitary-ensemble"><span class="header-section-number">2.1</span> Biased Unitary Ensemble</h3>
-<p><a href="https://arxiv.org/abs/cond-mat/9804023">Brezin and Hikami</a> considered a unique random matrix model, known as the biased unitary ensemble. Here’s the setup: Let <span class="math inline">\(H\)</span> be a <span class="math inline">\(2N \times 2N\)</span> Hermitian matrix. Additionally, let <span class="math inline">\(H_a\)</span> be a fixed <span class="math inline">\(2N \times 2N\)</span> matrix with only two distinct eigenvalues, <span class="math inline">\(a\)</span> and <span class="math inline">\(-a\)</span> (with <span class="math inline">\(a &gt; 0\)</span>), each having multiplicity <span class="math inline">\(N\)</span>.</p>
-<p>The probability density function defining the random law on these Hermitian matrices <span class="math inline">\(H\)</span> is given by: <span class="math display">\[
-    \rho_N^a(H) := \left( Z_N^a \right)^{-1} e^{-\frac12 \mathrm{Tr} (H + H_a)^2},
-\]</span> where <span class="math inline">\(Z_N^a\)</span> is a normalization constant. This framework yields a determinantal point process governing the eigenvalues of <span class="math inline">\(H\)</span>, with the kernel: <span class="math display">\[
+<section id="sec-pearcey-kernel" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="sec-pearcey-kernel"><span class="header-section-number">2</span> Pearcey Kernel</h2>
+<section id="sec-biased-ensemble" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="sec-biased-ensemble"><span class="header-section-number">2.1</span> Biased Unitary Ensemble</h3>
+<p><a href="https://arxiv.org/abs/cond-mat/9804023">Brézin and Hikami</a> considered the following random matrix model, the GUE with an external source, which we call the biased unitary ensemble. Let <span class="math inline">\(H\)</span> be a <span class="math inline">\(2N \times 2N\)</span> Hermitian matrix, and let <span class="math inline">\(H_a\)</span> be a fixed <span class="math inline">\(2N \times 2N\)</span> Hermitian matrix with only two distinct eigenvalues, <span class="math inline">\(a\)</span> and <span class="math inline">\(-a\)</span> (with <span class="math inline">\(a &gt; 0\)</span>), each of multiplicity <span class="math inline">\(N\)</span>.</p>
+<p>The distribution of <span class="math inline">\(H\)</span> has the density <span class="math display">\[
+    \rho_N^a(H) := \left( Z_N^a \right)^{-1} \mathrm{e}^{-\frac12 \mathrm{Tr} (H + H_a)^2},
+\]</span> where <span class="math inline">\(Z_N^a\)</span> is a normalization constant. The eigenvalues of <span class="math inline">\(H\)</span> then form a determinantal point process with the kernel <span class="math display">\[
     K^a_N(x,y) :=
-    \frac{-1}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{\infty} dt~ \oint_{\pm a} du~
+    \frac{-1}{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{\infty} \mathrm{d}t~ \oint_{\pm a} \mathrm{d}u~
     \left( \frac{a^2+t^2}{a^2-u^2} \right)^N
-    \frac{1}{u-it}\,
-    e^{-\frac{t^2}{2}-\frac{u^2}{2} - i t x + u y}.
-\]</span> Here, <span class="math inline">\(\oint_{\pm a} du\)</span> denotes the Cauchy integral around the singular points <span class="math inline">\(u = a\)</span> and <span class="math inline">\(u = -a\)</span> on the complex plane.</p>
+    \frac{1}{u-\mathrm{i}t}\,
+    \mathrm{e}^{-\frac{t^2}{2}-\frac{u^2}{2} - \mathrm{i} t x + u y}.
+\]</span> Here <span class="math inline">\(\oint_{\pm a} \mathrm{d}u\)</span> denotes the Cauchy integral in the complex plane, counterclockwise around the poles <span class="math inline">\(u = a\)</span> and <span class="math inline">\(u = -a\)</span>.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="images/eigenvalue_distribution_15_6.png" class="img-fluid figure-img"></p>
-<figcaption>Samples of eigenvalues <span class="math inline">\(\lambda\)</span> for <span class="math inline">\(N = 15\)</span> and <span class="math inline">\(a = 6\)</span>. Each of the <span class="math inline">\(20\)</span> strings corresponds to a sample consisting of <span class="math inline">\(15 \times 2 = 30\)</span> eigenvalues (particles) colored green. It can be observed that there are two slightly joined clusters on the real line.</figcaption>
+<p><a href="images/eigenvalue_distribution_15_6.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Samples of eigenvalues \lambda for N = 15 and a = 6. Each of the 20 rows is one random sample of the 15 \times 2 = 30 eigenvalues (particles), shown in green. The eigenvalues form two clusters on the real line that are barely joined."><img src="images/eigenvalue_distribution_15_6.png" class="img-fluid figure-img" alt="Samples of eigenvalues \lambda for N = 15 and a = 6. Each of the 20 rows is one random sample of the 15 \times 2 = 30 eigenvalues (particles), shown in green. The eigenvalues form two clusters on the real line that are barely joined."></a></p>
+<figcaption>Samples of eigenvalues <span class="math inline">\(\lambda\)</span> for <span class="math inline">\(N = 15\)</span> and <span class="math inline">\(a = 6\)</span>. Each of the <span class="math inline">\(20\)</span> rows is one random sample of the <span class="math inline">\(15 \times 2 = 30\)</span> eigenvalues (particles), shown in green. The eigenvalues form two clusters on the real line that are barely joined.</figcaption>
 </figure>
 </div>
-<p>Notably, the kernel <span class="math inline">\(K^a_N\)</span> is not symmetric with respect to permutation of its arguments. Furthermore, transforming the kernel via: <span class="math display">\[
+<p>The kernel <span class="math inline">\(K^a_N\)</span> is not symmetric in its arguments. A transformation <span class="math display">\[
     K(x,y) \rightarrow \frac{f(x)}{f(y)} K(x,y)
-\]</span> for any function <span class="math inline">\(f\)</span> preserves the determinantal probability law. However, even with such a transformation, the kernel <span class="math inline">\(K^a_N\)</span> cannot be symmetrized. This indicates that the decomposition into an orthogonal basis, as described in <span class="math inline">\(\eqref{eq:kernel-decomposition}\)</span>, is not feasible.</p>
-<p>Despite this, the projection property described in <span class="math inline">\(\eqref{eq:projection-property}\)</span> holds true. This means there exists a linear space of functions that remain unchanged when convolved with the integral operator <span class="math inline">\(K^a_N\)</span>.</p>
+\]</span> with any function <span class="math inline">\(f\)</span> preserves the determinantal law, but no kernel of this process, obtained by such a transformation or in any other way, is real symmetric or Hermitian. For any kernel <span class="math inline">\(K\)</span> of a determinantal point process, <span class="math display">\[
+    R_{N,2}(x, y) - R_{N,1}(x)\, R_{N,1}(y) = -K(x, y)\, K(y, x),
+\]</span> and the left-hand side depends on the process alone. A real symmetric or Hermitian kernel makes it nonpositive. For <span class="math inline">\(K^a_N\)</span> it is positive at some points: eigenvalues in the two clusters are slightly positively correlated. For example, for <span class="math inline">\(N = 1\)</span>, <span class="math inline">\(a = 2\)</span>, <span class="math inline">\(x = -3\)</span> and <span class="math inline">\(y = 1.2\)</span>, we find numerically <span class="math inline">\(R_{N,2}(x, y) - R_{N,1}(x)\, R_{N,1}(y) \approx 0.003\)</span>. Hence a decomposition into an orthogonal basis, as in <span class="math inline">\(\eqref{eq:kernel-decomposition}\)</span>, is impossible.</p>
+<p>The projection property <span class="math inline">\(\eqref{eq:projection-property}\)</span> still holds, so there is a linear space of functions that the integral operator <span class="math inline">\(K^a_N\)</span> leaves unchanged.</p>
 </section>
 <section id="pearcey-scaling-limit" class="level3" data-number="2.2">
 <h3 data-number="2.2" class="anchored" data-anchor-id="pearcey-scaling-limit"><span class="header-section-number">2.2</span> Pearcey Scaling Limit</h3>
-<p>For small values of <span class="math inline">\(a\)</span>, the random law approximates the form described in <a href="#sec-orthogonal-ensemble" class="quarto-xref">Section&nbsp;1.1</a>, where all eigenvalues form a single cluster. As <span class="math inline">\(a\)</span> increases, the two clusters of eigenvalues become more distinct. Following <a href="https://arxiv.org/abs/cond-mat/9804023">Brezin and Hikami</a>, we consider the limit <span class="math inline">\(a \rightarrow N^{\frac12}\)</span> and <span class="math inline">\(x \rightarrow N^{-\frac14} x\)</span>, for <span class="math inline">\(N \rightarrow +\infty\)</span>. This limit corresponds to the scenario where the two clusters of eigenvalues are exactly on the edge of being separated and merged. The limit <span class="math display">\[
+<p>For small <span class="math inline">\(a\)</span>, the distribution is close to the one of <a href="#sec-unitary-ensemble" class="quarto-xref">Section&nbsp;1.1</a>, with all eigenvalues in a single cluster. As <span class="math inline">\(a\)</span> grows, the eigenvalues split into two clusters that separate more and more. Following <a href="https://arxiv.org/abs/cond-mat/9804023">Brézin and Hikami</a>, we set <span class="math inline">\(a = (2N)^{\frac12}\)</span>, rescale <span class="math inline">\(x \rightarrow (2N)^{-\frac14} x\)</span> and let <span class="math inline">\(N \rightarrow +\infty\)</span>. At this value of <span class="math inline">\(a\)</span> the two clusters are exactly at the transition between merged and separated. The limit <span class="math display">\[
     K^{\text{Pear}}(x,y) :=
-    \lim_{N\rightarrow +\infty} C_N \cdot K^{(2N)^{\frac12}}_N
+    \lim_{N\rightarrow +\infty} (2N)^{-\frac14} K^{(2N)^{\frac12}}_N
     \left(
         (2N)^{-\frac14}x, (2N)^{-\frac14}y
     \right)
-\]</span> is known as the <em>Pearcey kernel</em>. It can be reformulated as follows: <span class="math display">\[
+\]</span> is called the <em>Pearcey kernel</em>. The factor <span class="math inline">\((2N)^{-\frac14}\)</span> is the Jacobian of the rescaling. The limit exists for all real <span class="math inline">\(x, y\)</span>, as <a href="https://arxiv.org/abs/math-ph/0602064">Bleher and Kuijlaars</a> prove (Theorem 1.1 with <span class="math inline">\(b = 0\)</span>, for matrices of size <span class="math inline">\(2N\)</span> rescaled by <span class="math inline">\((2N)^{-\frac12}\)</span>). <a href="https://arxiv.org/abs/math/0412005">Tracy and Widom</a> prove that the convergence to <span class="math inline">\(K^{\mathrm{Pear}}\)</span> is uniform on bounded sets in a model of non-intersecting Brownian motions, whose positions at a fixed time have, up to a constant scale factor, the law of the eigenvalues here.</p>
+<p>The Pearcey kernel can be written in terms of two functions <span class="math inline">\(\phi\)</span> and <span class="math inline">\(\psi\)</span> (<a href="https://arxiv.org/abs/cond-mat/9804023">Brézin and Hikami</a>, eqs. (3.7), (3.13) and (3.21)): <span class="math display">\[
     K^{\mathrm{Pear}}(x,y) = \frac{\phi'(x)\psi'(y)-\phi''(x)\psi(y)-\phi(x)\psi''(y) }{x-y},
 \]</span> where <span class="math display">\[
-    \phi(x) := \frac{1}{\pi} \int\limits_{0}^{+\infty} dt~ e^{-\frac{t^4}{4}} \cos(tx),
+    \phi(x) := \frac{1}{\pi} \int\limits_{0}^{+\infty} \mathrm{d}t~ \mathrm{e}^{-\frac{t^4}{4}} \cos(tx),
 \]</span> <span class="math display">\[
     \psi(x) := - \frac{1}{\pi}
-    \mathrm{Im} \left[\omega \int\limits_0^{+\infty} du\, e^{-\frac{u^4}{4}}
-    \left( e^{\omega x u} - e^{-\omega x u} \right)\right], \quad
-    \omega:= e^{\frac{i \pi}{4}}.
-\]</span> The Pearcey kernel is notable for its asymmetry and the inclusion of second derivatives of the functions <span class="math inline">\(\phi\)</span> and <span class="math inline">\(\psi\)</span>. This kernel describes the critical behavior of eigenvalues as they transition between forming a single cluster and two distinct clusters.</p>
+    \mathrm{Im} \left[\omega \int\limits_0^{+\infty} \mathrm{d}u\, \mathrm{e}^{-\frac{u^4}{4}}
+    \left( \mathrm{e}^{\omega x u} - \mathrm{e}^{-\omega x u} \right)\right], \quad
+    \omega:= \mathrm{e}^{\frac{\mathrm{i} \pi}{4}}.
+\]</span></p>
+<div class="callout callout-style-default callout-note callout-titled" title="Continuity on the diagonal">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Continuity on the diagonal
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The formula for <span class="math inline">\(K^{\mathrm{Pear}}\)</span> makes sense only for <span class="math inline">\(x \neq y\)</span>, and we extend <span class="math inline">\(K^{\mathrm{Pear}}\)</span> to the diagonal <span class="math inline">\(x = y\)</span> by continuity. The extension exists and is a smooth function on the whole plane, because the numerator <span class="math display">\[
+    N(x,y) := \phi'(x)\psi'(y) - \phi''(x)\psi(y) - \phi(x)\psi''(y)
+\]</span> is smooth and vanishes on the diagonal. It is smooth because the integrals defining <span class="math inline">\(\phi\)</span> and <span class="math inline">\(\psi\)</span> converge absolutely, together with all their derivatives in <span class="math inline">\(x\)</span>, locally uniformly in <span class="math inline">\(x\)</span>. It vanishes on the diagonal by <a href="https://arxiv.org/abs/cond-mat/9804023">Brézin and Hikami</a> (Appendix B, eqs. (B8)–(B9)). The value on the diagonal, <span class="math display">\[
+    K^{\mathrm{Pear}}(x,x) = \partial_x N(x,y)\big|_{y=x}
+    = \phi''(x)\psi'(x) - \phi'(x)\psi''(x) - x\,\phi(x)\psi(x),
+\]</span> is the density of the Pearcey process (Brézin and Hikami, eq. (3.22)).</p>
+</div>
+</div>
+</div>
+<p>The Pearcey kernel is not symmetric, and it contains second derivatives of the functions <span class="math inline">\(\phi\)</span> and <span class="math inline">\(\psi\)</span>.</p>
 </section>
 <section id="pearcey-basis" class="level3" data-number="2.3">
 <h3 data-number="2.3" class="anchored" data-anchor-id="pearcey-basis"><span class="header-section-number">2.3</span> Pearcey Basis</h3>
-<p>In this section, we derive the basis for the Pearcey Kernel, which is the central problem of this article.</p>
-<section id="finite-n-basis" class="level4" data-number="2.3.1">
-<h4 data-number="2.3.1" class="anchored" data-anchor-id="finite-n-basis"><span class="header-section-number">2.3.1</span> Finite <span class="math inline">\(N\)</span> Basis</h4>
-<p>Due to the asymmetric nature of the kernel, finding an orthonormal basis is impossible. However, we can still work with a <a href="https://arxiv.org/abs/math/9804027">biorthogonal basis</a>, which is a relaxed version of an orthonormal basis. To achieve this, we consider two different collections of functions on <span class="math inline">\(\mathbb{R}\)</span>: <span class="math inline">\(\{e_{i}\}_{i=0}^{+\infty}\)</span> and <span class="math inline">\(\{e^\dagger_{i}\}_{i=0}^{+\infty}\)</span>, instead of one, and require <span class="math display">\[
-    \int_{-\infty}^{+\infty} dx~ e^\dagger_i(x) e_j(x) = \delta_{i,j}, \quad i,j=0,1,2,\dotso
+<p>This section builds a basis for the Pearcey kernel, first at finite <span class="math inline">\(N\)</span> and then in the scaling limit.</p>
+<section id="sec-finite-n-basis" class="level4" data-number="2.3.1">
+<h4 data-number="2.3.1" class="anchored" data-anchor-id="sec-finite-n-basis"><span class="header-section-number">2.3.1</span> Finite <span class="math inline">\(N\)</span> Basis</h4>
+<p>As <a href="#sec-biased-ensemble" class="quarto-xref">Section&nbsp;2.1</a> shows, the kernel <span class="math inline">\(K^a_N\)</span> has no decomposition into an orthonormal basis. We can still work with a <a href="https://arxiv.org/abs/math/9804027">biorthogonal basis</a>, a relaxed version of an orthonormal one. It consists of two families of functions on <span class="math inline">\(\mathbb{R}\)</span> instead of one, <span class="math inline">\(\{e_{i}\}_{i=0}^{+\infty}\)</span> and <span class="math inline">\(\{e^\dagger_{i}\}_{i=0}^{+\infty}\)</span>, with <span class="math display">\[
+    \int_{-\infty}^{+\infty} \mathrm{d}x~ e^\dagger_i(x) e_j(x) = \delta_{i,j}, \quad i,j=0,1,2,\dotso
     \label{eq:biorthogonality}
 \]</span> and <span class="math display">\[
-    \sum\limits_{i=0}^{\infty}  e_i(x) e^{\dagger}_i(y) = \delta(x-y).
-\]</span> instead of <span class="math inline">\(\eqref{eq:orthogonality}\)</span> and <span class="math inline">\(\eqref{eq:completeness}\)</span>. This approach is less restrictive. Specifically, after the transformation <span class="math display">\[
+    \sum\limits_{i=0}^{\infty}  e_i(x) e^{\dagger}_i(y) = \delta(x-y),
+\]</span> instead of <span class="math inline">\(\eqref{eq:orthogonality}\)</span> and <span class="math inline">\(\eqref{eq:completeness}\)</span>. This is less restrictive: after the transformation <span class="math display">\[
     e^\dagger_i(x),~e_i(x) \rightarrow f(x) \cdot e^\dagger_i(x),~
     \frac{e_i(x)}{f(x)}
-\]</span> we still have a biorthogonal basis for any function <span class="math inline">\(f\)</span> that is non-zero at almost all points on <span class="math inline">\(\mathbb{R}\)</span>. Recall that the only freedom for an orthogonal real function basis is the choice of sign for each function.</p>
-<p>Our first step to obtain the Pearcey basis is to define the functions <span class="math display">\[
-    \phi_n^a(x) := \frac{1}{\sqrt2\pi} \int\limits_{-\infty}^{\infty} dt~
-    (t^2+a^2)^n e^{-\frac{t^2}{2}-i t x},\quad n=0,1,2,3,\dotso,
+\]</span> we still have a biorthogonal basis, for any function <span class="math inline">\(f\)</span> that is nonzero almost everywhere on <span class="math inline">\(\mathbb{R}\)</span>. For a real orthonormal basis, where <span class="math inline">\(e^\dagger_i = e_i\)</span>, the same transformation keeps the basis orthonormal only if <span class="math inline">\(f(x)^2 = 1\)</span> almost everywhere.</p>
+<p>To build the basis, we first define the functions <span class="math display">\[
+    \phi_n^a(x) := \frac{1}{\sqrt2\pi} \int\limits_{-\infty}^{\infty} \mathrm{d}t~
+    (t^2+a^2)^n \mathrm{e}^{-\frac{t^2}{2}-\mathrm{i} t x},\quad n=0,1,2,3,\dotso,
 \]</span> <span class="math display">\[
-    \psi_n^a(x) := \frac{1}{\sqrt2\pi i} \oint_{\pm a} du~
-    \frac{e^{-\frac{u^2}{2} + u y}}{(a^2-u^2)^{n+1}},\quad n=0,1,2,3,\dotso.
-\]</span> These functions are eigenfunctions of the <em>third order</em> differential eigenvalue equations <span class="math display">\[
+    \psi_n^a(x) := \frac{1}{\sqrt2\pi \mathrm{i}} \oint_{\pm a} \mathrm{d}u~
+    \frac{\mathrm{e}^{-\frac{u^2}{2} + u x}}{(a^2-u^2)^{n+1}},\quad n=0,1,2,3,\dotso.
+\]</span> They are closely related to the multiple Hermite polynomials of the external source model (<a href="https://arxiv.org/abs/math/0406616">Bleher and Kuijlaars, 2005</a>); the note at the end of this subsection gives the exact correspondence. These functions solve the <em>third-order</em> differential eigenvalue equations <span class="math display">\[
     (a^2-\partial_x^2) (\partial_x + x) \phi^a_n(x) = 2 n~ \partial_x \phi^a_n(x),\quad n=0,1,2,\dotso,
 \]</span> and <span class="math display">\[
     (\partial_x - x) (a^2-\partial_x^2)  \psi^a_n(x) = 2 n~  \partial_x \psi^a_n(x), \quad n=0,1,2,\dotso
-\]</span> respectively. For example, for <span class="math inline">\(n=0,1\)</span> we have <span class="math display">\[
-    \phi_0^a(x) = \frac{1}{\sqrt{\pi}} e^{-\frac{x^2}{2}}, \quad
-    \phi_1^a(x) = \frac{1}{\sqrt{\pi}} (1+a^2-x^2) e^{-\frac{x^2}{2}},\\
-    \psi_0^a(x) = -\sqrt2 \frac{e^{-\frac{a^2}{2}}}{a} \mathrm{sh}(ax), \quad
-    \psi_1^a(x) = \frac{e^{-\frac{a^2}{2}}}{\sqrt2 a^3}
-    \left( ax \,\mathrm{ch}(ax) - (1+a^2)~\mathrm{sh}(ax) \right),
+\]</span> respectively. For example, for <span class="math inline">\(n=0,1\)</span> <span class="math display">\[
+\begin{gathered}
+    \phi_0^a(x) = \frac{1}{\sqrt{\pi}} \mathrm{e}^{-\frac{x^2}{2}}, \quad
+    \phi_1^a(x) = \frac{1}{\sqrt{\pi}} (1+a^2-x^2) \mathrm{e}^{-\frac{x^2}{2}},\\
+    \psi_0^a(x) = -\sqrt2 \frac{\mathrm{e}^{-\frac{a^2}{2}}}{a} \sinh(ax), \quad
+    \psi_1^a(x) = \frac{\mathrm{e}^{-\frac{a^2}{2}}}{\sqrt2 a^3}
+    \left( ax \cosh(ax) - (1+a^2) \sinh(ax) \right).
+\end{gathered}
 \]</span> We define the biorthogonal basis by <span class="math display">\[
     e_{2n}^a(x) := 2^{-\frac12} \phi_n^a(x) ,\quad
     e_{2n+1}^a(x) := 2^{-\frac12} \phi_n^a{}'(x),\quad n=0,1,2,3,\dotso,
 \]</span> <span class="math display">\[
     {e^{\dagger}}_{2n}^a(x) := -2^{-\frac12} \psi_n^a{}'(x),\quad
     {e^{\dagger}}_{2n+1}^a(x) := 2^{-\frac12} \psi_n^a(x),\quad n=0,1,2,3,\dotso.
-\]</span> It is straightforward to check the biorthogonality <span class="math inline">\(\eqref{eq:biorthogonality}\)</span> as well as the decomposition <span class="math display">\[
+\]</span></p>
+<p>The biorthogonality has a structural reason. Let <span class="math inline">\(\mathcal{L} := (a^2-\partial_x^2)(\partial_x + x)\)</span> and <span class="math inline">\(\mathcal{D} := \partial_x\)</span>, with formal adjoints <span class="math inline">\(\mathcal{L}^* = (x - \partial_x)(a^2-\partial_x^2)\)</span> and <span class="math inline">\(\mathcal{D}^* = -\partial_x\)</span>. Then the two eigenvalue equations above read <span class="math display">\[
+    \mathcal{L} \phi^a_n = 2n\, \mathcal{D} \phi^a_n, \quad
+    \mathcal{L}^* \psi^a_n = 2n\, \mathcal{D}^* \psi^a_n,
+\]</span> so <span class="math inline">\(\phi^a_n\)</span> and <span class="math inline">\(\psi^a_n\)</span> are the right and left eigenfunctions of the operator pencil <span class="math inline">\(\mathcal{L} - \nu \mathcal{D}\)</span> for the same eigenvalue <span class="math inline">\(\nu = 2n\)</span>. Integrating by parts, which is allowed because <span class="math inline">\(\phi^a_n\)</span> decays like a Gaussian while <span class="math inline">\(\psi^a_n\)</span> grows at most exponentially, we get <span class="math display">\[
+    2n \int\limits_{-\infty}^{\infty} \mathrm{d}x~ \psi^a_m \mathcal{D} \phi^a_n
+    = \int\limits_{-\infty}^{\infty} \mathrm{d}x~ \psi^a_m \mathcal{L} \phi^a_n
+    = \int\limits_{-\infty}^{\infty} \mathrm{d}x~ \left( \mathcal{L}^* \psi^a_m \right) \phi^a_n
+    = 2m \int\limits_{-\infty}^{\infty} \mathrm{d}x~ \psi^a_m \mathcal{D} \phi^a_n,
+\]</span> hence <span class="math inline">\(\int \mathrm{d}x~ \psi^a_m \phi^a_n{}' = 0\)</span> for <span class="math inline">\(m \neq n\)</span>. The remaining pairings vanish by parity, since <span class="math inline">\(\phi^a_n\)</span> is even and <span class="math inline">\(\psi^a_n\)</span> is odd. In the Hermite case a single symmetric operator gives orthogonality. Here the operators are not formally self-adjoint, and the eigenfunctions of the pencil and of its adjoint form two different families. Each eigenvalue <span class="math inline">\(2n\)</span> contributes two basis functions, the even <span class="math inline">\(\phi^a_n\)</span> and the odd <span class="math inline">\(\mathcal{D}\phi^a_n\)</span>, with the duals <span class="math inline">\(\mathcal{D}^*\psi^a_n\)</span> and <span class="math inline">\(\psi^a_n\)</span> of the same parity; the proof below computes their normalization. The limit equations of <a href="#sec-limit-basis" class="quarto-xref">Section&nbsp;2.3.2</a> have the same form with <span class="math inline">\(\mathcal{L} = \partial_x^3 - x\)</span>, but there this argument is only formal, for the reason given there.</p>
+<p>The real Fourier basis also pairs an even and an odd function, <span class="math inline">\(\cos(\lambda x)\)</span> and <span class="math inline">\(\sin(\lambda x)\)</span>, with <span class="math inline">\(\partial_x \cos(\lambda x) = -\lambda \sin(\lambda x)\)</span>. There both are eigenfunctions of <span class="math inline">\(\partial_x^2\)</span> with the eigenvalue <span class="math inline">\(-\lambda^2\)</span>; here only <span class="math inline">\(\phi^a_n\)</span> is an eigenfunction of the pencil, and <span class="math inline">\(\mathcal{D}\phi^a_n\)</span> is not.</p>
+<p>In the completeness relation we read <span class="math inline">\(\delta(x-y)\)</span> as for <span class="math inline">\(\eqref{eq:completeness}\)</span>, after integration against a test function <span class="math inline">\(f\)</span>. Here the test functions are <span class="math inline">\(f(x) = p(x)\, \mathrm{e}^{-\frac{x^2}{2}}\)</span> with a polynomial <span class="math inline">\(p\)</span>. They are dense in <span class="math inline">\(L_2(\mathbb{R})\)</span>, for them the series has finitely many nonzero terms, and the relation holds exactly. We do not claim it for a general <span class="math inline">\(f \in L_2(\mathbb{R})\)</span>; the proofs below give the details.</p>
+<p>A direct computation, given below, checks the biorthogonality <span class="math inline">\(\eqref{eq:biorthogonality}\)</span> and the decomposition <span class="math display">\[
     K_N^a(x,y) =
     \sum\limits_{i=0}^{2 N-1} e_i^a(x) {e^{\dagger}}^a_i(y)
     =
@@ -539,179 +576,234 @@ window.Quarto = {
         \phi^a_n(x) \psi^a_n{}'(y)
     \right).
 \]</span></p>
-<div class="callout callout-style-default callout-note callout-titled" title="Details and proofs">
+<div class="callout callout-style-default callout-note callout-titled" title="Details and proofs: biorthogonality and completeness">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Details and proofs
+<span class="screen-reader-only">Note</span>Details and proofs: biorthogonality and completeness
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>For odd <span class="math inline">\(n\)</span> and even <span class="math inline">\(m\)</span> we calculate <span class="math display">\[
+<p>For all <span class="math inline">\(n, m\)</span> we calculate <span class="math display">\[
 \begin{aligned}
-    \int\limits_{-\infty}^{\infty} dx~
-    \psi^a_n{}'(x) \phi^a_m(x) =
-    \frac{2}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{\infty} dt~
-    \oint du~
-    \int\limits_{-\infty}^{\infty} dx~
-    u\frac{(t^2+a^2)^m }{(u^2-a^2)^{n+1}}
-    e^{-\frac{u^2}{2} + u x -\frac{t^2}{2}-i t x}
-    = \dotso
-\end{aligned}
-\]</span> after the change of variables <span class="math inline">\(t\rightarrow t - i u\)</span> we have <span class="math display">\[
-\begin{aligned}
-    \dotso =&amp;
-    \frac{2}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{\infty} dt~
-    \oint_{\pm a} du~
-    \int\limits_{-\infty}^{\infty} dx~
+    \int\limits_{-\infty}^{\infty} \mathrm{d}x~
+    \psi^a_n{}'(x) \phi^a_m(x) &amp;=
+    \frac{2}{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{\infty} \mathrm{d}t~
+    \oint_{\pm a} \mathrm{d}u~
+    \int\limits_{-\infty}^{\infty} \mathrm{d}x~
     u\frac{(a^2+t^2)^m }{(a^2-u^2)^{n+1}}
-    e^{-\frac{u^2}{2} + u x -\frac{t^2}{2}-i t x}
-    =\\=&amp;
-    \frac{2}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{\infty} dt~
-    \oint_{\pm a} du~
-    u\frac{(a^2+(t-iu)^2)^m }{(a^2-u^2)^{n+1}}
-    e^{-\frac{u^2}{2} - \frac{(t-iu)^2}{2}}
-    \int\limits_{-\infty}^{\infty} dx~
-    e^{-i t x}
-    =\\=&amp;
+    \mathrm{e}^{-\frac{u^2}{2} + u x -\frac{t^2}{2}-\mathrm{i} t x}
+    \\ &amp;=
+    \frac{2}{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{\infty} \mathrm{d}t~
+    \oint_{\pm a} \mathrm{d}u~
+    u\frac{(a^2+(t-\mathrm{i}u)^2)^m }{(a^2-u^2)^{n+1}}
+    \mathrm{e}^{-\frac{u^2}{2} - \frac{(t-\mathrm{i}u)^2}{2}}
+    \int\limits_{-\infty}^{\infty} \mathrm{d}x~
+    \mathrm{e}^{-\mathrm{i} t x}
+    \\ &amp;=
     \left.
-    \frac{2}{(2\pi) i}
-    \int\limits_{-\infty}^{\infty} dt~
-    \oint_{\pm a} du~
-    u\frac{(a^2+(t-iu)^2)^m }{(a^2-u^2)^{n+1}}
-    e^{-\frac{u^2}{2} - \frac{(t-iu)^2}{2}}
+    \frac{2}{2\pi \mathrm{i}}
+    \oint_{\pm a} \mathrm{d}u~
+    u\frac{(a^2+(t-\mathrm{i}u)^2)^m }{(a^2-u^2)^{n+1}}
+    \mathrm{e}^{-\frac{u^2}{2} - \frac{(t-\mathrm{i}u)^2}{2}}
     \right|_{t=0}
-    =\\=&amp;
-    \frac{2}{2\pi i}
-    \int\limits_{-\infty}^{\infty} dt~
-    \oint_{\pm a} du~
-    u~ (a^2-u^2)^{m-n-1} = -\delta_{n,m}.
+    \\ &amp;=
+    \frac{2}{2\pi \mathrm{i}}
+    \oint_{\pm a} \mathrm{d}u~
+    u~ (a^2-u^2)^{m-n-1} = -2\delta_{n,m},
 \end{aligned}
-\]</span> The identities <span class="math display">\[
-    \int\limits_{-\infty}^{\infty} dx~
+\]</span> where the second step is the change of variables <span class="math inline">\(t \rightarrow t - \mathrm{i}u\)</span>. The last integral vanishes for <span class="math inline">\(m &gt; n\)</span>, where the integrand is a polynomial, and for <span class="math inline">\(m &lt; n\)</span>, where it is a derivative: <span class="math inline">\(u (a^2-u^2)^{m-n-1} = -\frac{1}{2(m-n)} \partial_u (a^2-u^2)^{m-n}\)</span>. For <span class="math inline">\(m = n\)</span> both residues at <span class="math inline">\(u = \pm a\)</span> are equal to <span class="math inline">\(-\frac12\)</span>. The identities <span class="math display">\[
+    \int\limits_{-\infty}^{\infty} \mathrm{d}x~
     \psi^a_n{}'(x) \phi^a_m{}'(x) = 0,\quad
-    \int\limits_{-\infty}^{\infty} dx~
+    \int\limits_{-\infty}^{\infty} \mathrm{d}x~
     \psi^a_n(x) \phi^a_m(x) = 0, \quad
-    \int\limits_{-\infty}^{\infty} dx~
-    \psi^a_n(x) \phi^a_m{}'(x) = 2\delta_{n,m}.
-\]</span> can be shown analogously. The next formula can be proved as follows <span class="math display">\[
+    \int\limits_{-\infty}^{\infty} \mathrm{d}x~
+    \psi^a_n(x) \phi^a_m{}'(x) = 2\delta_{n,m}
+\]</span> follow: the first two by parity, since <span class="math inline">\(\phi^a_m\)</span> is even and <span class="math inline">\(\psi^a_n\)</span> is odd, and the third from the computation above by integration by parts. The completeness relation is proved as follows. At the step where we sum the geometric series in <span class="math inline">\(n\)</span>, we enlarge, for each <span class="math inline">\(t\)</span>, the contour around <span class="math inline">\(\pm a\)</span> to the circle <span class="math inline">\(\lvert u \rvert = R_t\)</span> with <span class="math display">\[
+    R_t &gt; \sqrt{t^2 + 2a^2}.
+\]</span> The integrals do not change, since every term is singular only at <span class="math inline">\(u = \pm a\)</span>. On this circle <span class="math inline">\(\lvert a^2 - u^2 \rvert \geq R_t^2 - a^2 &gt; a^2 + t^2\)</span>, so the series converges uniformly in <span class="math inline">\(u\)</span>, and the circle encloses the pole <span class="math inline">\(u = \mathrm{i}t\)</span> of its sum. <span class="math display">\[
 \begin{aligned}
     &amp;\sum\limits_{i=0}^{\infty} e_i(x) e^{\dagger}_i(y) =
-    \sum\limits_{n=0}^{\infty}
+    \frac12 \sum\limits_{n=0}^{\infty}
+    \left(
     \phi_n{}'(x) \psi_n(y)
     -\phi_n(x) \psi_n{}'(y)
-    =\\=&amp;
-    \frac{1}{(2\pi)^2 i} \int\limits_{-\infty}^{\infty} dt~ \oint du~
+    \right)
+    \\ &amp;=
+    \frac{1}{(2\pi)^2 \mathrm{i}} \int\limits_{-\infty}^{\infty} \mathrm{d}t~ \oint \mathrm{d}u~
     \sum\limits_{n=0}^{\infty}
-    (-it)\frac{(a^2+t^2)^n}{(a^2-u^2)^{n+1}}
-    e^{-\frac{t^2}{2}-i t x -\frac{u^2}{2} + u y}
-    -\\-&amp;
-    \frac{1}{(2\pi)^2 i} \int\limits_{-\infty}^{\infty} dt~ \oint du~
+    (-\mathrm{i}t)\frac{(a^2+t^2)^n}{(a^2-u^2)^{n+1}}
+    \mathrm{e}^{-\frac{t^2}{2}-\mathrm{i} t x -\frac{u^2}{2} + u y}
+    \\ &amp;\quad -
+    \frac{1}{(2\pi)^2 \mathrm{i}} \int\limits_{-\infty}^{\infty} \mathrm{d}t~ \oint \mathrm{d}u~
     \sum\limits_{n=0}^{\infty}
     u\frac{(a^2+t^2)^n}{(a^2-u^2)^{n+1}}
-    e^{-\frac{t^2}{2}-i t x -\frac{u^2}{2} + u y}
-    =\\=&amp;
-    \frac{-1}{(2\pi)^2 i} \int\limits_{-\infty}^{\infty} dt~ \oint du~
+    \mathrm{e}^{-\frac{t^2}{2}-\mathrm{i} t x -\frac{u^2}{2} + u y}
+    \\ &amp;=
+    \frac{-1}{(2\pi)^2 \mathrm{i}} \int\limits_{-\infty}^{\infty} \mathrm{d}t~ \oint \mathrm{d}u~
     \sum\limits_{n=0}^{\infty}
-    (u+it)\frac{(a^2+t^2)^n}{(a^2-u^2)^{n+1}}
-    e^{-\frac{t^2}{2}-i t x -\frac{u^2}{2} + u y}
-    =\\=&amp;
-    \frac{-1}{(2\pi)^2 i} \int\limits_{-\infty}^{\infty} dt~ \oint\limits_{|u|=|t|+\varepsilon} du~
-    \frac{u+it}{a^2-u^2 - (a^2 + t^2) }
-    e^{-\frac{t^2}{2}-i t x -\frac{u^2}{2} + u y}
-    =\\=&amp;
-    \frac{1}{(2\pi)^2 i} \int\limits_{-\infty}^{\infty} dt~ \oint\limits_{|u|=|t|+\varepsilon} du~
-    \frac{u+it}{u^2 + t^2}
-    e^{-\frac{t^2}{2}-i t x -\frac{u^2}{2} + u y}
-    =\\=&amp;
-    \frac{1}{(2\pi)^2 i} \int\limits_{-\infty}^{\infty} dt~ \oint\limits_{|u|=|t|+\varepsilon} du~
-    \frac{1}{u - it}
-    e^{-\frac{t^2}{2}-i t x -\frac{u^2}{2} + u y}
-    =\\=&amp;
-    \frac{1}{2\pi} \int\limits_{-\infty}^{\infty} dt~
+    (u+\mathrm{i}t)\frac{(a^2+t^2)^n}{(a^2-u^2)^{n+1}}
+    \mathrm{e}^{-\frac{t^2}{2}-\mathrm{i} t x -\frac{u^2}{2} + u y}
+    \\ &amp;=
+    \frac{-1}{(2\pi)^2 \mathrm{i}} \int\limits_{-\infty}^{\infty} \mathrm{d}t~ \oint\limits_{|u|=R_t} \mathrm{d}u~
+    \frac{u+\mathrm{i}t}{a^2-u^2 - (a^2 + t^2) }
+    \mathrm{e}^{-\frac{t^2}{2}-\mathrm{i} t x -\frac{u^2}{2} + u y}
+    \\ &amp;=
+    \frac{1}{(2\pi)^2 \mathrm{i}} \int\limits_{-\infty}^{\infty} \mathrm{d}t~ \oint\limits_{|u|=R_t} \mathrm{d}u~
+    \frac{u+\mathrm{i}t}{u^2 + t^2}
+    \mathrm{e}^{-\frac{t^2}{2}-\mathrm{i} t x -\frac{u^2}{2} + u y}
+    \\ &amp;=
+    \frac{1}{(2\pi)^2 \mathrm{i}} \int\limits_{-\infty}^{\infty} \mathrm{d}t~ \oint\limits_{|u|=R_t} \mathrm{d}u~
+    \frac{1}{u - \mathrm{i}t}
+    \mathrm{e}^{-\frac{t^2}{2}-\mathrm{i} t x -\frac{u^2}{2} + u y}
+    \\ &amp;=
+    \frac{1}{2\pi} \int\limits_{-\infty}^{\infty} \mathrm{d}t~
     \left.
-    e^{-\frac{t^2}{2}-i t x -\frac{u^2}{2} + u y}
-    \right|_{u=it}
+    \mathrm{e}^{-\frac{t^2}{2}-\mathrm{i} t x -\frac{u^2}{2} + u y}
+    \right|_{u=\mathrm{i}t}
     =
-    \frac{1}{2\pi} \int\limits_{-\infty}^{\infty} dt~
-    e^{-i t x  + i t  y} = \delta(x-y).
+    \frac{1}{2\pi} \int\limits_{-\infty}^{\infty} \mathrm{d}t~
+    \mathrm{e}^{-\mathrm{i} t x  + \mathrm{i} t  y} = \delta(x-y).
 \end{aligned}
-\]</span> We find now the kernel decomposition <span class="math display">\[
-\begin{aligned}
-    &amp;\sum\limits_{i=0}^{2(N-1)} e_i(x) e^{\dagger}_i(y) =
-    \sum\limits_{i=0}^{\infty} e_i(x) e^{\dagger}_i(y) -
-    \sum\limits_{i=2N}^{\infty} e_i(x) e^{\dagger}_i(y)
-    =\\=&amp;
-    \frac{1}{(2\pi)^2 i} \int\limits_{-\infty}^{\infty} dt~ \oint\limits_{|u|=|t|+\varepsilon} du~
-    \frac{1}{u - it}
-    e^{-\frac{t^2}{2}-i t x -\frac{u^2}{2} + u y}
-    -\\-&amp;
-    \frac{1}{(2\pi)^2 i} \int\limits_{-\infty}^{\infty} dt~
-    \oint\limits_{|u|=|t|+|a|+\varepsilon} du~
-    \left( \frac{a^2+t^2}{a^2-u^2} \right)^N
-    \frac{1}{u - it}
-    e^{-\frac{t^2}{2}-i t x -\frac{u^2}{2} + u y}
-    =\\=&amp;
-    \frac{-1}{(2\pi)^2 i} \int\limits_{-\infty}^{\infty} dt~
-    \oint_{\pm a} du~
-    \left( \frac{a^2+t^2}{a^2-u^2} \right)^N
-    \frac{1}{u - it}
-    e^{-\frac{t^2}{2}-i t x -\frac{u^2}{2} + u y}
-    =\\=&amp;
-    K_N^a(x,y).
-\end{aligned}
-\]</span></p>
+\]</span> This computation is formal: on the enlarged circle the factor <span class="math inline">\(\mathrm{e}^{-\frac{t^2}{2}-\frac{u^2}{2}}\)</span> does not decay as <span class="math inline">\(t \rightarrow \pm\infty\)</span>, so the interchange of the sum with the integral over <span class="math inline">\(t\)</span> and the last step are not justified as written.</p>
+<p>In which sense, then, is this a basis? A basis of <span class="math inline">\(L_2(\mathbb{R})\)</span> would give the expansion <span class="math display">\[
+    f(x) = \sum_{i=0}^{+\infty} e^a_i(x) \int_{-\infty}^{+\infty} \mathrm{d}y~ {e^\dagger}^a_i(y) f(y)
+\]</span> for every <span class="math inline">\(f \in L_2(\mathbb{R})\)</span>. We do not claim this: the functions <span class="math inline">\({e^\dagger}^a_{2n}\)</span> and <span class="math inline">\({e^\dagger}^a_{2n+1}\)</span> grow like <span class="math inline">\(\lvert x \rvert^n \mathrm{e}^{a \lvert x \rvert}\)</span>, so for a general <span class="math inline">\(f\)</span> the coefficients need not even be defined. The expansion does hold, with finitely many terms, on the functions <span class="math inline">\(f(x) = p(x)\, \mathrm{e}^{-\frac{x^2}{2}}\)</span> with a polynomial <span class="math inline">\(p\)</span>, which are dense in <span class="math inline">\(L_2(\mathbb{R})\)</span>. Indeed, <span class="math inline">\(\phi^a_n\)</span> is an even polynomial of degree <span class="math inline">\(2n\)</span> times <span class="math inline">\(\mathrm{e}^{-\frac{x^2}{2}}\)</span> and <span class="math inline">\(\phi^a_n{}'\)</span> an odd one of degree <span class="math inline">\(2n+1\)</span>, so <span class="math inline">\(e^a_0, \dotso, e^a_{2k-1}\)</span> span these <span class="math inline">\(f\)</span> with <span class="math inline">\(\deg p &lt; 2k\)</span>. Writing <span class="math inline">\(f = \sum_{j&lt;2k} c_j e^a_j\)</span>, the pairings with <span class="math inline">\({e^\dagger}^a_i\)</span> converge, since a Gaussian beats exponential growth, and <span class="math inline">\(\eqref{eq:biorthogonality}\)</span> gives <span class="math display">\[
+    \int_{-\infty}^{+\infty} \mathrm{d}y~ {e^\dagger}^a_i(y) f(y)
+    = \begin{cases} c_i, &amp; i &lt; 2k, \\ 0, &amp; i \geq 2k, \end{cases}
+\]</span> so the series above is the finite sum that defines <span class="math inline">\(f\)</span>.</p>
 </div>
 </div>
 </div>
-</section>
-<section id="limit-basis" class="level4" data-number="2.3.2">
-<h4 data-number="2.3.2" class="anchored" data-anchor-id="limit-basis"><span class="header-section-number">2.3.2</span> Limit basis</h4>
-<p>We consider now the analogous of scaling limits <span class="math inline">\(\eqref{eq:harmonic-limits}\)</span>. Let <span class="math inline">\(N,n \rightarrow +\infty\)</span> such that <span class="math display">\[
-    \frac{2^{\frac12}\left( N - n - 1   \right)}{N^{\frac12}} \rightarrow \lambda
-\]</span> for some fixed <span class="math inline">\(\lambda \in \mathbb{R}\)</span>. By the saddle point method it can be shown that <span class="math display">\[
-    \mathcal{C}_N \, (2N)^{\frac14-n} \, \phi_n^{(2N)^{\frac12}} \left((2N)^{-\frac14} x\right)
-    \quad \longrightarrow \quad
-    \phi_{\lambda} (x),
-\]</span> <span class="math display">\[
-    \mathcal{C}_N \, (2N)^{\frac14+n} \, \psi_n^{(2N)^{\frac12}} \left((2N)^{-\frac14} x\right)
-    \quad \longrightarrow \quad
-    \psi_{\lambda} (x),
-\]</span> where <span class="math display">\[
-    \phi_{\lambda}(x) := \frac{1}{2\pi} \int\limits_{-\infty}^{+\infty} dt\,
-    e^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - i t x},
-\]</span> <span class="math display">\[
-    \psi_{\lambda}(x) := \frac{1}{2\pi i} \int\limits_{\mathcal{C}} du\,
-    e^{\frac{u^4}{4} - \frac{\lambda u^2}{2} + u x}.
-\]</span> Here and below, the integral “<span class="math inline">\(\int\limits_{\mathcal{C}}\)</span>” is over the union of two infinite paths on the complex plane. The first one is from <span class="math inline">\(+\infty \cdot e^{i \frac34 \pi}\)</span> to <span class="math inline">\(+\infty \cdot e^{i \frac14 \pi}\)</span> and the second one is from <span class="math inline">\(+\infty \cdot e^{-i \frac14 \pi}\)</span> to <span class="math inline">\(+\infty \cdot e^{- i \frac34 \pi}\)</span>. The functions <span class="math inline">\(\phi_{\lambda}\)</span> and <span class="math inline">\(\psi_{\lambda}\)</span> are solutions to the third order differential eigenequations <span class="math display">\[
-    \left( \partial_x^3 -  x \right)
-    \phi_{\lambda}( x) = \lambda~  \partial_x \phi_{\lambda}( x),
-\]</span> <span class="math display">\[
-    \left( \partial_x^3 + x \right)
-    \psi_{\lambda}(x) = \lambda~  \partial_x \psi_{\lambda}(x)
-\]</span> for <span class="math inline">\(\lambda\in\mathbb{R}\)</span>. It is is also true that <span class="math display">\[
-    \phi_0(x) = \phi(x), \quad \psi_0(x) = \psi(x).
-\]</span></p>
-<div class="callout callout-style-default callout-note callout-titled" title="Details and proofs">
+<div class="callout callout-style-default callout-note callout-titled" title="Details and proofs: the kernel decomposition">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Details and proofs
+<span class="screen-reader-only">Note</span>Details and proofs: the kernel decomposition
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>The eigenequation for <span class="math inline">\(\phi^a_N\)</span> for becomes <span class="math display">\[
+<p>The kernel decomposition needs only a finite sum, so its proof is not formal. Let the contours around <span class="math inline">\(\pm a\)</span> be circles of radius less than <span class="math inline">\(a\)</span>. They do not enclose <span class="math inline">\(u = \mathrm{i}t\)</span>, since <span class="math inline">\(\lvert \mathrm{i}t \mp a \rvert \geq a\)</span>. By the finite geometric sum, <span class="math display">\[
+\begin{aligned}
+    &amp;\sum\limits_{i=0}^{2N-1} e_i(x) e^{\dagger}_i(y) =
+    \frac12 \sum\limits_{n=0}^{N-1}
+    \left(
+    \phi_n{}'(x) \psi_n(y)
+    -\phi_n(x) \psi_n{}'(y)
+    \right)
+    \\ &amp;=
+    \frac{-1}{(2\pi)^2 \mathrm{i}} \int\limits_{-\infty}^{\infty} \mathrm{d}t~ \oint_{\pm a} \mathrm{d}u~
+    \sum\limits_{n=0}^{N-1}
+    (u+\mathrm{i}t)\frac{(a^2+t^2)^n}{(a^2-u^2)^{n+1}}
+    \mathrm{e}^{-\frac{t^2}{2}-\mathrm{i} t x -\frac{u^2}{2} + u y}
+    \\ &amp;=
+    \frac{1}{(2\pi)^2 \mathrm{i}} \int\limits_{-\infty}^{\infty} \mathrm{d}t~ \oint_{\pm a} \mathrm{d}u~
+    \left( 1 - \left( \frac{a^2+t^2}{a^2-u^2} \right)^N \right)
+    \frac{1}{u - \mathrm{i}t}
+    \mathrm{e}^{-\frac{t^2}{2}-\mathrm{i} t x -\frac{u^2}{2} + u y}
+    \\ &amp;=
+    \frac{-1}{(2\pi)^2 \mathrm{i}} \int\limits_{-\infty}^{\infty} \mathrm{d}t~
+    \oint_{\pm a} \mathrm{d}u~
+    \left( \frac{a^2+t^2}{a^2-u^2} \right)^N
+    \frac{1}{u - \mathrm{i}t}
+    \mathrm{e}^{-\frac{t^2}{2}-\mathrm{i} t x -\frac{u^2}{2} + u y}
+    \\ &amp;=
+    K_N^a(x,y).
+\end{aligned}
+\]</span> The term with <span class="math inline">\(1\)</span> vanishes, because its integrand is analytic inside the circles around <span class="math inline">\(\pm a\)</span>.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Connection with the literature">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Connection with the literature
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The basis above is a form of the multiple Hermite polynomials, the multiple orthogonal polynomials of the external source model (<a href="https://arxiv.org/abs/math-ph/0307055">Bleher and Kuijlaars, 2004</a>). Let <span class="math inline">\(P_{n_1, n_2}\)</span> be the type II multiple Hermite polynomial and <span class="math inline">\(Q_{n_1, n_2}\)</span> the type I function for the two weights <span class="math inline">\(\mathrm{e}^{-\frac{x^2}{2} \pm a x}\)</span>, in the integral representations of <a href="https://arxiv.org/abs/math/0406616">Bleher and Kuijlaars, 2005</a> (eqs. (2.2) and (2.9)). Up to constant factors, <span class="math display">\[
+    \phi_n^a(x) \propto \mathrm{e}^{-\frac{x^2}{2}} P_{n, n}(x), \quad
+    \phi_n^a{}'(x) \propto \mathrm{e}^{-\frac{x^2}{2}} \left( P_{n+1, n}(x) + P_{n, n+1}(x) \right),
+\]</span> <span class="math display">\[
+    \psi_n^a(x) \propto \mathrm{e}^{\frac{x^2}{2}} Q_{n+1, n+1}(x), \quad
+    \psi_n^a{}'(x) \propto \mathrm{e}^{\frac{x^2}{2}} \left( Q_{n+1, n}(x) + Q_{n, n+1}(x) \right).
+\]</span> The standard construction (eq. (1.10) there) runs along a single path of multi-indices, such as <span class="math inline">\((n, n) \to (n+1, n) \to (n+1, n+1)\)</span>. Ours takes the symmetric combination at the odd levels instead, so that every basis function is even or odd, and is conjugated by <span class="math inline">\(\mathrm{e}^{\mp \frac{x^2}{2}}\)</span>, which is the freedom <span class="math inline">\(K(x,y) \rightarrow \frac{f(x)}{f(y)} K(x,y)\)</span> above. The third-order equation for <span class="math inline">\(\phi_n^a\)</span> is the case <span class="math inline">\(n_1 = n_2 = n\)</span> of the equation for type II multiple Hermite polynomials in <a href="https://arxiv.org/abs/1204.5058">Filipuk, Van Assche and Zhang</a> (§5.1). For symmetric weights and equal indices, <span class="math inline">\(n\)</span> enters that equation linearly, which is what makes it an eigenvalue equation.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-limit-basis" class="level4" data-number="2.3.2">
+<h4 data-number="2.3.2" class="anchored" data-anchor-id="sec-limit-basis"><span class="header-section-number">2.3.2</span> Limit basis</h4>
+<p>The proofs in this section are formal computations, given for illustration; we say where each one is not justified.</p>
+<p>We now take the analogue of the scaling limits <span class="math inline">\(\eqref{eq:harmonic-limits}\)</span>. Let <span class="math inline">\(N,n \rightarrow +\infty\)</span> such that <span class="math display">\[
+    \frac{2^{\frac12}\left( N - n - 1   \right)}{N^{\frac12}} \rightarrow \lambda
+\]</span> for some fixed <span class="math inline">\(\lambda \in \mathbb{R}\)</span>. After the substitution <span class="math inline">\(t = (2N)^{\frac14} s\)</span>, the integrand of <span class="math inline">\(\phi_n^{(2N)^{\frac12}}\)</span> converges pointwise: <span class="math display">\[
+    (2N)^{-n} \left( t^2 + 2N \right)^n \mathrm{e}^{-\frac{t^2}{2}}
+    = \mathrm{e}^{\, n \log\left( 1 + (2N)^{-\frac12} s^2 \right) - \frac{(2N)^{\frac12} s^2}{2}}
+    \quad \longrightarrow \quad
+    \mathrm{e}^{-\frac{s^4}{4} - \frac{\lambda s^2}{2}},
+\]</span> and the substitution <span class="math inline">\(u = (2N)^{\frac14} v\)</span> does the same for <span class="math inline">\(\psi_n^{(2N)^{\frac12}}\)</span>. Passing to the limit under the integral, and for <span class="math inline">\(\psi_n\)</span> moving the contour from the contours around <span class="math inline">\(\pm a\)</span> to <span class="math inline">\(\mathcal{C}\)</span> below, is formal here. Numerically, the ratio of the two sides of the limits below tends to <span class="math inline">\(1\)</span> with an error of order <span class="math inline">\(N^{-\frac12}\)</span>. We obtain, for each fixed <span class="math inline">\(x\)</span>, <span class="math display">\[
+    2^{-\frac12} (2N)^{-n-\frac14} \, \phi_n^{(2N)^{\frac12}} \left((2N)^{-\frac14} x\right)
+    \quad \longrightarrow \quad
+    \phi_{\lambda} (x),
+\]</span> <span class="math display">\[
+    2^{-\frac12} (2N)^{n+\frac34} \, \psi_n^{(2N)^{\frac12}} \left((2N)^{-\frac14} x\right)
+    \quad \longrightarrow \quad
+    \psi_{\lambda} (x),
+\]</span> where <span class="math display">\[
+    \phi_{\lambda}(x) := \frac{1}{2\pi} \int\limits_{-\infty}^{+\infty} \mathrm{d}t\,
+    \mathrm{e}^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - \mathrm{i} t x},
+\]</span> <span class="math display">\[
+    \psi_{\lambda}(x) := \frac{1}{2\pi \mathrm{i}} \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \mathrm{e}^{\frac{u^4}{4} - \frac{\lambda u^2}{2} + u x}.
+\]</span> Here and below, <span class="math inline">\(\int\limits_{\mathcal{C}}\)</span> is the integral over the union of two infinite paths in the complex plane: one from <span class="math inline">\(+\infty \cdot \mathrm{e}^{\mathrm{i} \frac14 \pi}\)</span> to <span class="math inline">\(+\infty \cdot \mathrm{e}^{\mathrm{i} \frac34 \pi}\)</span>, the other from <span class="math inline">\(+\infty \cdot \mathrm{e}^{-\mathrm{i} \frac34 \pi}\)</span> to <span class="math inline">\(+\infty \cdot \mathrm{e}^{- \mathrm{i} \frac14 \pi}\)</span>. Up to a change of variables, <span class="math inline">\(\phi_\lambda\)</span> and <span class="math inline">\(\psi_\lambda\)</span> are the Pearcey integrals of <a href="https://arxiv.org/abs/math-ph/0602064">Bleher and Kuijlaars</a>; the note after the asymptotics below gives the details.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="images/phi-lambda-limit.gif" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Illustration of the limit of \phi_n above for \lambda = -4. The blue curve is the rescaled \phi_n for the N shown in the legend, with n = \mathrm{round}\left( N - 1 - \lambda (N/2)^{\frac12} \right), chosen so that the ratio in the condition above equals \lambda up to rounding; the orange curve is \phi_\lambda. A negative \lambda gives n > N - 1, so these functions do not enter the kernel K^a_N, and in the limit \phi_\lambda does not enter K^{\mathrm{Pear}}, which is the part \lambda > 0. We show them because at \lambda < 0 the functions oscillate and the convergence is easier to see."><img src="images/phi-lambda-limit.gif" class="img-fluid figure-img" alt="Illustration of the limit of \phi_n above for \lambda = -4. The blue curve is the rescaled \phi_n for the N shown in the legend, with n = \mathrm{round}\left( N - 1 - \lambda (N/2)^{\frac12} \right), chosen so that the ratio in the condition above equals \lambda up to rounding; the orange curve is \phi_\lambda. A negative \lambda gives n > N - 1, so these functions do not enter the kernel K^a_N, and in the limit \phi_\lambda does not enter K^{\mathrm{Pear}}, which is the part \lambda > 0. We show them because at \lambda < 0 the functions oscillate and the convergence is easier to see."></a></p>
+<figcaption>Illustration of the limit of <span class="math inline">\(\phi_n\)</span> above for <span class="math inline">\(\lambda = -4\)</span>. The blue curve is the rescaled <span class="math inline">\(\phi_n\)</span> for the <span class="math inline">\(N\)</span> shown in the legend, with <span class="math inline">\(n = \mathrm{round}\left( N - 1 - \lambda (N/2)^{\frac12} \right)\)</span>, chosen so that the ratio in the condition above equals <span class="math inline">\(\lambda\)</span> up to rounding; the orange curve is <span class="math inline">\(\phi_\lambda\)</span>. A negative <span class="math inline">\(\lambda\)</span> gives <span class="math inline">\(n &gt; N - 1\)</span>, so these functions do not enter the kernel <span class="math inline">\(K^a_N\)</span>, and in the limit <span class="math inline">\(\phi_\lambda\)</span> does not enter <span class="math inline">\(K^{\mathrm{Pear}}\)</span>, which is the part <span class="math inline">\(\lambda &gt; 0\)</span>. We show them because at <span class="math inline">\(\lambda &lt; 0\)</span> the functions oscillate and the convergence is easier to see.</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="images/psi-lambda-limit.gif" class="lightbox" data-gallery="quarto-lightbox-gallery-7" title="The same for the limit of \psi_n, with \psi_\lambda in orange. For small N the blue curve leaves the frame."><img src="images/psi-lambda-limit.gif" class="img-fluid figure-img" alt="The same for the limit of \psi_n, with \psi_\lambda in orange. For small N the blue curve leaves the frame."></a></p>
+<figcaption>The same for the limit of <span class="math inline">\(\psi_n\)</span>, with <span class="math inline">\(\psi_\lambda\)</span> in orange. For small <span class="math inline">\(N\)</span> the blue curve leaves the frame.</figcaption>
+</figure>
+</div>
+<p>The functions <span class="math inline">\(\phi_{\lambda}\)</span> and <span class="math inline">\(\psi_{\lambda}\)</span> solve the third-order differential eigenvalue equations <span class="math display">\[
+    \left( \partial_x^3 -  x \right)
+    \phi_{\lambda}( x) = \lambda~  \partial_x \phi_{\lambda}( x),
+\]</span> <span class="math display">\[
+    \left( \partial_x^3 + x \right)
+    \psi_{\lambda}(x) = \lambda~  \partial_x \psi_{\lambda}(x)
+\]</span> for <span class="math inline">\(\lambda\in\mathbb{R}\)</span>.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Details and proofs: the limit equations">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Details and proofs: the limit equations
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>After the substitution <span class="math inline">\(a = (2N)^{\frac12}\)</span>, <span class="math inline">\(x \rightarrow (2N)^{-\frac14} x\)</span>, the eigenvalue equation for <span class="math inline">\(\phi^a_n\)</span> becomes <span class="math display">\[
 \begin{aligned}
     &amp;\left(
     (2N)^{\frac54} \partial_{x} + (2N)^{\frac34} x - (2N)^{\frac34} \partial_{x}^3
@@ -720,17 +812,17 @@ window.Quarto = {
     \phi^{(2N)^{\frac12}}_n((2N)^{-\frac14} x)
     =
     (2N)^{\frac14}2(n+1) \partial_{x} \phi^{(2N)^{\frac12}}_n((2N)^{-\frac14} x)
-    \quad \Leftrightarrow \\ \Leftrightarrow \quad &amp;
-    \left(\partial_{ x}^3 - x - 2^{-\frac12} N^{-\frac12} x \partial_{x}^2 \right)
+    \\ \Leftrightarrow \quad &amp;
+    \left(\partial_{ x}^3 - x + 2^{-\frac12} N^{-\frac12} x \partial_{x}^2 \right)
     \phi_n^{(2N)^{\frac12}} ((2N)^{-\frac14} x)
     =
     \frac{2^{\frac12}\left( N - n - 1   \right)}{N^{\frac12}}
-    \phi_n^{(2N)^{\frac12}} \left((2N)^{-\frac14} x\right)
-    \quad \longrightarrow \\ \longrightarrow \quad &amp;
+    \partial_{x} \phi_n^{(2N)^{\frac12}} \left((2N)^{-\frac14} x\right)
+    \\ \longrightarrow \quad &amp;
     \left(\partial_{x}^3 - x \right)
     \phi_{\lambda}( x) = \lambda  \partial_{ x} \phi_{\lambda}( x).
 \end{aligned}
-\]</span> For <span class="math inline">\(\psi^a_N\)</span> we have analogously <span class="math display">\[
+\]</span> For <span class="math inline">\(\psi^a_n\)</span> we have analogously <span class="math display">\[
 \begin{aligned}
     &amp;\left(
         (2N)^{\frac54} \partial_{ x} - (2N)^{\frac34} x - (2N)^{\frac34} \partial_{x}^3
@@ -739,13 +831,13 @@ window.Quarto = {
     \psi^{(2N)^{\frac12}}_n((2N)^{-\frac14} x)
     =
     (2N)^{\frac14}2(n+1) \partial_{x} \psi^{(2N)^{\frac12}}_n((2N)^{-\frac14} x)
-    \quad \Leftrightarrow \\ \Leftrightarrow \quad &amp;
+    \\ \Leftrightarrow \quad &amp;
     \left(\partial_{x}^3 + x - 2^{-\frac12} N^{-\frac12} \partial_{x}^2 x \right)
-    \psi_n^{N^{\frac12}} ((2N)^{-\frac14} x)
+    \psi_n^{(2N)^{\frac12}} ((2N)^{-\frac14} x)
     =
     \frac{2^{\frac12}\left( N - n - 1 \right)}{N^{\frac12}}
-    \psi_n^{(2N)^{\frac12}} ((2N)^{-\frac14}x)
-    \quad \longrightarrow \\ \longrightarrow \quad &amp;
+    \partial_{x} \psi_n^{(2N)^{\frac12}} ((2N)^{-\frac14}x)
+    \\ \longrightarrow \quad &amp;
     \left(\partial_{x}^3 + x \right)
     \psi_{\lambda}(x) = \lambda \partial_{x} \psi_{\lambda}(x).
 \end{aligned}
@@ -753,38 +845,80 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>We now define a two-fold real continuous biorthogonal basis. Specifically, for each fixed <span class="math inline">\(\lambda \in \mathbb{R}\)</span>, there are two left basis functions <span class="math inline">\(e^\dagger_\lambda\)</span> and two right basis functions <span class="math inline">\(e_\lambda\)</span>. This is analogous to the real Fourier continuous orthogonal basis, where for each <span class="math inline">\(\lambda \in \mathbb{R}\)</span>, we have two real basis functions <span class="math inline">\(\{ \sin(\lambda x), \cos(\lambda x) \}\)</span>.</p>
+<p>At <span class="math inline">\(\lambda = 0\)</span> they are the functions of the Pearcey kernel: <span class="math display">\[
+    \phi_0(x) = \phi(x), \quad \psi_0(x) = \psi(x).
+\]</span> As <span class="math inline">\(\lvert x \rvert \to \infty\)</span> with <span class="math inline">\(\lambda\)</span> fixed, steepest descent gives <span class="math display">\[
+    \phi_\lambda(x) = \sqrt{\tfrac{2}{3\pi}}\, \lvert x \rvert^{-\frac13}\,
+    \mathrm{e}^{\frac{\lambda^2}{6} - \frac38 \lvert x \rvert^{4/3} - \frac{\lambda}{4} \lvert x \rvert^{2/3}}
+    \Big( \cos\big( \tfrac{3\sqrt3}{8} \lvert x \rvert^{4/3} - \tfrac{\sqrt3}{4} \lambda \lvert x \rvert^{2/3} - \tfrac{\pi}{6} \big)
+    + O\big(\lvert x \rvert^{-2/3}\big) \Big),
+    \label{eq:phi-asym}
+\]</span> <span class="math display">\[
+    \psi_\lambda(x) = \operatorname{sgn}(x)\, \sqrt{\tfrac{2}{3\pi}}\, \lvert x \rvert^{-\frac13}\,
+    \mathrm{e}^{-\frac{\lambda^2}{6} + \frac38 \lvert x \rvert^{4/3} + \frac{\lambda}{4} \lvert x \rvert^{2/3}}
+    \Big( \cos\big( \tfrac{3\sqrt3}{8} \lvert x \rvert^{4/3} - \tfrac{\sqrt3}{4} \lambda \lvert x \rvert^{2/3} + \tfrac{2\pi}{3} \big)
+    + O\big(\lvert x \rvert^{-2/3}\big) \Big).
+    \label{eq:psi-asym}
+\]</span></p>
+<div class="callout callout-style-default callout-note callout-titled" title="Connection with the literature">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Connection with the literature
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Up to a change of variables, <span class="math inline">\(\phi_\lambda\)</span> and <span class="math inline">\(\psi_\lambda\)</span> are the Pearcey integrals <span class="math inline">\(p\)</span> and <span class="math inline">\(q\)</span> of <a href="https://arxiv.org/abs/math-ph/0602064">Bleher and Kuijlaars</a> (eqs. (1.6)–(1.8)) with <span class="math inline">\(b = \lambda\)</span>, and the eigenvalue equations above are their third-order equations. There <span class="math inline">\(b\)</span> labels a family of Pearcey kernels with <span class="math inline">\(K^{\mathrm{Pear}}\)</span> at <span class="math inline">\(b = 0\)</span>, and <a href="https://arxiv.org/abs/math/0412005">Tracy and Widom</a> (eq. (1.1)) use the same parameter as the time of the extended Pearcey kernel. The asymptotics <span class="math inline">\(\eqref{eq:phi-asym}\)</span> and <span class="math inline">\(\eqref{eq:psi-asym}\)</span> follow from Lemma 8.1 of Bleher and Kuijlaars; for <span class="math inline">\(\phi_\lambda\)</span> the complete expansion is eq. (10) of <a href="https://arxiv.org/abs/1511.05323">López and Pagola</a>. The decomposition of <span class="math inline">\(K^{\mathrm{Pear}}\)</span> at the end of this section integrates over <span class="math inline">\(\lambda &gt; 0\)</span> the derivative of the Pearcey kernel in this parameter (<a href="https://arxiv.org/abs/0901.4520">Adler, Orantin and van Moerbeke</a>, eq. (1.6)).</p>
+</div>
+</div>
+</div>
+<p>We now define a two-fold real continuous biorthogonal basis: for each fixed <span class="math inline">\(\lambda \in \mathbb{R}\)</span>, there are two left basis functions <span class="math inline">\(e^\dagger_\lambda\)</span> and two right basis functions <span class="math inline">\(e_\lambda\)</span>, one even and one odd in each pair. The real Fourier basis is the orthogonal analogue: for each <span class="math inline">\(\lambda \in \mathbb{R}\)</span>, it has two real basis functions <span class="math inline">\(\{ \sin(\lambda x), \cos(\lambda x) \}\)</span>.</p>
 <p>The pair of collections <span class="math display">\[
     \{-2^{-\frac12} \psi_{\lambda}', 2^{-\frac12} \psi_{\lambda}\}_{\lambda\in\mathbb{R}}, \quad
     \{2^{-\frac12} \phi_{\lambda}, 2^{-\frac12} \phi_{\lambda}' \}_{\lambda\in\mathbb{R}}
-\]</span> is a biorthogonal basis on <span class="math inline">\(L_2(\mathbb{R})\)</span>, namely <span class="math display">\[
-    \int\limits_{-\infty}^{+\infty} dx\,
+\]</span> is a biorthogonal basis in the sense described below: <span class="math display">\[
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}x\,
     \psi_{\lambda}'(x)
     \phi_{\mu}(x) =
     -2\,\delta(\lambda-\mu),
 \]</span> <span class="math display">\[
-    \int\limits_{-\infty}^{+\infty} dx\,
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}x\,
     \psi_{\lambda}'(x)
     \phi_{\mu}'(x) = 0,
 \]</span> <span class="math display">\[
-    \int\limits_{-\infty}^{+\infty} dx\,
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}x\,
     \psi_{\lambda}(x)
-    \phi_{\mu}(x) = 0
+    \phi_{\mu}(x) = 0,
 \]</span> <span class="math display">\[
-    \int\limits_{-\infty}^{+\infty} dx\,
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}x\,
     \psi_{\lambda}(x)
     \phi_{\mu}'(x) =
     2\,\delta(\lambda-\mu),
 \]</span> and <span class="math display">\[
-    \frac12 \int\limits_{-\infty}^{+\infty} d\lambda
+    \frac12 \int\limits_{-\infty}^{+\infty} \mathrm{d}\lambda
     \left(
     \phi_{\lambda}{}'(x) \psi_{\lambda}(y)
     - \phi_{\lambda}(x) \psi_{\lambda}{}'(y)
     \right)
-    = \delta(x-y)
-\]</span> where <span class="math inline">\(\delta\)</span> is the Dirac delta function.</p>
+    = \delta(x-y).
+\]</span></p>
+<p>Here the delta function needs more care than in the orthogonal case. By <span class="math inline">\(\eqref{eq:phi-asym}\)</span> and <span class="math inline">\(\eqref{eq:psi-asym}\)</span>, the functions <span class="math inline">\(\phi_\lambda\)</span> lie in <span class="math inline">\(L_2(\mathbb{R})\)</span> and the functions <span class="math inline">\(\psi_\lambda\)</span> do not. In each pairing the leading exponents <span class="math inline">\(\pm\frac38 \lvert x \rvert^{4/3}\)</span> cancel, and the next ones do not: for <span class="math inline">\(\mu &lt; \lambda\)</span> the integral over <span class="math inline">\(x\)</span> in the first identity diverges, since its integrand grows like <span class="math inline">\(\mathrm{e}^{\frac{\lambda-\mu}{4}\lvert x \rvert^{2/3}}\)</span>. Schwartz test functions do not repair this: <span class="math inline">\(\phi_\mu(0)\)</span> grows like <span class="math inline">\(\mathrm{e}^{\mu^2/4}\)</span> as <span class="math inline">\(\mu \to -\infty\)</span>, so <span class="math inline">\(\int \mathrm{d}\mu\, g(\mu)\, \phi_\mu(x)\)</span> diverges for a general Schwartz function <span class="math inline">\(g\)</span>. A class that works is the span of the Gaussians <span class="math display">\[
+    g_m(\mu) = \mathrm{e}^{-\frac{(\mu-m)^2}{3}}, \quad m \in \mathbb{R}.
+\]</span> Tested against them, the four identities hold; the first one, for instance, reads <span class="math display">\[
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}x\, \psi_{\lambda}'(x)
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}\mu\, g_m(\mu)\, \phi_\mu(x)
+    = -2\, g_m(\lambda).
+\]</span> The completeness relation holds in the form <span class="math display">\[
+    f(x) = \lim_{\Lambda \to +\infty} \int\limits_{-\infty}^{+\infty} \mathrm{d}y\, f(y)\,
+    \frac12 \int\limits_{-\Lambda}^{+\infty} \mathrm{d}\lambda
+    \left( \phi_\lambda'(x) \psi_\lambda(y) - \phi_\lambda(x) \psi_\lambda'(y) \right)
+\]</span> for continuously differentiable <span class="math inline">\(f\)</span> with compact support; Schwartz functions are again too many, since <span class="math inline">\(\psi_\lambda\)</span> grows. We prove it only formally.</p>
 <div class="callout callout-style-default callout-note callout-titled" title="Details and proofs">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -793,115 +927,81 @@ window.Quarto = {
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p><span class="math display">\[
+<p>For the Gaussian <span class="math inline">\(g_m\)</span> the integral over <span class="math inline">\(\mu\)</span> is Gaussian too: <span class="math display">\[
+    G_m(x) := \int\limits_{-\infty}^{+\infty} \mathrm{d}\mu\, g_m(\mu)\, \phi_\mu(x)
+    = \sqrt{6\pi}\, \phi_{2m}\big(\sqrt2\, x\big).
+\]</span> By <span class="math inline">\(\eqref{eq:phi-asym}\)</span> it decays like <span class="math inline">\(\mathrm{e}^{-\frac38 2^{2/3} \lvert x \rvert^{4/3}}\)</span>, fast enough to integrate over <span class="math inline">\(x\)</span> before <span class="math inline">\(u\)</span>, with <span class="math inline">\(\mathcal{C}\)</span> the rays through the origin: <span class="math display">\[
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}x\, \psi_{\lambda}'(x)\, G_m(x)
+    = \frac{\sqrt{3\pi}}{2\pi \mathrm{i}} \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    u\, \mathrm{e}^{\frac{3u^4}{16} + \frac{(m-\lambda)u^2}{2}}
+    = -2\, g_m(\lambda),
+\]</span> a Gaussian integral in <span class="math inline">\(\frac{u^2}{2} \in \mathrm{i}\mathbb{R}\)</span>. In the other three identities, with <span class="math inline">\(G_m'\)</span> in place of <span class="math inline">\(G_m\)</span> where <span class="math inline">\(\phi_\mu'\)</span> appears, the factor <span class="math inline">\(u\)</span> becomes <span class="math inline">\(-u^2\)</span>, <span class="math inline">\(1\)</span> and <span class="math inline">\(-u\)</span>; the first two integrals vanish, since <span class="math inline">\(u \mapsto -u\)</span> maps <span class="math inline">\(\mathcal{C}\)</span> onto itself with its orientation. The span of the <span class="math inline">\(g_m\)</span> is dense in <span class="math inline">\(L_2(\mathbb{R})\)</span> and in the Schwartz space, so these test functions determine the delta function uniquely.</p>
+<p>The proof of the last identity is formal: it changes the order of integration, and two more steps are not justified. Here <span class="math inline">\(\mathcal{C}\)</span> consists of the rays <span class="math inline">\(\arg u = \pm\frac{\pi}{4}, \pm\frac{3\pi}{4}\)</span> through the origin, since the factor <span class="math inline">\((u - \mathrm{i}t)^{-1}\)</span> has poles on the imaginary axis. The integral over <span class="math inline">\(\lambda\)</span> diverges at <span class="math inline">\(\lambda \to -\infty\)</span>, so we cut it at <span class="math inline">\(-\Lambda\)</span> and let <span class="math inline">\(\Lambda \to +\infty\)</span> at the end, and we do not prove that the remaining contour integral vanishes in this limit: <span class="math display">\[
 \begin{aligned}
-    &amp;\int\limits_{-\infty}^{+\infty} dx\,
-    \psi_{\lambda}'(x) \phi_{\mu}(x)
-    =\\=&amp;
-    \frac{1}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du
-    \int\limits_{-\infty}^{+\infty} dx\,
-    u \,e^{ \frac{u^4}{4} - \frac{\lambda u^2}{2} + u x
-    - \frac{t^4}{4} - \frac{\mu t^2}{2} - itx}
-    =\\=&amp;
-    \frac{1}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    u \,e^{ \frac{u^4}{4} - \frac{\lambda u^2}{2}
-    - \frac{(t-iu )^4}{4} - \frac{\mu (t-iu)^2}{2} }
-    \int\limits_{-\infty}^{+\infty} dx\,
-    e^{-i t x}
-    =\\=&amp;
-    \frac{1}{2\pi i}
-    \int\limits_{\mathcal{C}} du
-    \left.
-    u \,e^{ \frac{u^4}{4} - \frac{\lambda u^2}{2}
-    - \frac{(t-iu )^4}{4} - \frac{\mu (t-iu)^2}{2} }
-    \right|_{t=0}
-    =\\=&amp;
-    \frac{1}{2\pi i}
-    \int\limits_{\mathcal{C}} du\,
-    u \,e^{  - \frac{\lambda u^2}{2}
-    + \frac{\mu u^2}{2} }
-    =\\=&amp;
-    \frac{1}{2\pi i}
-    \int\limits_{\mathcal{C}} d\frac{u^2}{2}\,
-    e^{ - \frac{\lambda u^2}{2}
-    + \frac{\mu u^2}{2} }
-    =\\=&amp;
-    \frac{-2}{2\pi }
-    \int\limits_{-\infty}^{\infty} d  t \,
-    e^{ - i \lambda t + i \mu t}
-    =\\=&amp;
-    -2\,\delta(\lambda-\mu).
-\end{aligned}
-\]</span> Other 3 statements can be show in the same manner. The last identity can be proved as follows <span class="math display">\[
-\begin{aligned}
-    &amp;\frac12 \int\limits_{-\infty}^{+\infty} d\lambda
+    &amp;\frac12 \int\limits_{-\infty}^{+\infty} \mathrm{d}\lambda
     \left(
     \phi_{\lambda}{}'(x) \psi_{\lambda}(y)
     - \phi_{\lambda}(x) \psi_{\lambda}{}'(y)
     \right)
-    =\\=&amp;
-    \int\limits_{-\infty}^{+\infty} d\lambda
-    \frac{1}{2(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    (-it-u)
-    e^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - itx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
-    =\\=&amp;
-    \frac{-1}{2(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    \int\limits_{-\infty}^{+\infty} d\lambda
-    \frac{u^2+t^2}{u-it}
-    e^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - itx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
-    =\\=&amp;
-    -\frac{ \lim_{\Lambda \to +\infty} }{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    \int\limits_{-\Lambda}^{+\infty} d\lambda
-    \frac{-\partial_{\lambda}}{u-it}
-    e^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - itx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
-    =\\=&amp;
-    \frac{ \lim_{\Lambda \to +\infty} }{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    \frac{e^{-\frac{t^4}{4} - itx + \frac{u^4}{4} + u y + \frac{\Lambda}{2} (t^2+u^2)}}{u-it}
-    =\\=&amp;
+    \\ &amp;=
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}\lambda
+    \frac{1}{2(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    (-\mathrm{i}t-u)
+    \mathrm{e}^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - \mathrm{i}tx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
+    \\ &amp;=
+    \frac{-1}{2(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}\lambda
+    \frac{u^2+t^2}{u-\mathrm{i}t}
+    \mathrm{e}^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - \mathrm{i}tx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
+    \\ &amp;=
+    -\frac{ \lim_{\Lambda \to +\infty} }{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \int\limits_{-\Lambda}^{+\infty} \mathrm{d}\lambda
+    \frac{-\partial_{\lambda}}{u-\mathrm{i}t}
+    \mathrm{e}^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - \mathrm{i}tx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
+    \\ &amp;=
+    -\frac{ \lim_{\Lambda \to +\infty} }{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \frac{\mathrm{e}^{-\frac{t^4}{4} - \mathrm{i}tx + \frac{u^4}{4} + u y + \frac{\Lambda}{2} (t^2+u^2)}}{u-\mathrm{i}t}
+    \\ &amp;=
     \frac{ \lim_{\Lambda \to +\infty} }{2\pi}
-    \int\limits_{-\infty}^{+\infty} dt
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
     \left.
-    e^{-\frac{t^4}{4} - itx + \frac{u^4}{4} + u y + \frac{\Lambda}{2} (t^2+u^2)}
-    \right|_{u=it}
-    +\\+&amp;
-    \frac{ \lim_{\Lambda \to +\infty} }{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}'} du\,
-    \frac{e^{-\frac{t^4}{4} - itx + \frac{u^4}{4} + u y + \frac{\Lambda}{2} (t^2+u^2)}}{u-it}.
+    \mathrm{e}^{-\frac{t^4}{4} - \mathrm{i}tx + \frac{u^4}{4} + u y + \frac{\Lambda}{2} (t^2+u^2)}
+    \right|_{u=\mathrm{i}t}
+    \\ &amp;\quad -
+    \frac{ \lim_{\Lambda \to +\infty} }{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}'} \mathrm{d}u\,
+    \frac{\mathrm{e}^{-\frac{t^4}{4} - \mathrm{i}tx + \frac{u^4}{4} + u y + \frac{\Lambda}{2} (t^2+u^2)}}{u-\mathrm{i}t}.
 \end{aligned}
-\]</span> The first term in the last expression results from the contour integration by <span class="math inline">\(u\)</span> around <span class="math inline">\(u = it\)</span>. In the second integral, the contour <span class="math inline">\(\mathcal{C}'\)</span> is the remaining part of <span class="math inline">\(\mathcal{C}\)</span>. It tends to zero as <span class="math inline">\(\Lambda\)</span> approaches infinity. Continuing the calculation, we have <span class="math display">\[
+\]</span> The first term is the residue at <span class="math inline">\(u = \mathrm{i}t\)</span>, picked up when <span class="math inline">\(\mathcal{C}\)</span> is deformed across the pole into a contour <span class="math inline">\(\mathcal{C}'\)</span> on which <span class="math inline">\(\mathrm{Re}\,(t^2 + u^2) &lt; 0\)</span>. With the orientation of <span class="math inline">\(\mathcal{C}\)</span> the pole lies to the right of the path, so the residue enters with the factor <span class="math inline">\(-2\pi \mathrm{i}\)</span>. We assume, without proof, that the integral over <span class="math inline">\(\mathcal{C}'\)</span> tends to zero as <span class="math inline">\(\Lambda \to +\infty\)</span>. Then <span class="math display">\[
     \dotso = \frac{ \lim_{\Lambda \to +\infty} }{2\pi}
-    \int\limits_{-\infty}^{+\infty} dt\,
-    e^{ - itx  + i t y + \frac{\Lambda}{2}\cdot 0} =
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t\,
+    \mathrm{e}^{ - \mathrm{i}tx  + \mathrm{i} t y + \frac{\Lambda}{2}\cdot 0} =
     \delta(x-y).
 \]</span></p>
 </div>
 </div>
 </div>
-<p>The Pearcey kernel can thus be decomposed as follows <span class="math display">\[
+<p>The Pearcey kernel has the decomposition <span class="math display">\[
     K^{\mathrm{Pear}}(x,y) =
-    \frac12 \int\limits_0^{+\infty} d\lambda
+    \frac12 \int\limits_0^{+\infty} \mathrm{d}\lambda
     \left(
     \phi_{\lambda}'(x) \psi_{\lambda}(y)
     - \phi_{\lambda}(x) \psi_{\lambda}'(y)
     \right).
 \]</span></p>
 <div class="callout callout-style-default callout-note callout-titled" title="Details and proofs">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -910,86 +1010,104 @@ window.Quarto = {
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p><span class="math display">\[
+<p>We compute the right-hand side with the opposite sign, with <span class="math inline">\(\mathcal{C}\)</span> the rays through the origin, as in the proof of completeness above. <span class="math display">\[
 \begin{aligned}
-    &amp;\frac12 \int\limits_{0}^{+\infty} d\lambda
+    &amp;\frac12 \int\limits_{0}^{+\infty} \mathrm{d}\lambda
     \left(
     \phi_{\lambda}(x) \psi_{\lambda}'(y)
-    - \phi_{\lambda}(x)' \psi_{\lambda}(y)
+    - \phi_{\lambda}'(x) \psi_{\lambda}(y)
     \right)
-    =\\=&amp;
-    \int\limits_{0}^{+\infty} d\lambda
-    \frac{1}{2(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    (u+it)
-    e^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - itx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
-    =\\=&amp;
-    \frac{1}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    \int\limits_{0}^{+\infty} d\lambda
-    \frac{u^2+t^2}{u-it}
-    e^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - itx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
-    =\\=&amp;
-    \frac{1}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    \int\limits_{0}^{+\infty} d\lambda
-    \frac{-\partial_{\lambda}}{u-it}
-    e^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - itx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
-    =\\=&amp;
-    \frac{1}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    \frac{e^{-\frac{t^4}{4} - itx + \frac{u^4}{4} + u y }}{u-it}
-    =\\=&amp;
-    \frac{1}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    \frac{e^{-\frac{t^4}{4} + \frac{u^4}{4} }}{(u-it)(x-y)}
-    (i\partial_t-\partial_u)
-    e^{ - itx +  u y}
-    =\\=&amp;
-    \frac{1}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    e^{ - itx +  u y}
-    (i\partial_t-\partial_u)
-    \frac{e^{-\frac{t^4}{4} + \frac{u^4}{4} }}{(u-it)(x-y)}
-    =\\=&amp;
-    \frac{1}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    e^{ - itx +  u y}
-    \frac{ (-i t^3 - u^3 ) e^{-\frac{t^4}{4} + \frac{u^4}{4} }}{(u-it)(x-y)}
-    =\\=&amp;
-    \frac{1}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    \frac{ ( t^2 - itu - u^2 ) e^{-\frac{t^4}{4} + \frac{u^4}{4}  - itx +  u y } }{x-y}
-    =\\=&amp;
-    \frac{1}{(2\pi)^2 i}
-    \int\limits_{-\infty}^{+\infty} dt
-    \int\limits_{\mathcal{C}} du\,
-    \frac{ ( -\partial_x^2 + \partial_x \partial_y - \partial_y ^2 ) e^{-\frac{t^4}{4} + \frac{u^4}{4}  - itx +  u y } }{x-y}
-    =\\=&amp;
-    \frac{\phi'(x)\psi'(y)-\phi''(x)\psi(y)-\phi(x)\psi''(y) }{x-y}
-    =K(x,y).
+    \\ &amp;=
+    \int\limits_{0}^{+\infty} \mathrm{d}\lambda
+    \frac{1}{2(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    (u+\mathrm{i}t)
+    \mathrm{e}^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - \mathrm{i}tx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
+    \\ &amp;=
+    \frac{1}{2(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \int\limits_{0}^{+\infty} \mathrm{d}\lambda
+    \frac{u^2+t^2}{u-\mathrm{i}t}
+    \mathrm{e}^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - \mathrm{i}tx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
+    \\ &amp;=
+    \frac{1}{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \int\limits_{0}^{+\infty} \mathrm{d}\lambda
+    \frac{-\partial_{\lambda}}{u-\mathrm{i}t}
+    \mathrm{e}^{-\frac{t^4}{4} - \frac{\lambda t^2}{2} - \mathrm{i}tx + \frac{u^4}{4} - \frac{\lambda u^2}{2} + u y}
+    \\ &amp;=
+    \frac{1}{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \frac{\mathrm{e}^{-\frac{t^4}{4} - \mathrm{i}tx + \frac{u^4}{4} + u y }}{u-\mathrm{i}t}
+    \\ &amp;=
+    \frac{1}{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \frac{\mathrm{e}^{-\frac{t^4}{4} + \frac{u^4}{4} }}{(u-\mathrm{i}t)(x-y)}
+    (\mathrm{i}\partial_t-\partial_u)
+    \mathrm{e}^{ - \mathrm{i}tx +  u y}
+    \\ &amp;=
+    -\frac{1}{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \mathrm{e}^{ - \mathrm{i}tx +  u y}
+    (\mathrm{i}\partial_t-\partial_u)
+    \frac{\mathrm{e}^{-\frac{t^4}{4} + \frac{u^4}{4} }}{(u-\mathrm{i}t)(x-y)}
+    \\ &amp;=
+    -\frac{1}{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \mathrm{e}^{ - \mathrm{i}tx +  u y}
+    \frac{ (-\mathrm{i} t^3 - u^3 ) \mathrm{e}^{-\frac{t^4}{4} + \frac{u^4}{4} }}{(u-\mathrm{i}t)(x-y)}
+    \\ &amp;=
+    -\frac{1}{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \frac{ ( t^2 - \mathrm{i}tu - u^2 ) \mathrm{e}^{-\frac{t^4}{4} + \frac{u^4}{4}  - \mathrm{i}tx +  u y } }{x-y}
+    \\ &amp;=
+    -\frac{1}{(2\pi)^2 \mathrm{i}}
+    \int\limits_{-\infty}^{+\infty} \mathrm{d}t
+    \int\limits_{\mathcal{C}} \mathrm{d}u\,
+    \frac{ ( -\partial_x^2 + \partial_x \partial_y - \partial_y ^2 ) \mathrm{e}^{-\frac{t^4}{4} + \frac{u^4}{4}  - \mathrm{i}tx +  u y } }{x-y}
+    \\ &amp;=
+    -\frac{\phi'(x)\psi'(y)-\phi''(x)\psi(y)-\phi(x)\psi''(y) }{x-y}
+    =-K(x,y).
 \end{aligned}
-\]</span></p>
+\]</span> This computation is formal. The integral over <span class="math inline">\(\lambda\)</span> is exchanged with the double integral without absolute convergence, the boundary term at <span class="math inline">\(\lambda = +\infty\)</span> is dropped, and the integration by parts passes the pole <span class="math inline">\(u = \mathrm{i}t\)</span> without justification.</p>
 </div>
 </div>
 </div>
-<p>This is similar to the Airy kernel decomposition <span class="math inline">\(\eqref{eq:airy-kernel}\)</span>, where the kernel projects onto the positive half of the spectrum.</p>
+<p>As in the Airy kernel decomposition <span class="math inline">\(\eqref{eq:airy-kernel}\)</span>, the kernel projects onto the positive half of the spectrum.</p>
 </section>
 </section>
 </section>
-<section id="conclusion" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">3</span> Conclusion</h2>
-<p>The author is grateful to <a href="http://www.mathnet.ru/eng/person9066">Alexander Bufetov</a> for setting this problem and for valuable discussions. The basis was found in Spring 2016 and published first here.</p>
+<section id="acknowledgements" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="acknowledgements"><span class="header-section-number">3</span> Acknowledgements</h2>
+<p>The author is grateful to <a href="http://www.mathnet.ru/eng/person9066">Alexander Bufetov</a> for setting this problem and for valuable discussions. The author found this basis in spring 2016 as a solution to that problem.</p>
+<p><em>Revised in 2026 with Claude Code: language, review, checking of the mathematics and the citations, drafting from the author’s notes. The results are the author’s.</em></p>
+</section>
+<section id="references" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
+<p>Mark Adler, Nicolas Orantin, Pierre van Moerbeke, <a href="https://arxiv.org/abs/0901.4520"><em>Universality of the Pearcey process</em></a>, Physica D <strong>239</strong>, 924–941 (2010), arXiv:0901.4520.</p>
+<p>Pavel M. Bleher, Arno B. J. Kuijlaars, <a href="https://arxiv.org/abs/math-ph/0307055"><em>Random matrices with external source and multiple orthogonal polynomials</em></a>, International Mathematics Research Notices <strong>2004</strong>, 109–129 (2004), arXiv:math-ph/0307055.</p>
+<p>Pavel M. Bleher, Arno B. J. Kuijlaars, <a href="https://arxiv.org/abs/math/0406616"><em>Integral representations for multiple Hermite and multiple Laguerre polynomials</em></a>, Annales de l’Institut Fourier <strong>55</strong>, 2001–2014 (2005), arXiv:math/0406616.</p>
+<p>Pavel M. Bleher, Arno B. J. Kuijlaars, <a href="https://arxiv.org/abs/math-ph/0602064"><em>Large n limit of Gaussian random matrices with external source, Part III: Double scaling limit</em></a>, Communications in Mathematical Physics <strong>270</strong>, 481–517 (2007), arXiv:math-ph/0602064.</p>
+<p>Alexei Borodin, <a href="https://arxiv.org/abs/math/9804027"><em>Biorthogonal ensembles</em></a>, Nuclear Physics B <strong>536</strong>, 704–732 (1998), arXiv:math/9804027.</p>
+<p>Édouard Brézin, Shinobu Hikami, <a href="https://arxiv.org/abs/cond-mat/9804023"><em>Universal singularity at the closure of a gap in a random matrix theory</em></a>, Physical Review E <strong>57</strong>, 4140–4149 (1998), arXiv:cond-mat/9804023.</p>
+<p>Dmitry Chelkak, Clément Hongler, Konstantin Izyurov, <a href="https://arxiv.org/abs/1202.2838"><em>Conformal invariance of spin correlations in the planar Ising model</em></a>, arXiv:1202.2838 (2012).</p>
+<p>Dmitry Chelkak, Stanislav Smirnov, <a href="https://arxiv.org/abs/0910.2045"><em>Universality in the 2D Ising model and conformal invariance of fermionic observables</em></a>, arXiv:0910.2045 (2009).</p>
+<p>Galina Filipuk, Walter Van Assche, Lun Zhang, <a href="https://arxiv.org/abs/1204.5058"><em>Ladder operators and differential equations for multiple orthogonal polynomials</em></a>, Journal of Physics A <strong>46</strong>, 205204 (2013), arXiv:1204.5058.</p>
+<p>Israel M. Gelfand, Naum Ya. Vilenkin, <a href="https://books.google.com/books?id=LE4HjwEACAAJ"><em>Generalized Functions</em>, Vol. 4: <em>Applications of Harmonic Analysis</em></a>, Academic Press (1964).</p>
+<p>José L. López, Pedro Pagola, <a href="https://arxiv.org/abs/1511.05323"><em>The Pearcey integral in the highly oscillatory region</em></a>, arXiv:1511.05323 (2015).</p>
+<p>Madan Lal Mehta, <a href="https://books.google.com/books?id=Kp3Nx03_gMwC"><em>Random Matrices</em>, 3rd ed.</a>, Elsevier (2004).</p>
+<p>Craig A. Tracy, Harold Widom, <a href="https://arxiv.org/abs/hep-th/9304063"><em>Level-spacing distributions and the Bessel kernel</em></a>, Communications in Mathematical Physics <strong>161</strong>, 289–310 (1994), arXiv:hep-th/9304063.</p>
+<p>Craig A. Tracy, Harold Widom, <a href="https://arxiv.org/abs/math/0412005"><em>The Pearcey process</em></a>, Communications in Mathematical Physics <strong>263</strong>, 381–400 (2006), arXiv:math/0412005.</p>
 <hr>
 <p><em>If you have any questions, remarks, or other feedback please simply use the open discussion below as well as <a href="https://t.me/Alexey_Tochin">telegram</a>, <a href="mailto:Alexey.Tochin@gmail.com">e-mail</a>, and <a href="https://github.com/alexeytochin/alexeytochin.github.io/discussions/5">this github forum</a>.</em></p>
 
@@ -1416,9 +1534,9 @@ window.Quarto = {
     script.src = "https://giscus.app/client.js";
     script.async = true;
     script.dataset.repo = "alexeytochin/alexeytochin.github.io";
-    script.dataset.repoId = "";
-    script.dataset.category = "General";
-    script.dataset.categoryId = "";
+    script.dataset.repoId = "MDEwOlJlcG9zaXRvcnkzMTQ3OTMzMDQ=";
+    script.dataset.category = "Comments";
+    script.dataset.categoryId = "DIC_kwDOEsNdWM4DLrgC";
     script.dataset.mapping = "pathname";
     script.dataset.reactionsEnabled = "1";
     script.dataset.emitMetadata = "0";
@@ -1443,7 +1561,7 @@ window.Quarto = {
     <div class="nav-footer-right">
       <ul class="footer-items list-unstyled">
     <li class="nav-item compact">
-    <a class="nav-link" href="https://www.linkedin.com/in/alexey-tochin-40717989/?locale=en_US">
+    <a class="nav-link" href="https://www.linkedin.com/in/alexey-tochin-40717989/">
       <i class="bi bi-linkedin" role="img" aria-label="LinkedIn">
 </i> 
     </a>
@@ -1462,7 +1580,7 @@ window.Quarto = {
   </li>  
     <li class="nav-item compact">
     <a class="nav-link" href="mailto:Alexey.Tochin@gmail.com">
-      <i class="bi bi-envelope" role="img" aria-label="e-mail">
+      <i class="bi bi-envelope" role="img" aria-label="Email">
 </i> 
     </a>
   </li>  
@@ -1470,6 +1588,38 @@ window.Quarto = {
     </div>
   </div>
 </footer>
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
 
 
 

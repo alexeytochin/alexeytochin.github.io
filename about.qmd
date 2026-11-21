@@ -1,11 +1,14 @@
 ---
 title: "About"
+image: images/profile.jpg
 about:
   template: trestles
+  image-shape: rounded
+  image-width: 15em
   links:
     - icon: linkedin
       text: LinkedIn
-      href: https://www.linkedin.com/in/alexey-tochin-40717989/?locale=en_US
+      href: https://www.linkedin.com/in/alexey-tochin-40717989/
     - icon: github
       text: GitHub
       href: https://github.com/alexeytochin
@@ -13,7 +16,7 @@ about:
       text: Telegram
       href: https://t.me/Alexey_Tochin
     - icon: envelope
-      text: e-mail
+      text: Email
       href: mailto:Alexey.Tochin@gmail.com
 toc: false
 number-sections: false
@@ -21,21 +24,20 @@ number-sections: false
 
 ## The blog
 
-In this blog, I'm gonna post my own thoughts on various topics from machine
-learning to mathematical physics.
+In this blog, I write about topics ranging from machine learning
+to mathematical physics.
 
 ## The author
 
 I'm a mathematician and machine learning engineer.
-My Ph.D. in mathematics is made at University of Bergen and
-the alma mater is Saint-Petersburg State University where
-I studied quantum field theory.
-I'm excited about the relation between
-the mathematics of information theory and theoretical physics.
+I received my Ph.D. in mathematics from the University of Bergen;
+before that, I studied quantum field theory at
+Saint Petersburg State University.
+I'm particularly interested in the connections between
+information theory and theoretical physics.
 
 ## The website
 
 This website is built with [Quarto](https://quarto.org).
-Feel free to use
-[this forum](https://github.com/alexeytochin/alexeytochin.github.io/discussions/3)
-for website technical issues.
+If you notice a technical problem with the site, please report it in
+[this discussion thread](https://github.com/alexeytochin/alexeytochin.github.io/discussions/3).

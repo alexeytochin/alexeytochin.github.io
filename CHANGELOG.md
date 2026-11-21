@@ -5,6 +5,25 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Added
+- Click-to-zoom lightbox for figures in posts (`lightbox: true` in `posts/_metadata.yml`).
+- Profile photo on the About page (`images/profile.jpg`).
+- Dedicated listing thumbnails for both posts (`images/thumbnail.png`).
+
+### Changed
+- Revised "Is Batch Size a Real Hyperparameter?" and "Pearcey Kernel Basis" (text,
+  mathematics, figures, references).
+- Renamed the batch-size post's directory from `posts/batch_size_vs_momentum/` to
+  `posts/is_batch_size_a_real_hyperparameter/`, after its current title. The old URL
+  keeps working through an `aliases` redirect in the post's front matter.
+- Colour scheme: oxblood replaced by a muted sky blue (navbar, links, code).
+- Listing pages: wider column and larger thumbnails; dates kept on one line.
+- About page: rewritten text, cleaner LinkedIn link, "Email" label.
+- Table of contents now goes one level deeper (`toc-depth: 4`).
+
+### Removed
+- The home page subtitle "Notes on machine learning and mathematical physics."
+
 ## [2026-07-04] — Migrate to Quarto
 
 Rebuilt the blog on the [Quarto](https://quarto.org) framework, replacing the
