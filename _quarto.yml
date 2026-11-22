@@ -34,7 +34,7 @@ website:
     left: "© 2026 Alexey Tochin"
     right:
       - icon: linkedin
-        href: "https://www.linkedin.com/in/alexey-tochin-40717989/?locale=en_US"
+        href: "https://www.linkedin.com/in/alexey-tochin-40717989/"
         aria-label: LinkedIn
       - icon: github
         href: "https://github.com/alexeytochin"
@@ -44,7 +44,10 @@ website:
         aria-label: Telegram
       - icon: envelope
         href: "mailto:Alexey.Tochin@gmail.com"
-        aria-label: e-mail
+        aria-label: Email
+
+language:
+  title-block-modified: "Last modified"
 
 format:
   html:
@@ -52,7 +55,7 @@ format:
       - cosmo
       - theme.scss
     toc: true
-    toc-depth: 3
+    toc-depth: 4
     number-sections: true
     html-math-method: mathjax
     link-external-newwindow: true

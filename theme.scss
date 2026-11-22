@@ -3,15 +3,15 @@
 $font-family-base: "EB Garamond", Georgia, "Times New Roman", serif;
 $headings-font-weight: 500;
 
-$navbar-bg: #7a1f1f;   // oxblood — matches link color
+$navbar-bg: #3a7ca5;   // muted sky blue; white text on it is 4.6:1
 
 $body-bg:          #fbfaf6;
 $body-color:       #2a2722;
-$link-color:       #7a1f1f;
-$link-hover-color: #561515;
+$link-color:       #2a6496;
+$link-hover-color: #1d4a70;
 $border-color:     #e4ded0;
-$code-bg:          #f2ece0;
-$code-color:       #6a4a32;
+$code-bg:          #eef2f4;
+$code-color:       #34556e;
 
 /*-- scss:rules --*/
 
@@ -19,3 +19,16 @@ body { font-size: 1.05rem; line-height: 1.7; }
 
 main p { text-align: justify; hyphens: auto; }
 main   { max-width: 46rem; }
+
+/* Listing pages: category pages (column-page) and home (column-page-left,
+   narrower so it clears the Categories sidebar): wider column, bigger thumbnails */
+main.column-page      { max-width: 62rem; }
+main.column-page-left { max-width: 54rem; }
+main.column-page div.quarto-post .metadata,
+main.column-page-left div.quarto-post .metadata  { flex: 0 0 6.5rem; }
+main.column-page div.quarto-post .body,
+main.column-page-left div.quarto-post .body      { flex: 1 1 0; min-width: 0; }
+main.column-page div.quarto-post .thumbnail,
+main.column-page-left div.quarto-post .thumbnail { flex: 0 0 42%; }
+main.column-page div.quarto-post .listing-date,
+main.column-page-left div.quarto-post .listing-date { white-space: nowrap; }

@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Alexey Tochin">
+<meta name="dcterms.date" content="2021-04-08">
+<meta name="description" content="The gradient-accumulation trick sums the gradients of several small batches at one weight to simulate a larger batch. It looks redundant: the batch size is there for parallelism, and smoothing is what momentum is for. Settling that turned out to require a closer look at what changing the batch size actually does. Counted per sample rather than per update, that expectation is confirmed for plain gradient descent, with momentum or without. For Adam it holds only in part.">
+
+<title>Is Batch Size a Real Hyperparameter? – Alexey Tochin</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-320d2b4c3cef225b279c4a145f2ecf77.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&amp;display=swap" rel="stylesheet">
+<script>
+  window.MathJax = {
+    tex: { tags: 'all' }
+  };
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Alexey Tochin</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../machine_learning.html"> 
+<span class="menu-text">Machine Learning</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../other_topics.html"> 
+<span class="menu-text">Other Topics</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../references.html"> 
+<span class="menu-text">References</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/alexeytochin"> <i class="bi bi-github" role="img" aria-label="GitHub">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#sec-counting-samples" id="toc-sec-counting-samples" class="nav-link active" data-scroll-target="#sec-counting-samples"><span class="header-section-number">1</span> Counting Samples, Not Steps</a>
+  <ul>
+  <li><a href="#rescaling-the-learning-rate" id="toc-rescaling-the-learning-rate" class="nav-link" data-scroll-target="#rescaling-the-learning-rate"><span class="header-section-number">1.1</span> Rescaling the learning rate</a></li>
+  <li><a href="#sec-experimental-check" id="toc-sec-experimental-check" class="nav-link" data-scroll-target="#sec-experimental-check"><span class="header-section-number">1.2</span> Experimental check</a></li>
+  </ul></li>
+  <li><a href="#sec-noise" id="toc-sec-noise" class="nav-link" data-scroll-target="#sec-noise"><span class="header-section-number">2</span> The Noise: Batch Size as a Langevin Time Step</a>
+  <ul>
+  <li><a href="#the-noise-per-step" id="toc-the-noise-per-step" class="nav-link" data-scroll-target="#the-noise-per-step"><span class="header-section-number">2.1</span> The noise per step</a></li>
+  <li><a href="#the-langevin-algorithm" id="toc-the-langevin-algorithm" class="nav-link" data-scroll-target="#the-langevin-algorithm"><span class="header-section-number">2.2</span> The Langevin algorithm</a></li>
+  </ul></li>
+  <li><a href="#sec-convergence-stability" id="toc-sec-convergence-stability" class="nav-link" data-scroll-target="#sec-convergence-stability"><span class="header-section-number">3</span> Convergence Stability</a></li>
+  <li><a href="#sec-gradient-momentum" id="toc-sec-gradient-momentum" class="nav-link" data-scroll-target="#sec-gradient-momentum"><span class="header-section-number">4</span> Gradient Descent with Momentum</a></li>
+  <li><a href="#sec-adam" id="toc-sec-adam" class="nav-link" data-scroll-target="#sec-adam"><span class="header-section-number">5</span> Why Adam Is Weird</a>
+  <ul>
+  <li><a href="#adam-replacing-the-square-of-the-mean" id="toc-adam-replacing-the-square-of-the-mean" class="nav-link" data-scroll-target="#adam-replacing-the-square-of-the-mean"><span class="header-section-number">5.1</span> Adam′: replacing the square of the mean</a></li>
+  <li><a href="#sec-batch-noise" id="toc-sec-batch-noise" class="nav-link" data-scroll-target="#sec-batch-noise"><span class="header-section-number">5.2</span> The noise of a batch</a></li>
+  <li><a href="#sec-gate" id="toc-sec-gate" class="nav-link" data-scroll-target="#sec-gate"><span class="header-section-number">5.3</span> Where each algorithm puts the gate</a></li>
+  <li><a href="#sec-no-rescaling" id="toc-sec-no-rescaling" class="nav-link" data-scroll-target="#sec-no-rescaling"><span class="header-section-number">5.4</span> What a rescaling can and cannot do</a></li>
+  <li><a href="#sec-variant" id="toc-sec-variant" class="nav-link" data-scroll-target="#sec-variant"><span class="header-section-number">5.5</span> A variant that does scale</a></li>
+  </ul></li>
+  <li><a href="#sec-conclusion" id="toc-sec-conclusion" class="nav-link" data-scroll-target="#sec-conclusion"><span class="header-section-number">6</span> Conclusion</a>
+  <ul>
+  <li><a href="#sec-practice" id="toc-sec-practice" class="nav-link" data-scroll-target="#sec-practice"><span class="header-section-number">6.1</span> What This Means in Practice</a></li>
+  <li><a href="#sec-limits" id="toc-sec-limits" class="nav-link" data-scroll-target="#sec-limits"><span class="header-section-number">6.2</span> What This Does Not Cover</a></li>
+  <li><a href="#a-word-to-the-reader" id="toc-a-word-to-the-reader" class="nav-link" data-scroll-target="#a-word-to-the-reader"><span class="header-section-number">6.3</span> A Word to the Reader</a></li>
+  </ul></li>
+  <li><a href="#sec-postscript" id="toc-sec-postscript" class="nav-link" data-scroll-target="#sec-postscript"><span class="header-section-number">7</span> Postscript</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="index.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Is Batch Size a Real Hyperparameter?</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">machine-learning</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    <p>The <em>gradient-accumulation</em> trick sums the gradients of several small batches at one weight to simulate a larger batch. It looks redundant: the batch size is there for parallelism, and smoothing is what momentum is for. Settling that turned out to require a closer look at what changing the batch size actually does. Counted per sample rather than per update, that expectation is confirmed for plain gradient descent, with momentum or without. For Adam it holds only in part.</p>
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Alexey Tochin </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">April 8, 2021</p>
+    </div>
+  </div>
+  
+    <div>
+    <div class="quarto-title-meta-heading">Last modified</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">November 21, 2026</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>The trick that started this article is <a href="https://towardsdatascience.com/what-is-gradient-accumulation-in-deep-learning-ec034122cfa">gradient accumulation</a>. When the GPU runs out but we still want a larger batch, we split it into <span class="math inline">\(k\)</span> micro-batches, run them one after another at the same weight, sum the gradients and make a single step. The effective batch can then be as large as we like.</p>
+<p>Accumulation buys none of the parallelism, since the micro-batches are sequential. It spends exactly the compute of <span class="math inline">\(k\)</span> ordinary steps of the original size. The one thing it buys is a quieter step at the end, built from more gradients. But averaging gradients is momentum’s job, and momentum does it without freezing the weights: all <span class="math inline">\(k\)</span> backward passes move the model, where accumulation spends <span class="math inline">\(k-1\)</span> of them at a point we have already decided to leave.</p>
+<p>This may sound obvious to the reader, which is why some of what follows reads as straightforward. The difficulty is turning it into an argument. To claim that a larger batch buys nothing, we have to say what stays fixed while it grows. With the textbook hyperparameters nothing does. Raise the batch size and leave the learning rate alone, and the training changes for a trivial reason: the steps got longer. So the question of the batch size is really a question about how gradient descent ought to be parameterized in the first place.</p>
+<p>The neighbouring question is the practical one. Suppose we have tuned the learning rate and the other hyperparameters for a given model, and more powerful hardware then allows a larger batch. By how much should we rescale the ordinary learning rate to keep that tuning: linearly in the batch size, as its square root, or not at all? Otherwise the tuned setting quietly stops being tuned, and the larger batch that was supposed to come free costs another round of searching. The two questions have the same root, and <a href="#sec-counting-samples" class="quarto-xref">Section&nbsp;1</a> answers both at once.</p>
+<p>With that in hand we can put the question to one optimizer at a time, in order of increasing resistance. <a href="#sec-counting-samples" class="quarto-xref">Section&nbsp;1</a> does the arithmetic for plain stochastic gradient descent and checks it against an experiment. <a href="#sec-noise" class="quarto-xref">Section&nbsp;2</a> takes up the other half of the same claim, the noise the updates inject. There the batch size plays the part of a time step in the Langevin algorithm. <a href="#sec-convergence-stability" class="quarto-xref">Section&nbsp;3</a> draws the boundary of the region where any of that applies, since none of it survives unstable training. <a href="#sec-gradient-momentum" class="quarto-xref">Section&nbsp;4</a> then adds momentum, where the batch size and the smoothing become two parameters with one job each. <a href="#sec-adam" class="quarto-xref">Section&nbsp;5</a> reaches Adam, where the tidy picture stops working.</p>
+<p>The evidence below is narrow. The experiments use MNIST with a small convolutional network, a constant learning rate and no weight decay. Batch normalization is deliberately absent: it couples the samples inside a batch, which is the effect we are trying to isolate. The article reasons about what ought to hold in principle and checks that on a small problem. In practice weight decay, normalization or training close to the stability boundary of <a href="#sec-convergence-stability" class="quarto-xref">Section&nbsp;3</a> can each change the outcome, and <a href="#sec-postscript" class="quarto-xref">Section&nbsp;7</a> describes one case where a rule derived here does not survive at scale.</p>
+<section id="sec-counting-samples" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="sec-counting-samples"><span class="header-section-number">1</span> Counting Samples, Not Steps</h2>
+<section id="rescaling-the-learning-rate" class="level3" data-number="1.1">
+<h3 data-number="1.1" class="anchored" data-anchor-id="rescaling-the-learning-rate"><span class="header-section-number">1.1</span> Rescaling the learning rate</h3>
+<p>Let <span class="math inline">\(\boldsymbol\theta \in \mathbb{R}^D\)</span> be the weight vector of a model with <span class="math inline">\(D\)</span> trainable weights. We write the sequence of weights produced by training as <span class="math inline">\(\{\boldsymbol\theta_n\}_{n = 0,1,2,3,\ldots}\)</span>, starting from an initialization <span class="math inline">\(\boldsymbol\theta_0\)</span>.</p>
+<p>Let <span class="math inline">\(L(x, y; \boldsymbol\theta)\)</span> be the loss function for a supervised model with weight <span class="math inline">\(\boldsymbol\theta\)</span>, and a single data sample with feature <span class="math inline">\(x\)</span> and label <span class="math inline">\(y\)</span>. Define the loss gradient at point <span class="math inline">\(\boldsymbol\theta\)</span> for sample <span class="math inline">\((x_i,y_i)\)</span> with index <span class="math inline">\(i=0,1,2,\ldots\)</span> as <span class="math display">\[
+    \mathbf{g}_i(\boldsymbol\theta) :=
+    \frac{\partial}{\partial \boldsymbol\theta} L(x_i, y_i; \boldsymbol\theta).
+\]</span></p>
+<p>The samples <span class="math inline">\(\{(x_i,y_i)\}_{i=0,1,2,\ldots}\)</span> are grouped into batches. We consider a fixed batch size <span class="math inline">\(b=1,2,3,\ldots\)</span>. We define an integer-valued function <span class="math inline">\(t\)</span> <span class="math display">\[
+    t:\quad \{0,1,2,\ldots\} \quad \rightarrow \quad \{0,1,2,\ldots\}
+\]</span> that maps the index of each sample to the index of the batch it belongs to. For example, for batch size <span class="math inline">\(b=3\)</span>, we have <span class="math display">\[
+    t_0 = 0,~t_1 = 0,~t_2 = 0,~t_3 = 1,~t_4 = 1,~t_5 = 1,~t_6 = 2,~t_7 = 2,~t_8 = 2,~\dotso.
+\]</span></p>
+<p>We begin with the simplest version of stochastic gradient descent without momentum, parameterized by the learning rate <span class="math inline">\(\lambda^{\text{cl}} &gt; 0\)</span>. The weight update rule is <span class="math display">\[
+    \boldsymbol\theta_{n}~ \rightarrow~ \boldsymbol\theta_{n+1} :=
+    \boldsymbol\theta_{n} - \lambda^{\text{cl}} \,
+    b^{-1} \sum_{i:~ t(i) = n} \mathbf{g}_i(\boldsymbol\theta_n),
+    \quad n = 0,~1,~2,~...
+    \label{eq:sgd-classic}
+\]</span> where <span class="math inline">\(\sum_{i:~ t(i) = n}~\dotso\)</span> is a sum over the minibatch <span class="math inline">\(n\)</span>. The superscript “<span class="math inline">\(~^{\text{cl}}\)</span>” marks the “classically normalized” hyperparameters that we are going to reconsider.</p>
+<p>Suppose the batch size <span class="math inline">\(b\)</span> changes. We want to adjust <span class="math inline">\(\lambda^{\text{cl}}\)</span> so that the weight sequence <span class="math inline">\(\{\boldsymbol\theta_n\}_{n = 0,1,2,3,\ldots}\)</span> moves as little as possible. More precisely, after the batch size change <span class="math inline">\(b \rightarrow \tilde b\)</span>, each of the weights <span class="math inline">\(\tilde{\boldsymbol\theta}_{\tilde t(i)}\)</span> from the new sequence should be close to the original ones <span class="math inline">\(\boldsymbol\theta_{t(i)}\)</span> for each <span class="math inline">\(i=0,1,2,\ldots\)</span>, where <span class="math inline">\(\tilde t\)</span> corresponds to the new batch size <span class="math inline">\(\tilde b\)</span>. A reasonable adjustment is then <span class="math display">\[
+    \lambda^{\text{cl}} \rightarrow \tilde \lambda^{\text{cl}} =
+    \frac{\tilde b}{b}\, \lambda^{\text{cl}}.
+\]</span> Equivalently, the product <span class="math inline">\(\lambda^{\text{cl}} b^{-1}\)</span> is left unchanged by this rescaling, which makes it the natural variable. We give it a name: <span class="math display">\[
+    \lambda := \lambda^{\text{cl}}\, b^{-1},
+    \qquad \text{equivalently} \qquad
+    \lambda^{\text{cl}} = b\, \lambda .
+    \label{eq:lambda-cl}
+\]</span> The explicit factor <span class="math inline">\(b^{-1}\)</span> in <span class="math inline">\(\eqref{eq:sgd-classic}\)</span> is then absorbed into <span class="math inline">\(\lambda\)</span>, and the update rule becomes <span class="math display">\[
+    \boldsymbol\theta_{n+1} =
+    \boldsymbol\theta_{n} - \lambda \sum_{i:~ t(i) = n} \mathbf{g}_i(\boldsymbol\theta_n).
+    \label{eq:sgd}
+\]</span></p>
+<p>Each sample now contributes <span class="math inline">\(-\lambda\, \mathbf{g}_i\)</span> to the weight update, whatever batch it happens to fall in.</p>
+<p>Unrolling <span class="math inline">\(\eqref{eq:sgd}\)</span> from the initialization says the same thing in closed form, <span class="math display">\[
+    \boldsymbol\theta_{n+1} =
+    \boldsymbol\theta_{0} - \lambda \sum_{i:~ t(i) \leq n}
+    \mathbf{g}_i\left(\boldsymbol\theta_{t(i)}\right),
+    \label{eq:sgd-unrolled}
+\]</span> one term per sample consumed and no <span class="math inline">\(b\)</span> in sight. The batch size has not vanished from the problem. It survives in the arguments <span class="math inline">\(\boldsymbol\theta_{t(i)}\)</span>, which record at which weight each sample’s gradient was taken, and a larger batch means more samples sharing one argument. It no longer multiplies anything. <span class="math inline">\(\lambda\)</span> is a common factor of the whole displacement, while <span class="math inline">\(b\)</span> decides only where in the trajectory the gradients are evaluated.</p>
+<div id="fig-batch-size-trajectories" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-batch-size-trajectories-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="images/batch_size_trajectories.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: Two runs over the same 12 sample gradients, taken in the same order and with the same per-sample learning rate \lambda. The first one spends them in 12 updates with the batch size b = 1, the second one in 3 updates with the batch size \tilde b = 4. Every fourth weight of the first chain is matched by one weight of the second one, and the two disagree only because the gradients inside a batch are evaluated at a single weight rather than at the 4 nearby ones the first chain passes through."><img src="images/batch_size_trajectories.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-batch-size-trajectories-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Two runs over the same 12 sample gradients, taken in the same order and with the same per-sample learning rate <span class="math inline">\(\lambda\)</span>. The first one spends them in 12 updates with the batch size <span class="math inline">\(b = 1\)</span>, the second one in 3 updates with the batch size <span class="math inline">\(\tilde b = 4\)</span>. Every fourth weight of the first chain is matched by one weight of the second one, and the two disagree only because the gradients inside a batch are evaluated at a single weight rather than at the 4 nearby ones the first chain passes through.
+</figcaption>
+</figure>
+</div>
+<p>Read in the classic variables, <span class="math inline">\(\eqref{eq:lambda-cl}\)</span> is the familiar linear scaling rule <span class="math inline">\(\lambda^{\text{cl}} \propto b\)</span>, standard practice in large-batch training at least since <a href="https://arxiv.org/abs/1706.02677">Goyal et al.</a> trained ImageNet in an hour. <a href="https://arxiv.org/abs/1404.5997">Krizhevsky</a> reported it as a heuristic, and recorded a puzzle with it: multiplying the learning rate by <span class="math inline">\(k\)</span> worked best in his experiments, while theory, he wrote, asked for <span class="math inline">\(\sqrt{k}\)</span> “to keep the variance in the gradient expectation constant”, and he could not explain the discrepancy. We can explain the discrepancy. The <span class="math inline">\(\sqrt{k}\)</span> rule holds the noise of one update fixed, which <a href="#sec-noise" class="quarto-xref">Section&nbsp;2</a> shows is not what stays fixed over a budget of samples. His footnote that the heuristic “does eventually break down for batch sizes larger than the ones considered” is the restriction of <a href="#sec-convergence-stability" class="quarto-xref">Section&nbsp;3</a>.</p>
+<p>In the per-sample variables there is no rule to apply: once <span class="math inline">\(b\)</span> no longer stands next to the learning rate, there is nothing left to rescale by hand.</p>
+<p>For example, raise the batch size by a factor <span class="math inline">\(k\)</span>. The <span class="math inline">\(k\)</span> sequential steps become a single step over <span class="math inline">\(k\)</span> times as many samples. The two sums differ only in where their gradients are taken: at one weight in the large batch, and at <span class="math inline">\(k\)</span> nearby weights in the small one, as <a href="#fig-batch-size-trajectories" class="quarto-xref">Figure&nbsp;1</a> shows.</p>
+<p>If the batch size <span class="math inline">\(b\)</span> equals the entire dataset size <span class="math inline">\(N\)</span> or is of the same order of magnitude <span class="math inline">\(b \lesssim N\)</span>, each update moves the weights down the loss of the whole dataset. In mini-batch training with <span class="math inline">\(b \ll N\)</span> this fails, because a single mini-batch is a very poor sample of the dataset. Mini-batch learning works because those poor per-batch statistics average out over many updates: the signal accumulates across many samples and is not drawn from any single step.</p>
+<p>Now take two runs at different batch sizes. Let <span class="math inline">\(\boldsymbol\theta_{t(i)}\)</span> and <span class="math inline">\(\tilde{\boldsymbol\theta}_{\tilde t(i)}\)</span> be the weights after <span class="math inline">\(i\)</span> samples have been processed, in two runs with batch sizes <span class="math inline">\(b\)</span> and <span class="math inline">\(\tilde b\)</span> at the same <span class="math inline">\(\lambda\)</span>. For small <span class="math inline">\(\lambda\)</span>, large <span class="math inline">\(i\)</span> and finite <span class="math inline">\(b\)</span>, <span class="math display">\[
+    \left\|\tilde{\boldsymbol\theta}_{\tilde t(i)}
+        - \boldsymbol\theta_{t(i)}\right\|
+    = O\left(\lambda^2\, i\right).
+    \label{eq:trajectory-gap}
+\]</span> Both powers can be read off <span class="math inline">\(\eqref{eq:sgd-unrolled}\)</span>. The displacement itself is <span class="math inline">\(\lambda\)</span> times a sum of <span class="math inline">\(i\)</span> gradients, one factor of <span class="math inline">\(\lambda\)</span> and <span class="math inline">\(i\)</span> terms, so it is of order <span class="math inline">\(\lambda\, i\)</span>. The difference between the two runs holds those same <span class="math inline">\(i\)</span> gradients with the same factor <span class="math inline">\(\lambda\)</span> in front, and differs only in the arguments. Each gradient is taken at the weight its own batch started from, and those weights lie less than one batch apart, a distance <span class="math inline">\(O(\lambda)\)</span> at a fixed batch size. Every term of the difference therefore carries two factors of <span class="math inline">\(\lambda\)</span>, one from the rate and one from the lag, against the single factor the displacement carries, with the same <span class="math inline">\(i\)</span> terms either way. Counting the mismatches once each keeps this a first-order statement: once the two runs have separated they begin to feed on that separation, which is why <a href="#sec-experimental-check" class="quarto-xref">Section&nbsp;1.2</a> compares losses over a long run rather than weights.</p>
+<p>The two runs thus differ by a fraction of order <span class="math inline">\(\lambda\)</span> of the distance they have both covered. Expanded in <span class="math inline">\(\lambda\)</span>, the first-order term of the displacement is the same for every batch size, and <span class="math inline">\(b\)</span> enters only at second order, which <a href="#sec-experimental-check" class="quarto-xref">Section&nbsp;1.2</a> tests.</p>
+<p>No other rescaling of the hyperparameters with the batch size achieves <span class="math inline">\(\eqref{eq:trajectory-gap}\)</span>. In <span class="math inline">\(\eqref{eq:sgd-unrolled}\)</span> the per-sample rate multiplies the whole displacement, so changing it along with the batch size shifts the weights at first order in <span class="math inline">\(\lambda\)</span> instead of at second. The batch size is then left with nothing to do but fill the hardware, and without momentum nothing does the smoothing either.</p>
+<p><em>In mini-batch learning the natural control variable is the number of samples processed, the measure of the computation spent, rather than the number of updates performed. At a fixed <span class="math inline">\(\lambda\)</span> the weight trajectory is the same function of the number of samples at every batch size, to first order in <span class="math inline">\(\lambda\)</span>, and <span class="math inline">\(\lambda\)</span> is the only hyperparameter whose equality brings that about.</em></p>
+</section>
+<section id="sec-experimental-check" class="level3" data-number="1.2">
+<h3 data-number="1.2" class="anchored" data-anchor-id="sec-experimental-check"><span class="header-section-number">1.2</span> Experimental check</h3>
+<p>We test the reasoning above on MNIST with a simple convolutional network.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Model details">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Model details
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> tf.keras.Sequential([</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    tf.keras.layers.Reshape(input_shape<span class="op">=</span>(<span class="dv">28</span>, <span class="dv">28</span>, <span class="dv">1</span>), target_shape<span class="op">=</span>(<span class="dv">28</span>, <span class="dv">28</span>, <span class="dv">1</span>)),</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    tf.keras.layers.Conv2D(kernel_size<span class="op">=</span><span class="dv">3</span>, filters<span class="op">=</span><span class="dv">12</span>, padding<span class="op">=</span><span class="st">'same'</span>, activation<span class="op">=</span><span class="st">'relu'</span>),</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    tf.keras.layers.Conv2D(kernel_size<span class="op">=</span><span class="dv">6</span>, filters<span class="op">=</span><span class="dv">24</span>, padding<span class="op">=</span><span class="st">'same'</span>, strides<span class="op">=</span><span class="dv">2</span>, activation<span class="op">=</span><span class="st">'relu'</span>),</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    tf.keras.layers.Conv2D(kernel_size<span class="op">=</span><span class="dv">6</span>, filters<span class="op">=</span><span class="dv">32</span>, padding<span class="op">=</span><span class="st">'same'</span>, strides<span class="op">=</span><span class="dv">2</span>, activation<span class="op">=</span><span class="st">'relu'</span>),</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    tf.keras.layers.Flatten(),</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    tf.keras.layers.Dense(units<span class="op">=</span><span class="dv">256</span>, activation<span class="op">=</span><span class="st">'relu'</span>),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    tf.keras.layers.Dropout(<span class="fl">0.3</span>),</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    tf.keras.layers.Dense(units<span class="op">=</span><span class="dv">10</span>, activation<span class="op">=</span><span class="va">None</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The loss function is the standard classification cross-entropy.</p>
+</div>
+</div>
+</div>
+<p>In practice, comparing the weight update sequences directly is difficult. Instead, we consider the entire training progress and the mean loss convergence rate. The model does not overfit appreciably, so we report only training-set means below.</p>
+<p>The experiment in <a href="#fig-batch-lambda" class="quarto-xref">Figure&nbsp;2</a> is a grid of seven batch sizes <span class="math inline">\(b = 1, 4, \ldots, 4096\)</span> against three learning rates <span class="math inline">\(\lambda = 10^{-2}\)</span>, <span class="math inline">\(10^{-3}\)</span>, <span class="math inline">\(10^{-4}\)</span>, with five seeds for each pair. If the reasoning above is right, the curves for one <span class="math inline">\(\lambda\)</span> must lie on top of each other whatever the batch size. They do wherever the training is stable: at a fixed <span class="math inline">\(\lambda\)</span> the convergence rate does not depend on the batch size. The same invariance has been checked at a larger scale by <a href="https://arxiv.org/abs/1711.04623">Jastrzębski et al.</a>, who raise the batch size and the learning rate by a common factor on ResNet56 and VGG11 and find the learning curves matching when drawn against epochs. They also report that it matches more closely than raising the learning rate by the square root of that factor instead, which is the alternative the argument above rules out. Their networks carry batch normalization, so the loss itself depends there on how the samples are grouped, a complication absent from the runs above.</p>
+<div id="fig-batch-lambda" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-batch-lambda-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="images/batch_size_and_lambda_rerun.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;2: Training loss on MNIST against the number of elapsed samples, one panel per \lambda. The batch size runs along the rainbow, from b = 1 in indigo to b = 4096 in dark red. Each curve is the geometric mean over the seeds, the band is their spread, a cross marks a run that diverged, and the dotted line is the chance level \ln 10 = 2.30. The grey curves repeat the other panels, so the groups can be placed against each other, and they separate. The first batch size to fail is b = 64 at \lambda = 10^{-2}, b = 1024 at \lambda = 10^{-3} and b = 4096 at \lambda = 10^{-4}, so a smaller \lambda tolerates a larger batch. Section&nbsp;3 discusses the restriction."><img src="images/batch_size_and_lambda_rerun.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-batch-lambda-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Training loss on MNIST against the number of elapsed samples, one panel per <span class="math inline">\(\lambda\)</span>. The batch size runs along the rainbow, from <span class="math inline">\(b = 1\)</span> in indigo to <span class="math inline">\(b = 4096\)</span> in dark red. Each curve is the geometric mean over the seeds, the band is their spread, a cross marks a run that diverged, and the dotted line is the chance level <span class="math inline">\(\ln 10 = 2.30\)</span>. The grey curves repeat the other panels, so the groups can be placed against each other, and they separate. The first batch size to fail is <span class="math inline">\(b = 64\)</span> at <span class="math inline">\(\lambda = 10^{-2}\)</span>, <span class="math inline">\(b = 1024\)</span> at <span class="math inline">\(\lambda = 10^{-3}\)</span> and <span class="math inline">\(b = 4096\)</span> at <span class="math inline">\(\lambda = 10^{-4}\)</span>, so a smaller <span class="math inline">\(\lambda\)</span> tolerates a larger batch. <a href="#sec-convergence-stability" class="quarto-xref">Section&nbsp;3</a> discusses the restriction.
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="sec-noise" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="sec-noise"><span class="header-section-number">2</span> The Noise: Batch Size as a Langevin Time Step</h2>
+<section id="the-noise-per-step" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="the-noise-per-step"><span class="header-section-number">2.1</span> The noise per step</h3>
+<p><a href="#sec-counting-samples" class="quarto-xref">Section&nbsp;1</a> settled what happens over a budget of samples: to first order in <span class="math inline">\(\lambda\)</span>, the accumulated update is the same sum of the same gradients, only grouped differently, so nothing about it can depend on <span class="math inline">\(b\)</span>. The batch size does change the individual step. A larger batch makes fewer and longer steps, each carrying its own share of the noise, and it is not obvious that a different pattern of noisy steps leads to the same place.</p>
+<p>Why check the noise at all, once the drift is settled? Because in deep learning the noise helps decide where the training ends up, and is no small correction to the drift. Gradient descent does not settle at a distinguished point. It keeps moving through a region of low loss, and it stops where the sample budget runs out. The trained network is then closer to a single draw from a distribution over weights than to the solution of an optimization problem, and that distribution is shaped by the noise as well as by the drift. Training behaves like a random sampler stopped after producing a single sample. As a first picture, take the distribution it samples from to be <span class="math display">\[
+    \pi(\boldsymbol\theta) \propto e^{-\alpha L(\boldsymbol\theta)},
+    \label{eq:pi-alpha}
+\]</span> where <span class="math inline">\(L(\boldsymbol\theta)\)</span> is the loss averaged over the <span class="math inline">\(N\)</span> training samples and <span class="math inline">\(\alpha &gt; 0\)</span> is a constant. The constant <span class="math inline">\(\alpha\)</span> sets how strongly the sampler prefers a low loss. For a large <span class="math inline">\(\alpha\)</span> the distribution concentrates where <span class="math inline">\(L\)</span> is smallest, and as <span class="math inline">\(\alpha \to \infty\)</span> sampling turns into plain minimization. For a small <span class="math inline">\(\alpha\)</span> it spreads over a wide region of weights where the loss is only moderately low. In the language of statistical physics <span class="math inline">\(\alpha\)</span> is an inverse temperature. One value is special: for the cross-entropy loss used here, <span class="math inline">\(e^{-N L(\boldsymbol\theta)}\)</span> is the likelihood of the training data, so <span class="math inline">\(\alpha = N\)</span> gives the Bayesian posterior with a flat prior. Training is not bound to that value. Nobody sets <span class="math inline">\(\alpha\)</span> directly; it is fixed by the noise of the training, and the rest of this section works out which hyperparameter controls it. <a href="https://arxiv.org/abs/1704.04289">Mandt, Hoffman and Blei</a> work this view out in detail. Dropout, which our example network uses, adds noise of its own to that of the samples. Incidentally, under certain conditions training with dropout is itself approximate Bayesian inference (<a href="https://arxiv.org/abs/1506.02142">Gal and Ghahramani</a>), each random mask drawing one network from an approximation to the posterior.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="A caveat: reshuffling once per epoch">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>A caveat: reshuffling once per epoch
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The sampler picture, and the comparison with the Langevin algorithm below, treat the noise of different updates as independent. The independence is exact when every batch is drawn afresh from the data. When the data are instead reshuffled once per epoch, the batches of one epoch partition the dataset, and at a frozen weight their gradients add up to the full-batch gradient. The noise of the sampling cancels, and only that of the dropout masks, drawn afresh at every step, remains. On the scale of an epoch and longer the sampler picture then overstates the noise, by an amount that depends on how far the weights move within the epoch. None of this touches the invariance of <a href="#sec-counting-samples" class="quarto-xref">Section&nbsp;1</a>, which holds for any fixed order of the data.</p>
+</div>
+</div>
+</div>
+<p>We will not need that theory, only its simplest consequence: the fluctuations are part of what training computes, so a reparameterization that calls the batch size technical has to leave them alone as well as the drift. This section asks whether it does.</p>
+<p>Let <span class="math inline">\(\bar{\mathbf{g}} \in \mathbb{R}^D\)</span> and the <span class="math inline">\(D \times D\)</span> matrix <span class="math inline">\(\Sigma\)</span> be the mean and the covariance of a single-sample gradient <span class="math inline">\(\mathbf{g}_i\)</span> at a given weight, over the draw of the sample: <span class="math display">\[
+    \bar{\mathbf{g}} := \mathbb{E}_i\left[\mathbf{g}_i\right],
+    \qquad
+    \Sigma := \mathbb{E}_i\left[
+        \left(\mathbf{g}_i - \bar{\mathbf{g}}\right)
+        \left(\mathbf{g}_i - \bar{\mathbf{g}}\right)^{\mathsf T}
+    \right].
+    \label{eq:grad-moments}
+\]</span> For independently drawn samples, one update <span class="math inline">\(\eqref{eq:sgd}\)</span> moves the weight by a random amount with <span class="math display">\[
+    \mathbb{E}\left[\Delta\boldsymbol\theta\right] = -\lambda\, b\, \bar{\mathbf{g}},
+    \qquad
+    \mathrm{Cov}\left[\Delta\boldsymbol\theta\right] = \lambda^2\, b\, \Sigma,
+    \label{eq:step-moments}
+\]</span> the drift adding up over the <span class="math inline">\(b\)</span> samples and the covariance adding up too, since the cross terms vanish. At a fixed <span class="math inline">\(\lambda\)</span> both are proportional to <span class="math inline">\(b\)</span>, so the random kick goes like <span class="math inline">\(\sqrt{b}\)</span>.</p>
+</section>
+<section id="the-langevin-algorithm" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="the-langevin-algorithm"><span class="header-section-number">2.2</span> The Langevin algorithm</h3>
+<p>Suppose we want to draw random points from a given distribution over the weights, <span class="math display">\[
+    \pi(\boldsymbol\theta) \propto e^{-U(\boldsymbol\theta)/T},
+    \label{eq:target}
+\]</span> with an energy <span class="math inline">\(U\)</span> and a temperature <span class="math inline">\(T\)</span>. With <span class="math inline">\(U = L\)</span> and <span class="math inline">\(T = 1/\alpha\)</span> this is <span class="math inline">\(\eqref{eq:pi-alpha}\)</span>. Drawing such points is the task of the random sampler we compared training to above, and the task of Bayesian inference too, with <span class="math inline">\(\pi\)</span> the posterior. One way to do it is to iterate <span class="math display">\[
+    \boldsymbol\theta_{n+1} = \boldsymbol\theta_n - h\, \nabla U(\boldsymbol\theta_n)
+        + \sqrt{2\, T\, h}\;\boldsymbol\xi_n,
+    \label{eq:ula}
+\]</span> with <span class="math inline">\(\boldsymbol\xi_n\)</span> independent standard normal vectors and a small step <span class="math inline">\(h\)</span>. After many iterations the points are distributed approximately according to <span class="math inline">\(\pi\)</span>, the more accurately the smaller the step. This iteration is known as the unadjusted Langevin algorithm (<a href="https://projecteuclid.org/journals/bernoulli/volume-2/issue-4/Exponential-convergence-of-Langevin-distributions-and-their-discrete-approximations/bj/1178291835.full">Roberts and Tweedie</a>). Run with a stochastic gradient in place of <span class="math inline">\(\nabla U\)</span>, it becomes stochastic gradient Langevin dynamics (<a href="https://www.stats.ox.ac.uk/~teh/research/compstats/WelTeh2011a.pdf">Welling and Teh</a>), in which the noise is injected into gradient descent deliberately. The algorithm is a step-by-step approximation of a process in continuous time, the overdamped Langevin equation <span class="math display">\[
+    d\boldsymbol\theta = -\nabla U(\boldsymbol\theta)\, dt + \sqrt{2\, T}\; d\mathbf{W}_t,
+    \label{eq:langevin}
+\]</span> in which the weight slides down <span class="math inline">\(U\)</span> while being pushed around by a random force <span class="math inline">\(\mathbf{W}_t\)</span> whose accumulated effect has a variance growing in proportion to the elapsed time. The approximation is the simplest one possible. Over a short time <span class="math inline">\(h\)</span> it keeps the downhill pull fixed at its value at the start of the step, and it replaces the random pushes by a single normal kick with the variance they would have accumulated over that time, <span class="math inline">\(2Th\)</span>. (This recipe is known as the Euler–Maruyama scheme.) The square root in front of the noise in <span class="math inline">\(\eqref{eq:ula}\)</span> is what that recipe dictates: the drift over a step is proportional to <span class="math inline">\(h\)</span> while the kick is only of size <span class="math inline">\(\sqrt{2Th}\)</span>. The asymmetry is the rule a change of step has to follow if the algorithm is to keep sampling the same <span class="math inline">\(\pi\)</span>: scale the noise any other way, and changing <span class="math inline">\(h\)</span> changes the temperature, and with it the distribution. The step itself is a trade. A larger <span class="math inline">\(h\)</span> covers ground faster, and pays with a bias that grows with the step and, once the step is too long for the curvature of <span class="math inline">\(U\)</span>, with the loss of convergence altogether.</p>
+<p>To compare the two algorithms, write the gradient descent update <span class="math inline">\(\eqref{eq:sgd}\)</span> in the same shape as <span class="math inline">\(\eqref{eq:ula}\)</span>. Split every single-sample gradient into its mean and a random remainder, <span class="math inline">\(\mathbf{g}_i = \bar{\mathbf{g}} + (\mathbf{g}_i - \bar{\mathbf{g}})\)</span>. The update becomes <span class="math display">\[
+    \boldsymbol\theta_{n+1} = \boldsymbol\theta_n
+        - \lambda b\; \bar{\mathbf{g}}(\boldsymbol\theta_n)
+        + \sqrt{\lambda b}\;\boldsymbol\zeta_n,
+    \qquad
+    \boldsymbol\zeta_n := -\sqrt{\lambda / b}
+        \sum_{i:~ t(i) = n} \left(\mathbf{g}_i(\boldsymbol\theta_n)
+        - \bar{\mathbf{g}}(\boldsymbol\theta_n)\right),
+    \label{eq:sgd-split}
+\]</span> where the random vector <span class="math inline">\(\boldsymbol\zeta_n\)</span> has mean zero and, by <span class="math inline">\(\eqref{eq:step-moments}\)</span>, covariance <span class="math inline">\(\lambda\Sigma\)</span>. Now <span class="math inline">\(\eqref{eq:ula}\)</span> and <span class="math inline">\(\eqref{eq:sgd-split}\)</span> can be read term by term:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 26%">
+<col style="width: 39%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Langevin <span class="math inline">\(\eqref{eq:ula}\)</span></th>
+<th>gradient descent <span class="math inline">\(\eqref{eq:sgd-split}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>step</td>
+<td><span class="math inline">\(h\)</span></td>
+<td><span class="math inline">\(\lambda b\)</span></td>
+</tr>
+<tr class="even">
+<td>downhill direction</td>
+<td><span class="math inline">\(\nabla U\)</span></td>
+<td><span class="math inline">\(\bar{\mathbf{g}} = \nabla L\)</span></td>
+</tr>
+<tr class="odd">
+<td>noise covariance per unit of step</td>
+<td><span class="math inline">\(2T \cdot I\)</span></td>
+<td><span class="math inline">\(\lambda\Sigma\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>Here <span class="math inline">\(I\)</span> is the <span class="math inline">\(D \times D\)</span> identity matrix. The last row is where the analogy is loose. The Langevin noise is the same in every direction, so its covariance is a multiple of the identity, while <span class="math inline">\(\Sigma\)</span> is a general matrix that also changes with the weights. Apart from that, the two updates have the same form, and the <span class="math inline">\(\sqrt{b}\)</span> growth of the random kick found above is the <span class="math inline">\(\sqrt{h}\)</span> of the Langevin algorithm. A change of <span class="math inline">\(b\)</span> at a fixed <span class="math inline">\(\lambda\)</span> changes <span class="math inline">\(h\)</span> and nothing else. The batch size is the time step of the discretization, and <span class="math inline">\(\lambda\Sigma\)</span> is its temperature. Whatever distribution the iteration settles into is fixed by <span class="math inline">\(\bar{\mathbf{g}}\)</span> and by that temperature; <span class="math inline">\(b\)</span> reaches it only through the step, and so only through the corrections that any discretization carries. Changing <span class="math inline">\(\lambda\)</span> is a different matter, since it rescales the temperature and therefore the distribution itself. So the batch size is technical not only for the deterministic part of the update but for its noise as well: it sets the resolution at which one and the same random process is followed. Stochastic equations of this kind have been derived for gradient descent systematically, as an expansion in the learning rate, by <a href="https://arxiv.org/abs/1511.06251">Li, Tai and E</a>. <a href="https://arxiv.org/abs/1711.04623">Jastrzębski et al.</a> make the same identification. They single out the ratio of the learning rate to the batch size, which is <span class="math inline">\(\lambda\)</span> here, as the quantity the dynamics depend on. Two runs that share it, they argue, are two discretizations of one stochastic differential equation.</p>
+<p>The looseness in the last row of the table has a price. The noise of gradient descent comes from the data rather than being injected, and its covariance <span class="math inline">\(\Sigma\)</span> depends on the weights and is far from isotropic. The distribution that the iteration <span class="math inline">\(\eqref{eq:sgd-split}\)</span> settles into, where there is one, is therefore in general not <span class="math inline">\(\eqref{eq:pi-alpha}\)</span>, which it would be if <span class="math inline">\(\Sigma\)</span> were a constant multiple of the identity. <span class="math inline">\(\lambda\Sigma\)</span> is a temperature in the looser sense that it sets the size of the fluctuations, and of its two factors only <span class="math inline">\(\lambda\)</span> is ours to choose, <span class="math inline">\(\Sigma\)</span> being fixed by the model and the data. When we call <span class="math inline">\(\lambda\)</span> the temperature below, we mean this controllable part.</p>
+<p>So far we have compared only two moments. For a large batch the central limit theorem gives more: <span class="math inline">\(\boldsymbol\zeta_n\)</span> is a sum of <span class="math inline">\(b\)</span> independent centred terms, so its distribution is close to normal, and <span class="math inline">\(\eqref{eq:sgd-split}\)</span> takes the form of <span class="math inline">\(\eqref{eq:ula}\)</span> exactly, the <span class="math inline">\(\sqrt{\text{step}}\)</span> scaling of the noise included. What the comparison gives is the form of the iteration and not its stationary law: the noise covariance per unit of step is <span class="math inline">\(\lambda\Sigma\)</span> where the Langevin algorithm has <span class="math inline">\(2T \cdot I\)</span>, which is the looseness of the last row of the table, and no batch size touches it. The central limit theorem does not hand over <span class="math inline">\(\Sigma\)</span> either. It is a property of the model and the data, and we neither choose it nor, in practice, compute it. The analogy says how the fluctuations must change when the step changes, and that their size is governed by <span class="math inline">\(\lambda\)</span>, but it does not say what that size is. It does explain what mini-batch practice keeps running into: too small a learning rate gives a colder search that explores less.</p>
+<p>This agrees with the observations of <a href="https://arxiv.org/abs/1710.06451">Samuel L. Smith and Quoc V. Le</a>. They report that “…optimum batch size is proportional to the learning rate”, which says, in our variables, that there is an optimal <span class="math inline">\(\lambda\)</span> and that it does not depend on <span class="math inline">\(b\)</span>. The familiar trade-off is real, but it is a trade-off in <span class="math inline">\(\lambda\)</span>, not in <span class="math inline">\(b\)</span>: a large <span class="math inline">\(\lambda\)</span> means a hot, strongly fluctuating search that generalizes well but settles poorly, while a small <span class="math inline">\(\lambda\)</span> gives a cold search that settles to a lower training loss. Claims of the form “small batches generalize better” are claims about a fixed <span class="math inline">\(\lambda^{\text{cl}}\)</span>, where shrinking <span class="math inline">\(b\)</span> raises <span class="math inline">\(\lambda = \lambda^{\text{cl}} / b\)</span>, and with it the temperature. Once <span class="math inline">\(\lambda\)</span> is the control variable, the trade-off is tuned by changing <span class="math inline">\(\lambda\)</span>, and the batch size plays no part in it.</p>
+</section>
+</section>
+<section id="sec-convergence-stability" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="sec-convergence-stability"><span class="header-section-number">3</span> Convergence Stability</h2>
+<p>Most of the statements of this article carry the caveat “if the training is stable”, so the topic cannot be avoided altogether. We measure where that region ends for the problem at hand, say what kind of restriction each of the two boundaries is, and stop there.</p>
+<p>Gradient descent becomes unstable once the learning rate passes a certain value. For a classical optimization problem, where the batch is the entire dataset, the threshold belongs to the deterministic step. Mini-batch training is less simple. A step can be read as a deterministic step plus noise, the way <span class="math inline">\(\eqref{eq:sgd-split}\)</span> writes it, and a single mini-batch is no more informative than the samples inside it. So we expect the threshold to be set by the two per-sample quantities of <a href="#sec-counting-samples" class="quarto-xref">Section&nbsp;1</a> and <a href="#sec-noise" class="quarto-xref">Section&nbsp;2</a> rather than by the step alone.</p>
+<p><a href="#fig-convergence-stability" class="quarto-xref">Figure&nbsp;3</a> shows the result for the MNIST problem introduced above.</p>
+<div id="fig-convergence-stability" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-convergence-stability-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="images/convergence_stability_rerun.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;3: Each dot is one training run of plain gradient descent on MNIST, placed at its batch size and learning rate and coloured by the training loss at the end. Every run is given the same budget of 60,000 samples, one pass over the dataset, and not the same number of updates. Dark red is the chance level \ln 10 = 2.30 for the ten MNIST classes, where a run that blew up is reported as well. A ring marks a run that ended within one percent of the loss it started from, which separates a run that was lost from one that was merely slow: at the smallest \lambda the budget runs out with the loss still high, but it has come down, and the dot carries no ring. The two panels hold the same runs under the two normalizations of the learning rate, see \eqref{eq:lambda-cl}. In each panel the dashed line is the restriction on the variable of that panel, and the dotted line the restriction on the other one."><img src="images/convergence_stability_rerun.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-convergence-stability-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Each dot is one training run of plain gradient descent on MNIST, placed at its batch size and learning rate and coloured by the training loss at the end. Every run is given the same budget of 60,000 samples, one pass over the dataset, and not the same number of updates. Dark red is the chance level <span class="math inline">\(\ln 10 = 2.30\)</span> for the ten MNIST classes, where a run that blew up is reported as well. A ring marks a run that ended within one percent of the loss it started from, which separates a run that was lost from one that was merely slow: at the smallest <span class="math inline">\(\lambda\)</span> the budget runs out with the loss still high, but it has come down, and the dot carries no ring. The two panels hold the same runs under the two normalizations of the learning rate, see <span class="math inline">\(\eqref{eq:lambda-cl}\)</span>. In each panel the dashed line is the restriction on the variable of that panel, and the dotted line the restriction on the other one.
+</figcaption>
+</figure>
+</div>
+<p>The lost region is bounded by two straight lines, and both conditions have to hold at once:</p>
+<ol type="1">
+<li><span class="math inline">\(\lambda^{\text{cl}} = \lambda\, b \lesssim 10^{-0.5}\)</span>,</li>
+<li><span class="math inline">\(\lambda = \lambda^{\text{cl}} / b \lesssim 10^{-1.5}\)</span>.</li>
+</ol>
+<p>The first is the classical restriction. Within one update the weight moves by <span class="math inline">\(\lambda^{\text{cl}}\)</span> times a batch-averaged gradient, and that displacement has to stay small against the scale on which the mean gradient <span class="math inline">\(\bar{\mathbf{g}}\)</span> itself varies, the scale set by the curvature of <span class="math inline">\(L\)</span> along the trajectory. Too long a step overshoots, exactly as in deterministic optimization, and nothing about this is particular to mini-batches.</p>
+<p>The second is less banal. What carries the weights away is the spread of the gradient from one sample to the next, not the curvature of the mean. The parameter that measures it is <span class="math inline">\(\lambda\)</span>, the temperature of <a href="#sec-noise" class="quarto-xref">Section&nbsp;2</a>, and not <span class="math inline">\(\lambda^{\text{cl}}\)</span>.</p>
+<p>Two observations support reading the two boundaries as restrictions of different kinds. The first is the difference between the way a run is lost at <span class="math inline">\(b = 1\)</span> and at <span class="math inline">\(b = 1000\)</span>.</p>
+<div id="fig-instability-trace" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-instability-trace-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="images/instability_trace_b1_b1000.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;4: The training loss (top) and the Euclidean distance of the weights from where they started (bottom), for five learning rates at each of two batch sizes, taken from the grid of Figure&nbsp;3. Each column covers the range that settles its own outcome: 10,000 samples at b = 1, which is 10,000 updates, and the whole pass at b = 1000, which is 60. In both columns the two smallest rates train and the three largest are lost. The dashed line is the chance level and the dotted line the norm of the starting weights, \|\boldsymbol\theta_0\| = 22.5."><img src="images/instability_trace_b1_b1000.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-instability-trace-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: The training loss (top) and the Euclidean distance of the weights from where they started (bottom), for five learning rates at each of two batch sizes, taken from the grid of <a href="#fig-convergence-stability" class="quarto-xref">Figure&nbsp;3</a>. Each column covers the range that settles its own outcome: 10,000 samples at <span class="math inline">\(b = 1\)</span>, which is 10,000 updates, and the whole pass at <span class="math inline">\(b = 1000\)</span>, which is 60. In both columns the two smallest rates train and the three largest are lost. The dashed line is the chance level and the dotted line the norm of the starting weights, <span class="math inline">\(\|\boldsymbol\theta_0\| = 22.5\)</span>.
+</figcaption>
+</figure>
+</div>
+<p>At <span class="math inline">\(b = 1000\)</span> a lost run leaves within a few updates and then stops. The loss sits at the chance level and <span class="math inline">\(\|\boldsymbol\theta - \boldsymbol\theta_0\|\)</span> holds its value to four digits for the rest of the pass: the network has reached a state in which almost every rectifier is off, which has no gradient and no way back. The same runs with a leaky rectifier, which has no such state, blow up instead of freezing. At <span class="math inline">\(b = 1\)</span> nothing stops. At the largest rate traced, <span class="math inline">\(\lambda = 10^{-1}\)</span>, the weights keep wandering by a few percent of the distance they have covered while the loss stays at chance.</p>
+<p>The second observation raises the noise by hand. We add an independent Gaussian of standard deviation <span class="math inline">\(\kappa\)</span> to the gradient of every sample, which leaves the mean gradient where it was and widens the spread around it. That noise is isotropic, where the sampling noise is not, so the experiment raises the noise level without imitating the sampling. If the second restriction is a restriction on noise, it has to come down as <span class="math inline">\(\kappa\)</span> grows, while the first stays where it is. <a href="#fig-stability-noise" class="quarto-xref">Figure&nbsp;5</a> shows that this is what happens.</p>
+<div id="fig-stability-noise" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-stability-noise-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="images/convergence_stability_rerun_kappa1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;5: The grid of Figure&nbsp;3 run again with noise added by hand. Every single-sample gradient becomes \mathbf{g}_i + \kappa\, \boldsymbol\xi_i, with \boldsymbol\xi_i an independent standard normal vector drawn afresh for every weight and every sample, at \kappa = 1. The batch mean then carries an extra noise of standard deviation \kappa / \sqrt{b} per weight, which is the batch-size dependence the sampling noise has as well. This \kappa is far above the sampling noise of the problem itself, whose standard deviation at \boldsymbol\theta_0 is 2.1 \cdot 10^{-3} per weight, so the injected noise dominates everywhere in the panel. The dashed and dotted lines are the two restrictions of Figure&nbsp;3, left where they were: the restriction on \lambda has dropped by more than a decade, to about 10^{-3}, while the one on \lambda^{\text{cl}} has not moved."><img src="images/convergence_stability_rerun_kappa1.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stability-noise-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: The grid of <a href="#fig-convergence-stability" class="quarto-xref">Figure&nbsp;3</a> run again with noise added by hand. Every single-sample gradient becomes <span class="math inline">\(\mathbf{g}_i + \kappa\, \boldsymbol\xi_i\)</span>, with <span class="math inline">\(\boldsymbol\xi_i\)</span> an independent standard normal vector drawn afresh for every weight and every sample, at <span class="math inline">\(\kappa = 1\)</span>. The batch mean then carries an extra noise of standard deviation <span class="math inline">\(\kappa / \sqrt{b}\)</span> per weight, which is the batch-size dependence the sampling noise has as well. This <span class="math inline">\(\kappa\)</span> is far above the sampling noise of the problem itself, whose standard deviation at <span class="math inline">\(\boldsymbol\theta_0\)</span> is <span class="math inline">\(2.1 \cdot 10^{-3}\)</span> per weight, so the injected noise dominates everywhere in the panel. The dashed and dotted lines are the two restrictions of <a href="#fig-convergence-stability" class="quarto-xref">Figure&nbsp;3</a>, left where they were: the restriction on <span class="math inline">\(\lambda\)</span> has dropped by more than a decade, to about <span class="math inline">\(10^{-3}\)</span>, while the one on <span class="math inline">\(\lambda^{\text{cl}}\)</span> has not moved.
+</figcaption>
+</figure>
+</div>
+<p>Both thresholds depend on the model and the data. In practice it is the second that the batch size runs into first, and that is an argument for the <span class="math inline">\((\lambda, b)\)</span> parameterization over the classical <span class="math inline">\((\lambda^{\text{cl}}, b)\)</span>.</p>
+<p>A ceiling of this kind is well known in large-batch training under the name <em>critical batch size</em>. <a href="https://arxiv.org/abs/1811.03600">Shallue et al.</a> measure it across many models and datasets: the progress per sample stays flat as the batch grows, exactly as in <a href="#fig-batch-lambda" class="quarto-xref">Figure&nbsp;2</a>, and then degrades beyond a problem-dependent threshold. <a href="https://arxiv.org/abs/1812.06162">McCandlish et al.</a> predict where that threshold sits from the gradient noise.</p>
+<p>The subject raises more questions than it answers, and the stability of training is not what this article is about, so we stop here.</p>
+</section>
+<section id="sec-gradient-momentum" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="sec-gradient-momentum"><span class="header-section-number">4</span> Gradient Descent with Momentum</h2>
+<p>We now add momentum. Its most widely used parameterization is <span class="math display">\[
+    \begin{aligned}
+        \mathbf{v}^{\text{cl}}_{n+1}
+            &amp;= m^{\text{cl}}\, \mathbf{v}^{\text{cl}}_{n}
+            - \lambda^{\text{cl}}\, b^{-1} \sum_{i:~ t(i) = n} \mathbf{g}_i(\boldsymbol\theta_n) \\
+        \boldsymbol\theta_{n+1} &amp;=
+            \boldsymbol\theta_{n} + \mathbf{v}^{\text{cl}}_{n+1}
+    \end{aligned},\quad
+    0 \leq m^{\text{cl}} &lt;1, \quad
+    \lambda^{\text{cl}} &gt; 0
+    \label{eq:sgd-mom-classic}
+\]</span></p>
+<p>The parameter <span class="math inline">\(\mathbf{v}^{\text{cl}}\)</span> has a well-known physical reading. Take <span class="math inline">\(n\)</span> for a discrete time, and <span class="math inline">\(\mathbf{v}^{\text{cl}}\)</span> is a velocity in the space of weights, with the batch-averaged gradient as the acceleration. We use a different aspect of momentum here.</p>
+<p>The exponential moving average for the sequence <span class="math inline">\(\{g_n\}_{n=0,1,2,\dotso}\)</span> is a sequence <span class="math inline">\(\{s_n\}_{n=0,1,2,\dotso}\)</span> defined by the recursion <span class="math display">\[
+    s_{n+1} = m\, s_n + (1 - m)\, g_n, \quad 0 \leq m &lt; 1
+\]</span> with some initial condition for <span class="math inline">\(s_0\)</span> that we are not interested in. Unrolling it, <span class="math display">\[
+    s_{n+1} = (1 - m)\sum_{k=0,1,2,\dotso} \, m^k\, g_{n-k}.
+\]</span> So momentum smooths the gradients of previous steps. Instead of using only the gradients at the current weight <span class="math inline">\(\boldsymbol\theta_n\)</span>, we sum the gradients taken at all earlier weights <span class="math inline">\(\boldsymbol\theta_{n-1}\)</span>, <span class="math inline">\(\boldsymbol\theta_{n-2}\)</span>, <span class="math inline">\(\boldsymbol\theta_{n-3}\)</span>, and so on, with the decreasing coefficients <span class="math inline">\((1-m)m\)</span>, <span class="math inline">\((1-m)m^2\)</span>, <span class="math inline">\((1-m)m^3\)</span>. The coefficients sum to one: <span class="math display">\[
+    (1-m)\sum_{k=0,1,2,\dotso} \, m^k = 1, \quad 0 \leq m &lt; 1.
+\]</span></p>
+<p>The same formula shows where momentum and gradient accumulation genuinely differ, and why the introduction’s claim that momentum already does accumulation’s job holds only for small <span class="math inline">\(\lambda\)</span>. Accumulation averages the gradients of its micro-batches at one weight, the current one. Momentum averages gradients taken at earlier weights, stale by about one smoothing time, over which the weights move a distance of order <span class="math inline">\(\lambda\)</span>. The difference is exactly that displacement, and it is negligible in the same regime in which the <span class="math inline">\(O(\lambda)\)</span> corrections of <a href="#sec-counting-samples" class="quarto-xref">Section&nbsp;1</a> can be dropped.</p>
+<p>The parameter <span class="math inline">\(m\)</span> sets how fast those coefficients decay. We want this rate fixed per sample, as in <a href="#sec-counting-samples" class="quarto-xref">Section&nbsp;1</a>. The coefficient multiplying each single-sample gradient <span class="math inline">\(g_i\)</span> should change as little as possible when the batch size changes, which gives <span class="math display">\[
+    \sqrt[b]{m} = \sqrt[\tilde b]{\tilde m}.
+    \label{eq:m-root}
+\]</span> So the momentum must be rescaled as <span class="math display">\[
+    m \rightarrow \tilde m = m^{\frac{\tilde b}{b}}
+    \label{eq:m-rescale}
+\]</span> to keep the smoothing per sample the same. <a href="#fig-momentum-weights" class="quarto-xref">Figure&nbsp;6</a> shows what this means.</p>
+<div id="fig-momentum-weights" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-momentum-weights-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="images/momentum_weight_coefficients_rerun.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;6: Weight coefficients with which each sample gradient g_i contributes to a training step under the condition \eqref{eq:m-root}. The batch sizes are 4 and 16, and \sqrt[b]{m} = \sqrt[\tilde b]{\tilde m} = 0.97, so that each sample retains, on average, 97\% of the weight of the previous one, which corresponds to m = 0.885 at b = 4 and \tilde m = 0.614 at \tilde b = 16. The coefficients are grouped into blocks of b=4 or \tilde b = 16, one block per batch. At either batch size the momentum can be tuned so that the coefficients nearly agree. The curve is the same weighting with the batch taken to a single sample, w(s) = -\ln r \cdot r^{s} with r = 0.97, and each block sits at the average of that curve across it."><img src="images/momentum_weight_coefficients_rerun.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-momentum-weights-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Weight coefficients with which each sample gradient <span class="math inline">\(g_i\)</span> contributes to a training step under the condition <span class="math inline">\(\eqref{eq:m-root}\)</span>. The batch sizes are <span class="math inline">\(4\)</span> and <span class="math inline">\(16\)</span>, and <span class="math inline">\(\sqrt[b]{m} = \sqrt[\tilde b]{\tilde m} = 0.97\)</span>, so that each sample retains, on average, <span class="math inline">\(97\%\)</span> of the weight of the previous one, which corresponds to <span class="math inline">\(m = 0.885\)</span> at <span class="math inline">\(b = 4\)</span> and <span class="math inline">\(\tilde m = 0.614\)</span> at <span class="math inline">\(\tilde b = 16\)</span>. The coefficients are grouped into blocks of <span class="math inline">\(b=4\)</span> or <span class="math inline">\(\tilde b = 16\)</span>, one block per batch. At either batch size the momentum can be tuned so that the coefficients nearly agree. The curve is the same weighting with the batch taken to a single sample, <span class="math inline">\(w(s) = -\ln r \cdot r^{s}\)</span> with <span class="math inline">\(r = 0.97\)</span>, and each block sits at the average of that curve across it.
+</figcaption>
+</figure>
+</div>
+<p><em>The goal of the reparameterization is to separate the technical part, data parallelism, from the real one, the smoothing between gradients.</em> This motivates an alternative parameterization of <span class="math inline">\(\eqref{eq:sgd-mom-classic}\)</span>: <span class="math display">\[
+    \begin{aligned}
+        \mathbf{v}_{n+1} &amp;= e^{-\frac{b}{\tau}}\, \mathbf{v}_{n}
+             + (1 - e^{-\frac{b}{\tau}})\, \sum_{i:\, t(i) = n} \mathbf{g}_i(\boldsymbol\theta_n) \\
+        \boldsymbol\theta_{n+1} &amp;=
+            \boldsymbol\theta_{n} - \lambda\, \mathbf{v}_{n+1}
+    \end{aligned},\quad
+    \tau \geq 0, \quad
+    \lambda &gt; 0.
+    \label{eq:sgd-mom-new}
+\]</span> The new parameter <span class="math inline">\(\tau\)</span> is defined as <span class="math display">\[
+    \tau := - \frac{b}{\ln m^{\text{cl}}},
+    \quad \text{equivalently} \quad
+    m^{\text{cl}} = e^{-\frac{b}{\tau}},
+    \label{eq:tau-def}
+\]</span> so that <span class="math inline">\(e^{-\frac{1}{\tau}} = \sqrt[b]{m^{\text{cl}}}\)</span> is exactly the per-sample decay rate that <span class="math inline">\(\eqref{eq:m-root}\)</span> asks to be kept fixed. <span class="math inline">\(\tau\)</span> is the smoothing length measured in samples: each sample gradient loses the factor <span class="math inline">\(e^{-\frac{1}{\tau}}\)</span> of its weight per elapsed sample, so its contribution decays by <span class="math inline">\(e\)</span> over <span class="math inline">\(\tau\)</span> samples regardless of the batch size. We read <span class="math inline">\(\tau = 0\)</span> as the limit <span class="math inline">\(\tau \rightarrow 0^{+}\)</span>, where <span class="math inline">\(\eqref{eq:sgd-mom-new}\)</span> degenerates to plain gradient descent, <span class="math inline">\(\eqref{eq:sgd-classic}\)</span> with <span class="math inline">\(m^{\text{cl}} = 0\)</span>. The larger the value of <span class="math inline">\(\tau\)</span>, the stronger the smoothing.</p>
+<p>The advantage is that moving to different hardware does not call for retuning <span class="math inline">\(\lambda\)</span> and <span class="math inline">\(\tau\)</span>. We set the batch size <span class="math inline">\(b\)</span> as large as possible, or as large as the stability restrictions of <a href="#sec-convergence-stability" class="quarto-xref">Section&nbsp;3</a> allow. <a href="#fig-batch-momentum" class="quarto-xref">Figure&nbsp;7</a> confirms this experimentally.</p>
+<div id="fig-batch-momentum" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-batch-momentum-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="images/batch_size_and_momentum_rerun.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7" title="Figure&nbsp;7: Training loss on MNIST for \eqref{eq:sgd-mom-new} at \lambda = 10^{-3}. Each curve is the geometric mean over 5 seeds, and the band is their spread. Before each run we warm the velocity up over 10\,\tau samples at \lambda = 0, so the smoothing is already full when the weights start to move. At fixed \lambda and \tau the progress per sample does not depend on the batch size, until stability is lost between b = 10^{2} and b = 10^{3}, where \lambda^{\text{cl}} = \lambda b leaves the range of Section&nbsp;3. Those runs stay at chance level or leave the top of the panel. A longer \tau converges more slowly here, which may differ for other problems."><img src="images/batch_size_and_momentum_rerun.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-batch-momentum-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Training loss on MNIST for <span class="math inline">\(\eqref{eq:sgd-mom-new}\)</span> at <span class="math inline">\(\lambda = 10^{-3}\)</span>. Each curve is the geometric mean over 5 seeds, and the band is their spread. Before each run we warm the velocity up over <span class="math inline">\(10\,\tau\)</span> samples at <span class="math inline">\(\lambda = 0\)</span>, so the smoothing is already full when the weights start to move. At fixed <span class="math inline">\(\lambda\)</span> and <span class="math inline">\(\tau\)</span> the progress per sample does not depend on the batch size, until stability is lost between <span class="math inline">\(b = 10^{2}\)</span> and <span class="math inline">\(b = 10^{3}\)</span>, where <span class="math inline">\(\lambda^{\text{cl}} = \lambda b\)</span> leaves the range of <a href="#sec-convergence-stability" class="quarto-xref">Section&nbsp;3</a>. Those runs stay at chance level or leave the top of the panel. A longer <span class="math inline">\(\tau\)</span> converges more slowly here, which may differ for other problems.
+</figcaption>
+</figure>
+</div>
+<p>For <span class="math inline">\(b \gtrsim \tau\)</span>, however, the momentum smoothing is weak compared with the batch smoothing, and the approximation of <a href="#fig-momentum-weights" class="quarto-xref">Figure&nbsp;6</a> no longer holds.</p>
+<p>The relations between the proposed and the classic normalization are: <span class="math display">\[
+\begin{aligned}
+    m^{\text{cl}} &amp;= e^{-\frac{b}{\tau}} \\
+    \lambda^{\text{cl}} &amp;= \left(1 - e^{-\frac{b}{\tau}} \right) \lambda\, b
+\end{aligned}
+\]</span></p>
+<p>A rule of this kind is already in use. <a href="https://arxiv.org/abs/1711.00489">Smith, Kindermans, Ying and Le</a> characterize momentum gradient descent by what they call the noise scale: the coefficient of the noise correlation in a Langevin equation of the kind <a href="#sec-noise" class="quarto-xref">Section&nbsp;2</a> discusses, and a temperature in the sense used there. They prescribe holding it fixed when the batch size is changed. Their learning rate, batch size and momentum coefficient are <span class="math inline">\(\lambda^{\text{cl}}\)</span>, <span class="math inline">\(b\)</span> and <span class="math inline">\(m^{\text{cl}}\)</span> here, so with <span class="math inline">\(N\)</span> the size of the training set their quantity reads <span class="math display">\[
+    \text{noise scale}
+        := \frac{\lambda^{\text{cl}}\, N}{b \left(1 - m^{\text{cl}}\right)}
+         = \frac{\left(1 - e^{-\frac{b}{\tau}}\right) \lambda\, b\, N}
+                {b \left(1 - e^{-\frac{b}{\tau}}\right)}
+         = \lambda\, N ,
+\]</span> where the middle expression substitutes the two relations above. The factor <span class="math inline">\(N\)</span> is theirs, carried by a cost summed over the training examples rather than averaged over them. So their prescription is the instruction to keep <span class="math inline">\(\lambda\)</span> fixed, and neither the batch size nor the momentum coefficient enters it on its own.</p>
+<p>That leaves <span class="math inline">\(\tau\)</span> free, which is where the two jobs separate. Holding <span class="math inline">\(\lambda\)</span> fixed says nothing about the smoothing, and keeping the smoothing fixed as well is the extra demand of <span class="math inline">\(\eqref{eq:m-rescale}\)</span>: raising the batch by a factor <span class="math inline">\(k\)</span> asks for <span class="math inline">\(m^{\text{cl}} \to \left(m^{\text{cl}}\right)^{k}\)</span>, a momentum coefficient moving down. The cited authors move it up instead, on purpose, since their aim is to spend fewer updates rather than to keep the trajectory. They report the price: a slight loss of test accuracy, which they attribute to the averaging timescale growing until the average can no longer follow the training. They count that timescale in epochs; multiplied by the number of samples in an epoch it becomes <span class="math display">\[
+    \text{averaging timescale}
+        := \frac{b}{1 - m^{\text{cl}}}
+         = \tau \left(1 + O\!\left(\frac{b}{\tau}\right)\right)
+\]</span> samples, so what they are describing is a change of <span class="math inline">\(\tau\)</span>.</p>
+<p>The effect of momentum itself is of the same order as the effect of the batch size, and the two come from the same place. A gradient enters the update at a weight the run has already left: by up to <span class="math inline">\(b\)</span> samples inside a batch, and by about <span class="math inline">\(\tau\)</span> samples under the smoothing. Both corrections are of first order in <span class="math inline">\(\lambda\)</span> with those lengths multiplying it, so at a small enough <span class="math inline">\(\lambda\)</span> neither one is visible.</p>
+<p><a href="https://www.jmlr.org/papers/v17/16-157.html">Yuan, Ying and Sayed</a> proved this in the classical variables: momentum gradient descent with a small constant step size follows the trajectory of the plain method run at the step size <span class="math display">\[
+    \frac{\lambda^{\text{cl}}}{1 - m^{\text{cl}}}
+        = \frac{\left(1 - e^{-\frac{b}{\tau}}\right) \lambda\, b}
+               {1 - e^{-\frac{b}{\tau}}}
+         = \lambda\, b ,
+\]</span> which is the classical learning rate of plain gradient descent at the same per-sample rate, <span class="math inline">\(\eqref{eq:lambda-cl}\)</span>. Their rescaling therefore asks for nothing in the per-sample variables, and <span class="math inline">\(\tau\)</span> leaves the leading order. <a href="https://arxiv.org/abs/1511.06251">Li, Tai and E</a> reach the same point from their stochastic equation for momentum, where the velocity relaxes over <span class="math inline">\(\tau\)</span> samples and then follows the gradient. The same combination carries the momentum in the noise scale of <a href="https://arxiv.org/abs/1710.06451">Smith and Le</a>. <a href="https://arxiv.org/abs/1803.05591">Kidambi et al.</a> go further and find no advantage in momentum on stochastic gradients at all, reading the gains seen in practice as a by-product of mini-batching.</p>
+<p>We take the effects of momentum no further. The smoothing and the batch size differ in the length of the window they average over, then, and not in the order of magnitude in <span class="math inline">\(\lambda\)</span> at which they enter, and this section needs only that the smoothing has a parameter of its own. Without momentum there is no such parameter and the smoothing simply goes undone. The batch size does not take it over: by <a href="#sec-counting-samples" class="quarto-xref">Section&nbsp;1</a> and <a href="#sec-noise" class="quarto-xref">Section&nbsp;2</a> a larger batch buys a cleaner gradient per step and proportionally fewer steps, which leaves the noise over a budget of samples where it was.</p>
+</section>
+<section id="sec-adam" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="sec-adam"><span class="header-section-number">5</span> Why Adam Is Weird</h2>
+<p>The same treatment applies to other methods. Adam in its classic parameterization reads, in our notation, <span class="math display">\[
+    \begin{aligned}
+        \mathbf{v}^{\text{cl}}_{n+1}
+            &amp;= \beta_1^{\text{cl}}\, \mathbf{v}^{\text{cl}}_{n}
+            + (1 - \beta_1^{\text{cl}})\, b^{-1} \sum_{i:~ t(i) = n} \mathbf{g}_i(\boldsymbol\theta_n), \\
+        \mathbf{w}^{\text{cl}}_{n+1}
+            &amp;= \beta_2^{\text{cl}}\, \mathbf{w}^{\text{cl}}_{n}
+            + (1 - \beta_2^{\text{cl}})\,
+                \left[
+                    b^{-1} \sum_{i:~ t(i) = n} \mathbf{g}_i(\boldsymbol\theta_n)
+                \right]^2, \\
+        \boldsymbol\theta_{n+1} &amp;=
+            \boldsymbol\theta_{n} - \alpha^{\text{cl}} \frac
+                {\mathbf{v}^{\text{cl}}_{n+1}}
+                {\sqrt{\mathbf{w}^{\text{cl}}_{n+1}} + \varepsilon^{\text{cl}}}, \\
+        &amp;0 \leq \beta_1^{\text{cl}} &lt;1, \quad
+        0 \leq \beta_2^{\text{cl}} &lt;1, \quad
+        \alpha^{\text{cl}} &gt; 0, \quad
+        \varepsilon^{\text{cl}} &gt; 0,
+    \end{aligned}
+    \label{eq:adam-classic}
+\]</span> where squares and square roots of vectors are elementwise.</p>
+<p>Adam differs from the methods before it in one property that matters here. Plain gradient descent and momentum are <em>linear</em> in the gradients: they add them up, and a sum does not care how its terms were grouped into batches. That is why only the first two moments of an update entered <a href="#sec-noise" class="quarto-xref">Section&nbsp;2</a>, and why they took the form <span class="math inline">\(\eqref{eq:step-moments}\)</span>. An update that divides by a running estimate of the gradient’s size is not linear, and it sees the noise of each step directly. Where that leaves the batch size is worked out from <a href="#sec-batch-noise" class="quarto-xref">Section&nbsp;5.2</a> on.</p>
+<p>Classic Adam tracks the square of the batch-mean gradient, <span class="math inline">\(\left[b^{-1}\sum g\right]^2\)</span>, rather than the mean of the squared gradients, <span class="math inline">\(b^{-1}\sum g^2\)</span>. The latter is the natural continuation of the previous sections: like the first moment, it is a plain sum over the batch, so it smooths across samples under exactly the same exponential normalization we used for momentum. So we first take a modified Adam, call it Adam′, with that replacement, and ask afterwards what the deviation costs. Adam′ is a different algorithm with its own hyperparameters, which we mark with a prime to keep them apart from those of Adam itself.</p>
+<section id="adam-replacing-the-square-of-the-mean" class="level3" data-number="5.1">
+<h3 data-number="5.1" class="anchored" data-anchor-id="adam-replacing-the-square-of-the-mean"><span class="header-section-number">5.1</span> Adam′: replacing the square of the mean</h3>
+<p>Written in the classic shape, Adam′ reads <span class="math display">\[
+    \begin{aligned}
+        \hat{\mathbf{v}}_{n+1}
+            &amp;= \hat\beta_1\, \hat{\mathbf{v}}_{n}
+            + (1 - \hat\beta_1)\, b^{-1} \sum_{i:~ t(i) = n} \mathbf{g}_i(\boldsymbol\theta_n), \\
+        \hat{\mathbf{w}}_{n+1}
+            &amp;= \hat\beta_2\, \hat{\mathbf{w}}_{n}
+            + (1 - \hat\beta_2)\,
+                b^{-1} \sum_{i:~ t(i) = n} \mathbf{g}^2_i(\boldsymbol\theta_n), \\
+        \boldsymbol\theta_{n+1} &amp;=
+            \boldsymbol\theta_{n} - \hat\alpha \frac
+                {\hat{\mathbf{v}}_{n+1}}
+                {\sqrt{\hat{\mathbf{w}}_{n+1}} + \hat\varepsilon}, \\
+        &amp;0 \leq \hat\beta_1 &lt;1, \quad
+        0 \leq \hat\beta_2 &lt;1, \quad
+        \hat\alpha &gt; 0, \quad
+        \hat\varepsilon &gt; 0.
+    \end{aligned}
+    \label{eq:adam-prime}
+\]</span> The hats are temporary: this is the parameterization we are about to replace, and these symbols appear only here and in <span class="math inline">\(\eqref{eq:adam-relation}\)</span>.</p>
+<p>Our normalization gives Adam′ the symbols it keeps for the rest of the article: <span class="math display">\[
+\begin{aligned}
+    \mathbf{v}'_{n+1}
+        &amp;= e^{-\frac{b}{\tau_1'}}\, \mathbf{v}'_{n}
+        + (1 - e^{-\frac{b}{\tau_1'}})\, b^{-1} \sum_{i:~ t(i) = n} \mathbf{g}_i(\boldsymbol\theta_n), \\
+    \mathbf{w}'_{n+1}
+        &amp;= e^{-\frac{b}{\tau_2'}}\, \mathbf{w}'_{n}
+        + (1 - e^{-\frac{b}{\tau_2'}})\,
+            b^{-1} \sum_{i:~ t(i) = n} \mathbf{g}_i(\boldsymbol\theta_n)^2, \\
+    \boldsymbol\theta_{n+1} &amp;=
+        \boldsymbol\theta_{n} - \alpha'\, b \frac
+            {\mathbf{v}'_{n+1}}
+            {\sqrt{\mathbf{w}'_{n+1}} + \varepsilon'}, \\
+    &amp; 0 \leq \tau_1', \quad
+    0 \leq \tau_2', \quad
+    \alpha' &gt; 0, \quad
+    \varepsilon' &gt; 0.
+\end{aligned}
+    \label{eq:adam-new}
+\]</span> The time constants <span class="math inline">\(\tau_1'\)</span> and <span class="math inline">\(\tau_2'\)</span> are measured in samples, exactly as <span class="math inline">\(\tau\)</span> is in <span class="math inline">\(\eqref{eq:tau-def}\)</span>.</p>
+<p>The two moments are treated differently on purpose. The explicit <span class="math inline">\(b\)</span> in the step does the work that the batch sums do in <span class="math inline">\(\eqref{eq:sgd}\)</span> and <span class="math inline">\(\eqref{eq:sgd-mom-new}\)</span>: the product <span class="math inline">\(b\, \mathbf{v}'\)</span> is a batch sum, so each sample contributes once regardless of how the samples are grouped. The denominator must not be scaled that way, because it sits under a square root: if <span class="math inline">\(\mathbf{w}'\)</span> were a batch sum it would grow like <span class="math inline">\(b\)</span>, its square root like <span class="math inline">\(\sqrt{b}\)</span>, and a stray <span class="math inline">\(\sqrt{b}\)</span> would survive in the step. Keeping <span class="math inline">\(\mathbf{w}'\)</span> a per-sample mean makes it a batch-size-independent scale, which is what a normalizer should be.</p>
+<p>Setting aside the deviation just introduced, the relations between the two parameterizations of Adam′ are: <span class="math display">\[
+    \begin{aligned}
+        \hat\beta_1 &amp;= e^{-\frac{b}{\tau_1'}}, \\
+        \hat\beta_2 &amp;= e^{-\frac{b}{\tau_2'}}, \\
+        \hat\alpha &amp;= b\, \alpha', \\
+        \hat\varepsilon &amp;= \varepsilon'.
+    \end{aligned}
+    \label{eq:adam-relation}
+\]</span> The step size scales with the batch size exactly as it did for plain gradient descent in <span class="math inline">\(\eqref{eq:lambda-cl}\)</span>, and <span class="math inline">\(\varepsilon'\)</span> does not scale at all. Adam′, at least, fits the pattern of the previous sections without a remainder.</p>
+</section>
+<section id="sec-batch-noise" class="level3" data-number="5.2">
+<h3 data-number="5.2" class="anchored" data-anchor-id="sec-batch-noise"><span class="header-section-number">5.2</span> The noise of a batch</h3>
+<p>Both algorithms are built out of the same raw material, the gradient of a single sample, so we start with that gradient. Take one component of it and read it as a noisy measurement: a signal <span class="math inline">\(\mu\)</span>, the same for every sample, plus a fluctuation of typical size <span class="math inline">\(\sigma\)</span> that differs from sample to sample. In the notation of <span class="math inline">\(\eqref{eq:grad-moments}\)</span>, <span class="math inline">\(\mu\)</span> is that component of <span class="math inline">\(\bar{\mathbf{g}}\)</span> and <span class="math inline">\(\sigma^2\)</span> is the matching diagonal entry of <span class="math inline">\(\Sigma\)</span>. Everything that follows is componentwise, and every component carries its own pair.</p>
+<p>A batch of <span class="math inline">\(b\)</span> samples adds <span class="math inline">\(b\)</span> such measurements together. Means add, so the signal grows as <span class="math inline">\(b\, \mu\)</span>; variances add, so the fluctuation grows only as <span class="math inline">\(\sqrt{b}\, \sigma\)</span>. By the central limit theorem, already used in <a href="#sec-noise" class="quarto-xref">Section&nbsp;2</a>, the batch sum is moreover close to Gaussian, so its mean and its variance describe it completely. Treating the batch gradient noise this way is standard, as in <a href="https://arxiv.org/abs/1704.04289">Mandt, Hoffman and Blei</a> and <a href="https://arxiv.org/abs/1511.06251">Li, Tai and E</a>.</p>
+<p>The ratio of the two, <span class="math display">\[
+    \text{SNR}(b) = \sqrt{b}\, \frac{\mu}{\sigma} ,
+\]</span> is the signal to noise ratio of the batch gradient. It passes one at the batch size <span class="math display">\[
+    b_* := \frac{\sigma^2}{\mu^2} ,
+    \label{eq:b-star}
+\]</span> which we call the crossover: below it (<span class="math inline">\(b \ll b_*\)</span>) a batch gradient is mostly fluctuation, above it (<span class="math inline">\(b \gg b_*\)</span>) mostly signal.</p>
+<p>The ratio is not one number for a whole network. It differs between weights, between layers, and between the stages of training. We need only a one-sided statement about it. The argument asks that the crossover lie far above any batch we would run, so the quantity to quote is a bound over the weights and over the training, not a typical value. For the model of this article, <span class="math display">\[
+    \frac{\mu}{\sigma} \lesssim 10^{-2} ,
+\]</span> with the largest values along the active part of the trajectory and smaller ones on either side of it, which puts the crossover at <span class="math display">\[
+    b_* \gtrsim 10^4 .
+\]</span> So a single sample carries a very weak signal in this model. Others report the same direction: <a href="https://arxiv.org/abs/1812.06162">McCandlish et al.</a> form the same ratio out of sums over the weights, call it the gradient noise scale, and find that it grows as the loss falls over a run. The largest useful batch size they report ranges from the tens of thousands on ImageNet to the millions in a reinforcement learning agent. Theirs is a number of samples, unlike the noise scale of <a href="#sec-gradient-momentum" class="quarto-xref">Section&nbsp;4</a>, which is a temperature. A crossover of <span class="math inline">\(10^4\)</span> samples and up sits inside those figures, and on their evidence a larger problem puts it further off.</p>
+</section>
+<section id="sec-gate" class="level3" data-number="5.3">
+<h3 data-number="5.3" class="anchored" data-anchor-id="sec-gate"><span class="header-section-number">5.3</span> Where each algorithm puts the gate</h3>
+<p>With this in hand we can state the difference between the two algorithms exactly. Over one batch, <span class="math display">\[
+     \mathbb{E} \left[ \sum_{\text{batch}} g^2 \right] = b\, (\mu^2 + \sigma^2)
+\]</span> for the quantity Adam′ tracks, and <span class="math display">\[
+     \mathbb{E} \left[ \Big(\sum_{\text{batch}} g\Big)^2 \right] = b^2 \mu^2 + b\, \sigma^2
+\]</span> for the one Adam tracks. The first grows as <span class="math inline">\(b\)</span> at every batch size. The second grows as <span class="math inline">\(b\)</span> while <span class="math inline">\(b \ll b_*\)</span> and as <span class="math inline">\(b^2\)</span> once <span class="math inline">\(b \gg b_*\)</span>, which is the crossover again, in the form in which it will be used.</p>
+<p>Both algorithms divide by a running average of one of these. The numerators are the same object in both, an exponential moving average of the batch mean gradient, so <span class="math display">\[
+    \mathbb{E}[\mathbf{v}'] = \mathbb{E}\big[\mathbf{v}^{\text{cl}}\big] = \mu .
+\]</span> The denominators differ. Adam′ averages the mean of the squares, the first display divided by <span class="math inline">\(b\)</span>, and Adam the square of the batch mean, the second display divided by <span class="math inline">\(b^2\)</span>, so that <span class="math display">\[
+    \mathbb{E}[\mathbf{w}'] = \mu^2 + \sigma^2
+    \qquad \text{and} \qquad
+    \mathbb{E}\big[\mathbf{w}^{\text{cl}}\big] = \mu^2 + \frac{\sigma^2}{b} .
+\]</span> All four hold once the averages have forgotten their starting values, and on the assumption that <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span> change little over the span of an average. These are steady values of the averages; the weights go on moving.</p>
+<p>The training is decided per sample, by the average weight increment <span class="math inline">\(\mathbb{E}[\Delta \theta] / b\)</span>, since one update consumes <span class="math inline">\(b\)</span> samples. Take it for both algorithms at once. Adam′ moves a weight by <span class="math inline">\(- \alpha' b\, \mathbf{v}' / (\sqrt{\mathbf{w}'} + \varepsilon')\)</span> and Adam by <span class="math inline">\(- \alpha^{\text{cl}} \mathbf{v}^{\text{cl}} / (\sqrt{\mathbf{w}^{\text{cl}}} + \varepsilon^{\text{cl}})\)</span>, and in both the <span class="math inline">\(\varepsilon\)</span> only keeps the division safe, so drop it. The smoothing is done on <span class="math inline">\(\mathbf{v}\)</span> and <span class="math inline">\(\mathbf{w}\)</span> separately, so we take each increment at their settled values, <span class="math inline">\(\mathbb{E}[\mathbf{v}]\)</span> and <span class="math inline">\(\mathbb{E}[\mathbf{w}]\)</span>. What the fluctuations around those values leave behind is of the order of the inverse number of updates an average spans, which is small at the decay rates Adam is usually run with, and the displays below are accurate to that order. The estimate takes the noise of a single sample to be symmetric, and a skewed one enlarges it, the more so the smaller the batch.</p>
+<p>With the expectations found above, and taking <span class="math inline">\(\mu &gt; 0\)</span> for the component in hand, since a negative <span class="math inline">\(\mu\)</span> only flips the sign of what follows, the step and the increment per sample are <span class="math display">\[
+\begin{aligned}
+    \mathbb{E}[\Delta \theta]
+        &amp;\approx - \alpha'\, b \, \frac{\mu}{\sqrt{\mu^2 + \sigma^2}}
+        = - b\, \alpha' \, \frac{1}{\sqrt{1 + b_*}} , \\
+    \frac{\mathbb{E}[\Delta \theta]}{b}
+        &amp;\approx - \alpha' \, \frac{1}{\sqrt{1 + b_*}}
+\end{aligned}
+\]</span> for Adam′ and <span class="math display">\[
+\begin{aligned}
+    \mathbb{E}[\Delta \theta]
+        &amp;\approx - \alpha^{\text{cl}} \, \frac{\mu}{\sqrt{\mu^2 + \sigma^2 / b}}
+        = - \alpha^{\text{cl}} \, \frac{1}{\sqrt{1 + b_* / b}} , \\
+    \frac{\mathbb{E}[\Delta \theta]}{b}
+        &amp;\approx - \frac{\alpha^{\text{cl}}}{b} \, \frac{1}{\sqrt{1 + b_* / b}}
+        = - \frac{\alpha^{\text{cl}}}{\sqrt{b}\, \sqrt{b + b_*}}
+\end{aligned}
+\]</span> for Adam. Adam′ takes a step <span class="math inline">\(b\)</span> times the larger, by the explicit factor in <span class="math inline">\(\eqref{eq:adam-new}\)</span>, and that is exactly the factor which disappears again on dividing by the <span class="math inline">\(b\)</span> samples the step consumed. In Adam nothing cancels the division.</p>
+<p>The factor <span class="math inline">\(1 / \sqrt{1 + \cdot}\)</span> in each is a gate: close to one when the gradient being measured is clean, close to zero when that gradient is mostly noise, and opening as the signal to noise ratio grows. The design is deliberate. <a href="https://arxiv.org/abs/1412.6980">Kingma and Ba</a> call the ratio of the two moment estimates a signal to noise ratio, and note that a smaller value should give an effective step closer to zero, precisely because a small value means the direction is uncertain. <a href="https://arxiv.org/abs/1705.07774">Balles and Hennig</a>, taking Adam apart, find its direction set by the sign of the gradient and its magnitude by an estimate of the relative variance. The gate is a large part of why Adam is used at all.</p>
+<p>The two algorithms place the same gate at different points. Adam′ measures the signal to noise ratio of a single sample, so its gate sits at <span class="math inline">\(b_*\)</span> and does not move. Adam measures the ratio of the batch gradient it actually steps with, so its gate sits at <span class="math inline">\(b_* / b\)</span> and the batch pushes it open. Where the gate sits is the only difference between the two algorithms.</p>
+</section>
+<section id="sec-no-rescaling" class="level3" data-number="5.4">
+<h3 data-number="5.4" class="anchored" data-anchor-id="sec-no-rescaling"><span class="header-section-number">5.4</span> What a rescaling can and cannot do</h3>
+<p>Adam′ needs no retuning at all, for any component: by <a href="#sec-gate" class="quarto-xref">Section&nbsp;5.3</a> the batch size has already left its increment per sample, and gradient accumulation can buy nothing there.</p>
+<p>In Adam’s increment it stays, inside <span class="math inline">\(\sqrt{b}\, \sqrt{b + b_*}\)</span>. A change of <span class="math inline">\(\alpha^{\text{cl}}\)</span> cannot compensate that in general, since <span class="math inline">\(b_*\)</span> varies across weights, layers and training stages, <a href="#sec-batch-noise" class="quarto-xref">Section&nbsp;5.2</a>, while <span class="math inline">\(\alpha^{\text{cl}}\)</span> is a single number for the whole network.</p>
+<p>Two limits are the exception, because in both the batch size separates from <span class="math inline">\(b_*\)</span>: <span class="math display">\[
+    \frac{\mathbb{E}[\Delta \theta]}{b}
+        \approx - \frac{\alpha^{\text{cl}}}{b}
+    \quad \text{for} \quad b \gg b_* ,
+    \qquad
+    \frac{\mathbb{E}[\Delta \theta]}{b}
+        \approx - \frac{\alpha^{\text{cl}}}{\sqrt{b}\, \sqrt{b_*}}
+    \quad \text{for} \quad b \ll b_* .
+\]</span> The first asks for a linear rescaling, holding <span class="math inline">\(\alpha^{\text{cl}} / b\)</span> fixed, the second for a square root one, holding <span class="math display">\[
+    \tilde{\alpha} := \frac{\alpha^{\text{cl}}}{\sqrt{b}}
+\]</span> fixed, and each serves every component at once. Between the two, where <span class="math inline">\(b\)</span> and <span class="math inline">\(b_*\)</span> are comparable, no single number serves.</p>
+<p>Real training runs at <span class="math display">\[
+    1 \leq b \ll b_* ,
+\]</span> so the second is the practical one: raising the batch by a factor <span class="math inline">\(k\)</span> asks for the classical step size to be raised by <span class="math inline">\(\sqrt{k}\)</span>, which is the square root scaling rule for Adam, see <a href="https://arxiv.org/abs/2205.10287">Malladi et al.</a> and <a href="https://arxiv.org/abs/2006.09092">Granziol et al.</a>. Malladi et al.&nbsp;prove more than we do: their rule comes from a limit in which the whole training trajectory is preserved, while we have only matched the expected progress per sample. The two exponents agree, and that agreement is not evidence for the stronger claim.</p>
+<p><a href="#fig-adam-sqrt" class="quarto-xref">Figure&nbsp;8</a> puts the rule to the network of <a href="#sec-experimental-check" class="quarto-xref">Section&nbsp;1.2</a>. We run Adam without momentum, <span class="math inline">\(\beta_1^{\text{cl}} = 0\)</span>, at the batch sizes <span class="math inline">\(b = 1, 4, 16\)</span>, all far below <span class="math inline">\(b_*\)</span>, and let the second moment average over the same number of samples at every batch size, <span class="math display">\[
+    \beta_2^{\text{cl}} = 0.999^{\,b} .
+\]</span> Where the training is stable, the curves at a common <span class="math inline">\(\tilde\alpha\)</span> lie on top of each other. Held at a common <span class="math inline">\(\alpha^{\text{cl}}\)</span> instead, the same runs separate, the larger batch settling to a lower loss.</p>
+<div id="fig-adam-sqrt" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-adam-sqrt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="images/adam_sqrt_scaling.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8" title="Figure&nbsp;8: Adam without momentum on MNIST: the training loss against the number of elapsed samples, one panel per \tilde\alpha. The batch sizes keep their colours from Figure&nbsp;2, and the legend gives the \alpha^{\text{cl}} of each run. Each curve is the geometric mean over five seeds and the band is their spread. A cross marks where a run that stayed at the chance level, the dotted line, was stopped. The grey curves repeat the other panels. At \tilde\alpha = 4 \cdot 10^{-3} the training is past its stability boundary, and it is lost in four of five seeds at b = 16, three at b = 4 and none at b = 1."><img src="images/adam_sqrt_scaling.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-adam-sqrt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: Adam without momentum on MNIST: the training loss against the number of elapsed samples, one panel per <span class="math inline">\(\tilde\alpha\)</span>. The batch sizes keep their colours from <a href="#fig-batch-lambda" class="quarto-xref">Figure&nbsp;2</a>, and the legend gives the <span class="math inline">\(\alpha^{\text{cl}}\)</span> of each run. Each curve is the geometric mean over five seeds and the band is their spread. A cross marks where a run that stayed at the chance level, the dotted line, was stopped. The grey curves repeat the other panels. At <span class="math inline">\(\tilde\alpha = 4 \cdot 10^{-3}\)</span> the training is past its stability boundary, and it is lost in four of five seeds at <span class="math inline">\(b = 16\)</span>, three at <span class="math inline">\(b = 4\)</span> and none at <span class="math inline">\(b = 1\)</span>.
+</figcaption>
+</figure>
+</div>
+<p>If moving the gate is worth something, then Adam is the better algorithm and accumulation, which raises the effective batch without the memory, is a legitimate way to move it, at an effective batch of the order of <span class="math inline">\(b_*\)</span> itself, <span class="math inline">\(10^4\)</span> samples or more for our model. Nothing in this article establishes that it is worth something, and we do not test whether training there is any better.</p>
+</section>
+<section id="sec-variant" class="level3" data-number="5.5">
+<h3 data-number="5.5" class="anchored" data-anchor-id="sec-variant"><span class="header-section-number">5.5</span> A variant that does scale</h3>
+<p>Adam’s form has a practical argument behind it: <span class="math inline">\(\sum g^2\)</span> requires a separate gradient for every element of the batch, whereas <span class="math inline">\((\sum g)^2\)</span> comes for free from the batch gradient that back-propagation already produces. That weighs on the choice far more heavily than anything above, and it is most probably why Adam was written with the square of the mean in the first place.</p>
+<p>Adam′ is not an approximation to Adam that happens to be convenient. It is a different algorithm. One could build a variant that does approximate Adam, by replacing the square of the mean with <span class="math inline">\(b^{-2} \sum g^2\)</span> instead of <span class="math inline">\(b^{-1} \sum g^2\)</span>, and it would agree with Adam whenever <span class="math inline">\(b\, \mu^2 \ll \sigma^2\)</span>. But it would inherit the moving gate along the way, and the clean scaling would be gone. So a variant cannot both track Adam and keep the clean scaling.</p>
+<p>Invariance under a change of the batch size does not conflict with using only the batch-summed gradient. Adam’s particular combination of the two moments gives up the invariance while keeping the cheap quantities. Consider, for instance, <span class="math display">\[
+    \boldsymbol\theta_{n+1} = \boldsymbol\theta_{n}
+        - \alpha''\, \sqrt{b}\; \frac{\mathbf{v}''_{n+1}}
+            {\sqrt{\mathbf{w}''_{n+1} - \left(\mathbf{v}''_{n+1}\right)^2}
+             + \varepsilon''} ,
+\]</span> where <span class="math inline">\(\mathbf{v}''\)</span> and <span class="math inline">\(\mathbf{w}''\)</span> are moving averages of the batch mean gradient and of its square, the two quantities Adam already keeps, both free of per-example gradients. The two averages share a single time constant, <span class="math inline">\(\tau_1'' = \tau_2''\)</span>, which Adam’s <span class="math inline">\(\beta_1^{\text{cl}} \neq \beta_2^{\text{cl}}\)</span> do not. Their difference estimates the variance of the batch mean, <span class="math display">\[
+    \mathbb{E}[\mathbf{w}''] - \mathbb{E}[\mathbf{v}'']^2
+        = \left( \mu^2 + \frac{\sigma^2}{b} \right) - \mu^2
+        = \frac{\sigma^2}{b} ,
+\]</span> so that <span class="math display">\[
+    \mathbb{E}[\Delta \theta]
+        \approx - \alpha''\, \sqrt{b}\, \frac{\mu}{\sigma / \sqrt{b}}
+        = - b\, \alpha''\, \frac{\mu}{\sigma} ,
+    \qquad
+    \frac{\mathbb{E}[\Delta \theta]}{b} \approx - \alpha''\, \frac{\mu}{\sigma} .
+\]</span> The batch size is gone, and the gate is now <span class="math inline">\(\mu / \sigma\)</span>, the signal to noise ratio of a single sample. That is <span class="math inline">\(1 / \sqrt{b_*}\)</span>, so it agrees with Adam′’s <span class="math inline">\(1 / \sqrt{1 + b_*}\)</span> on every component whose gradient is noisy, which by the measurement above is every component that matters.</p>
+<p>Because the two moments share a time constant, the subtraction is a weighted variance of the batch means and cannot be negative; two different time constants would not guarantee that. The gate, however, has no upper bound where Adam’s saturates at one, so <span class="math inline">\(\varepsilon''\)</span> is doing real work rather than guarding a division.</p>
+<p><a href="https://arxiv.org/abs/1705.07774">Balles and Hennig</a>, cited above for their reading of Adam, build M-SVAG out of the same difference of two averages under a single shared decay, as here, with a correction for the bias it carries. <a href="https://arxiv.org/abs/2010.07468">Zhuang et al.</a> reach the same denominator from the other side: AdaBelief averages the squared deviation of the batch mean gradient from its own moving average, which is equally cheap.</p>
+<p>We are not proposing this rule and we have not run it.</p>
+</section>
+</section>
+<section id="sec-conclusion" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="sec-conclusion"><span class="header-section-number">6</span> Conclusion</h2>
+<section id="sec-practice" class="level3" data-number="6.1">
+<h3 data-number="6.1" class="anchored" data-anchor-id="sec-practice"><span class="header-section-number">6.1</span> What This Means in Practice</h3>
+<p>We would rather not give general recommendations. There are always details that can matter more than anything derived here. What the article offers is an argument about how the hyperparameters ought to behave, and its conclusions agree with the literature in the main.</p>
+<p>Read back in the classical variables, it gives each optimizer a rule for keeping the training the same per sample when the batch size is raised by a factor <span class="math inline">\(k\)</span>.</p>
+<p>Plain gradient descent, by <a href="#sec-counting-samples" class="quarto-xref">Section&nbsp;1</a>, inside the stable region of <a href="#sec-convergence-stability" class="quarto-xref">Section&nbsp;3</a>: <span class="math display">\[
+    \lambda^{\text{cl}} \to k\, \lambda^{\text{cl}} .
+\]</span></p>
+<p>Gradient descent with momentum, <span class="math inline">\(\eqref{eq:sgd-mom-classic}\)</span>, by <a href="#sec-gradient-momentum" class="quarto-xref">Section&nbsp;4</a>: <span class="math display">\[
+\begin{aligned}
+    m^{\text{cl}} &amp;\to \left(m^{\text{cl}}\right)^{k} , \\
+    \lambda^{\text{cl}} &amp;\to k\, \lambda^{\text{cl}} \,
+        \frac{1 - \left(m^{\text{cl}}\right)^{k}}{1 - m^{\text{cl}}} .
+\end{aligned}
+\]</span> The factor approaches <span class="math inline">\(k\)</span> as <span class="math inline">\(m^{\text{cl}} \to 1\)</span>, where the rule becomes <span class="math display">\[
+    \lambda^{\text{cl}} \to k^2\, \lambda^{\text{cl}}
+        + O\big( 1 - m^{\text{cl}} \big) .
+\]</span></p>
+<p>The extra factor is the gain of the unnormalized velocity of <span class="math inline">\(\eqref{eq:sgd-mom-classic}\)</span>, which changes with <span class="math inline">\(m^{\text{cl}}\)</span>. Adam’s moments are normalized, so its step size rule carries no such factor.</p>
+<p>Adam, <span class="math inline">\(\eqref{eq:adam-classic}\)</span>, by <a href="#sec-no-rescaling" class="quarto-xref">Section&nbsp;5.4</a> for the step size and by the same argument as momentum for the decay rates: <span class="math display">\[
+\begin{aligned}
+    \alpha^{\text{cl}} &amp;\to \sqrt{k}\, \alpha^{\text{cl}} , \\
+    \beta_i^{\text{cl}} &amp;\to \left(\beta_i^{\text{cl}}\right)^{k} .
+\end{aligned}
+\]</span></p>
+<p>None of these rules is new. The linear one goes back to <a href="https://arxiv.org/abs/1404.5997">Krizhevsky</a> and is the rule of <a href="https://arxiv.org/abs/1706.02677">Goyal et al.</a>, the momentum one holds the noise scale of <a href="https://arxiv.org/abs/1711.00489">Smith, Kindermans, Ying and Le</a> fixed and the smoothing length with it, the square root one is that of <a href="https://arxiv.org/abs/2205.10287">Malladi et al.</a>, and <a href="https://arxiv.org/abs/2507.07101">Marek et al.</a> count Adam’s decay in tokens.</p>
+</section>
+<section id="sec-limits" class="level3" data-number="6.2">
+<h3 data-number="6.2" class="anchored" data-anchor-id="sec-limits"><span class="header-section-number">6.2</span> What This Does Not Cover</h3>
+<p>The analytic statements hold to leading order in <span class="math inline">\(\lambda\)</span>, and the experiments behind them are the single small network on MNIST described at the start.</p>
+<p>A small <span class="math inline">\(\lambda\)</span> is the assumption the whole argument rests on, and near the stability boundary of <a href="#sec-convergence-stability" class="quarto-xref">Section&nbsp;3</a> it can stop holding. Training is often pushed as close to that boundary as it will go. Two things change there. The boundary is not a single number: it differs from weight to weight and from layer to layer. And a run that sits on it has no free <span class="math inline">\(\lambda\)</span> left, because the boundary fixes the value, so <span class="math inline">\(\lambda\)</span> stops being a hyperparameter in the sense used here.</p>
+<p>Two omissions are more than caveats, since they are where the verdict on accumulation could change. Batch normalization makes the loss depend on how the samples are grouped, so an accumulated batch and a real one are not the same object, see <a href="https://arxiv.org/abs/1802.06455">Mattias Teye, Hossein Azizpour, Kevin Smith</a>. And losses that are not sums over samples, contrastive objectives being the usual example, fall outside the argument.</p>
+</section>
+<section id="a-word-to-the-reader" class="level3" data-number="6.3">
+<h3 data-number="6.3" class="anchored" data-anchor-id="a-word-to-the-reader"><span class="header-section-number">6.3</span> A Word to the Reader</h3>
+<p>When I first heard of gradient accumulation I was puzzled. That such a thing should be worth doing is open to doubt, and this article is my attempt to say where the doubt comes from. I hope it has reached the reader.</p>
+<p>This is not a claim that accumulation is useless. In machine learning anything may work against reasonable expectation. It is a claim about where the burden of proof lies: the usefulness is what needs an argument, and not the doubt. So instead of resting on the doubt, I went looking for the argument that would settle it the other way, and that search is most of this text: it follows the batch size through the drift, the noise, the momentum and Adam, and the one place the batch size survives is inside Adam’s gate. Practical examples are not known to me either, and an improvement in the metrics after a head-on increase of the batch size is not one, since the hyperparameters moved along with it.</p>
+<p>Counting in samples rather than in updates, or in tokens for a language model, is the more obvious half of all this.</p>
+</section>
+</section>
+<section id="sec-postscript" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="sec-postscript"><span class="header-section-number">7</span> Postscript</h2>
+<p>Some years after the first version of this post appeared, <a href="https://arxiv.org/abs/2507.07101">Marek et al.</a> put the same questions to language models, at a scale nothing here approaches. Much of it agrees. They recommend the smallest batch size that saturates throughput, advise against gradient accumulation outside a multi-device case this article does not treat, count the decay of Adam’s second moment in tokens rather than in updates, and train stably with no momentum at all, which <a href="#sec-gradient-momentum" class="quarto-xref">Section&nbsp;4</a> allows.</p>
+<p>One thing does not agree. They find that the square root rule of <a href="#sec-no-rescaling" class="quarto-xref">Section&nbsp;5.4</a> “does not hold” in their setting: from a batch of one to a batch of 1024 it asks for the step size to be multiplied by 32, and they measure a factor of about 3 as the better choice. <a href="#sec-no-rescaling" class="quarto-xref">Section&nbsp;5.4</a> computes the step size that leaves the expected progress per sample unchanged, which is not the same quantity as the step size that trains best. We leave it there.</p>
+<hr>
+<p><em>Revised in 2026 with Claude Code: language, review, checking of the mathematics and the citations, drafting from the author’s notes. The results and conclusions are the author’s.</em></p>
+</section>
+<section id="references" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
+<p>Lukas Balles, Philipp Hennig, <a href="https://arxiv.org/abs/1705.07774"><em>Dissecting Adam: The Sign, Magnitude and Variance of Stochastic Gradients</em></a>, arXiv:1705.07774 (2017).</p>
+<p>Alex Krizhevsky, <a href="https://arxiv.org/abs/1404.5997"><em>One Weird Trick for Parallelizing Convolutional Neural Networks</em></a>, arXiv:1404.5997 (2014).</p>
+<p>Priya Goyal, Piotr Dollár, Ross Girshick et al., <a href="https://arxiv.org/abs/1706.02677"><em>Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour</em></a>, arXiv:1706.02677 (2017).</p>
+<p>Yarin Gal, Zoubin Ghahramani, <a href="https://arxiv.org/abs/1506.02142"><em>Dropout as a Bayesian Approximation: Representing Model Uncertainty in Deep Learning</em></a>, ICML 2016, arXiv:1506.02142.</p>
+<p>Diego Granziol, Stefan Zohren, Stephen Roberts, <a href="https://arxiv.org/abs/2006.09092"><em>Learning Rates as a Function of Batch Size: A Random Matrix Theory Approach to Neural Network Training</em></a>, arXiv:2006.09092 (2020).</p>
+<p>Stanisław Jastrzębski, Zachary Kenton, Devansh Arpit et al., <a href="https://arxiv.org/abs/1711.04623"><em>Three Factors Influencing Minima in SGD</em></a>, arXiv:1711.04623 (2017).</p>
+<p>Rahul Kidambi, Praneeth Netrapalli, Prateek Jain, Sham M. Kakade, <a href="https://arxiv.org/abs/1803.05591"><em>On the Insufficiency of Existing Momentum Schemes for Stochastic Optimization</em></a>, arXiv:1803.05591 (2018).</p>
+<p>Diederik P. Kingma, Jimmy Ba, <a href="https://arxiv.org/abs/1412.6980"><em>Adam: A Method for Stochastic Optimization</em></a>, arXiv:1412.6980 (2014).</p>
+<p>Qianxiao Li, Cheng Tai, Weinan E, <a href="https://arxiv.org/abs/1511.06251"><em>Stochastic modified equations and adaptive stochastic gradient algorithms</em></a>, arXiv:1511.06251 (2015).</p>
+<p>Sadhika Malladi, Kaifeng Lyu, Abhishek Panigrahi, Sanjeev Arora, <a href="https://arxiv.org/abs/2205.10287"><em>On the SDEs and Scaling Rules for Adaptive Gradient Algorithms</em></a>, arXiv:2205.10287 (2022).</p>
+<p>Stephan Mandt, Matthew D. Hoffman, David M. Blei, <a href="https://arxiv.org/abs/1704.04289"><em>Stochastic Gradient Descent as Approximate Bayesian Inference</em></a>, arXiv:1704.04289 (2017).</p>
+<p>Martin Marek, Sanae Lotfi, Aditya Somasundaram et al., <a href="https://arxiv.org/abs/2507.07101"><em>Small Batch Size Training for Language Models: When Vanilla SGD Works, and Why Gradient Accumulation Is Wasteful</em></a>, arXiv:2507.07101 (2025).</p>
+<p>Sam McCandlish, Jared Kaplan, Dario Amodei, OpenAI Dota Team, <a href="https://arxiv.org/abs/1812.06162"><em>An Empirical Model of Large-Batch Training</em></a>, arXiv:1812.06162 (2018).</p>
+<p>Gareth O. Roberts, Richard L. Tweedie, <a href="https://projecteuclid.org/journals/bernoulli/volume-2/issue-4/Exponential-convergence-of-Langevin-distributions-and-their-discrete-approximations/bj/1178291835.full"><em>Exponential convergence of Langevin distributions and their discrete approximations</em></a>, Bernoulli <strong>2</strong>(4) (1996).</p>
+<p>Christopher J. Shallue, Jaehoon Lee, Joseph Antognini et al., <a href="https://arxiv.org/abs/1811.03600"><em>Measuring the Effects of Data Parallelism on Neural Network Training</em></a>, arXiv:1811.03600 (2018).</p>
+<p>Samuel L. Smith, Pieter-Jan Kindermans, Chris Ying, Quoc V. Le, <a href="https://arxiv.org/abs/1711.00489"><em>Don’t Decay the Learning Rate, Increase the Batch Size</em></a>, arXiv:1711.00489 (2017).</p>
+<p>Samuel L. Smith, Quoc V. Le, <a href="https://arxiv.org/abs/1710.06451"><em>A Bayesian Perspective on Generalization and Stochastic Gradient Descent</em></a>, arXiv:1710.06451 (2017).</p>
+<p>Mattias Teye, Hossein Azizpour, Kevin Smith, <a href="https://arxiv.org/abs/1802.06455"><em>Bayesian Uncertainty Estimation for Batch Normalized Deep Networks</em></a>, arXiv:1802.06455 (2018).</p>
+<p>Max Welling, Yee Whye Teh, <a href="https://www.stats.ox.ac.uk/~teh/research/compstats/WelTeh2011a.pdf"><em>Bayesian Learning via Stochastic Gradient Langevin Dynamics</em></a>, ICML (2011).</p>
+<p>Kun Yuan, Bicheng Ying, Ali H. Sayed, <a href="https://www.jmlr.org/papers/v17/16-157.html"><em>On the Influence of Momentum Acceleration on Online Learning</em></a>, Journal of Machine Learning Research <strong>17</strong>(192) (2016).</p>
+<p>Juntang Zhuang, Tommy Tang, Yifan Ding et al., <a href="https://arxiv.org/abs/2010.07468"><em>AdaBelief Optimizer: Adapting Stepsizes by the Belief in Observed Gradients</em></a>, arXiv:2010.07468 (2020).</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/alexeytochin\.github\.io");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="light">
+<input type="hidden" id="giscus-alt-theme" value="light">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "alexeytochin/alexeytochin.github.io";
+    script.dataset.repoId = "MDEwOlJlcG9zaXRvcnkzMTQ3OTMzMDQ=";
+    script.dataset.category = "Comments";
+    script.dataset.categoryId = "DIC_kwDOEsNdWM4DLrgC";
+    script.dataset.mapping = "pathname";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "top";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 Alexey Tochin</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/alexey-tochin-40717989/">
+      <i class="bi bi-linkedin" role="img" aria-label="LinkedIn">
+</i> 
+    </a>
+  </li>  
+    <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/alexeytochin">
+      <i class="bi bi-github" role="img" aria-label="GitHub">
+</i> 
+    </a>
+  </li>  
+    <li class="nav-item compact">
+    <a class="nav-link" href="https://t.me/Alexey_Tochin">
+      <i class="bi bi-telegram" role="img" aria-label="Telegram">
+</i> 
+    </a>
+  </li>  
+    <li class="nav-item compact">
+    <a class="nav-link" href="mailto:Alexey.Tochin@gmail.com">
+      <i class="bi bi-envelope" role="img" aria-label="Email">
+</i> 
+    </a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+</body></html>

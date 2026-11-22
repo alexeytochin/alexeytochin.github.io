@@ -8,3 +8,13 @@ python/*
 **/*.quarto_ipynb
 /docs_committed/
 
+
+# Working files kept next to the posts but not part of the site
+/TODO.md
+posts/**/CLAUDE.md
+posts/**/REVIEW.md
+posts/**/OPEN_QUESTIONS.md
+posts/*/experiments/
+posts/*/future_proofs/
+posts/*/scripts/
+posts/pearcey_basis/M22_explanation.html

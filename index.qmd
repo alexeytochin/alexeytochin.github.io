@@ -1,6 +1,5 @@
 ---
 title: "All Articles"
-subtitle: "Notes on machine learning and mathematical physics."
 listing:
   contents: posts
   sort: "date desc"

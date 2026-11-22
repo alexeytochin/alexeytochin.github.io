@@ -52,7 +52,7 @@ quarto preview
 
 ```bash
 # Rebuild one post in all its formats (HTML + PDF)
-quarto render posts/batch_size_vs_momentum/index.qmd
+quarto render posts/is_batch_size_a_real_hyperparameter/index.qmd
 ```
 
 ---
@@ -184,6 +184,7 @@ rm -rf docs_committed
 ## Comments (giscus)
 
 Comments use [giscus](https://giscus.app) (GitHub Discussions), configured in
-`posts/_metadata.yml`. Before they work: enable the giscus app on the repo, turn
-on Discussions, and fill the `repo-id` / `category-id` placeholders from
-<https://giscus.app>.
+`posts/_metadata.yml`, which holds the repository and category ids (discussion
+category "Comments", Announcement format). The giscus app is installed and Discussions are on. giscus
+needs the repository to be **public**, and the site itself needs GitHub Pages
+(`master`, `/docs`); until both hold, the comment box will not load for visitors.

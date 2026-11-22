@@ -2,13 +2,13 @@
   {
     "listing": "/machine_learning.html",
     "items": [
-      "/posts/batch_size_vs_momentum/index.html"
+      "/posts/is_batch_size_a_real_hyperparameter/index.html"
     ]
   },
   {
     "listing": "/index.html",
     "items": [
-      "/posts/batch_size_vs_momentum/index.html",
+      "/posts/is_batch_size_a_real_hyperparameter/index.html",
       "/posts/pearcey_basis/index.html"
     ]
   },

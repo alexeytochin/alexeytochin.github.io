@@ -43,7 +43,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-ee075cc6cae44f5928a8092fb7663854.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-320d2b4c3cef225b279c4a145f2ecf77.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -204,7 +204,6 @@ window.Quarto = {
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
 <h1 class="title">All Articles</h1>
-<p class="subtitle lead">Notes on machine learning and mathematical physics.</p>
 </div>
 
 
@@ -227,37 +226,37 @@ window.Quarto = {
 
 <div class="quarto-listing quarto-listing-container-default" id="listing-listing">
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-categories="bWFjaGluZS1sZWFybmluZw==" data-listing-date-sort="1617832800000" data-listing-file-modified-sort="1783158746992" data-listing-date-modified-sort="1719180000000" data-listing-reading-time-sort="15" data-listing-word-count-sort="2806">
-<div class="thumbnail"><a href="./posts/batch_size_vs_momentum/index.html" class="no-external">
+<div class="quarto-post image-right" data-index="0" data-categories="bWFjaGluZS1sZWFybmluZw==" data-listing-date-sort="1617832800000" data-listing-file-modified-sort="1795298360387" data-listing-date-modified-sort="1795215600000" data-listing-reading-time-sort="54" data-listing-word-count-sort="10639">
+<div class="thumbnail"><a href="./posts/is_batch_size_a_real_hyperparameter/index.html" class="no-external">
 
-<img loading="lazy" src="./posts/batch_size_vs_momentum/images/icon.png" class="thumbnail-image">
+<img loading="lazy" src="./posts/is_batch_size_a_real_hyperparameter/images/thumbnail.png" class="thumbnail-image">
 
 </a></div>
 <div class="body">
 <h3 class="no-anchor listing-title">
-<a href="./posts/batch_size_vs_momentum/index.html" class="no-external">Batch size vs Momentum</a>
+<a href="./posts/is_batch_size_a_real_hyperparameter/index.html" class="no-external">Is Batch Size a Real Hyperparameter?</a>
 </h3>
 <div class="listing-categories">
 
 <div class="listing-category" onclick="window.quartoListingCategory('bWFjaGluZS1sZWFybmluZw=='); return false;">machine-learning</div>
 
 </div>
-<div class="delink listing-description"><a href="./posts/batch_size_vs_momentum/index.html" class="no-external">
-<p>Imagine we’ve pinpointed the optimal learning rate and other hyperparameters for a gradient descent method and a specific model. But how do we adjust the gradient descent hyperparameters to scale up the batch size effectively without disrupting the current settings? Our main thesis: changing the batch size is roughly equivalent to adjusting the learning rate and momentum.</p>
+<div class="delink listing-description"><a href="./posts/is_batch_size_a_real_hyperparameter/index.html" class="no-external">
+<p>The <em>gradient-accumulation</em> trick sums the gradients of several small batches at one weight to simulate a larger batch. It looks redundant: the batch size is there for parallelism, and smoothing is what momentum is for. Settling that turned out to require a closer look at what changing the batch size actually does. Counted per sample rather than per update, that expectation is confirmed for plain gradient descent, with momentum or without. For Adam it holds only in part.</p>
 </a></div>
 </div>
 <div class="metadata">
-<a href="./posts/batch_size_vs_momentum/index.html" class="no-external">
+<a href="./posts/is_batch_size_a_real_hyperparameter/index.html" class="no-external">
 <div class="listing-date">
 Apr 8, 2021
 </div>
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="1" data-categories="b3RoZXItdG9waWNz" data-listing-date-sort="1617832800000" data-listing-file-modified-sort="1783160749696" data-listing-date-modified-sort="1719180000000" data-listing-reading-time-sort="27" data-listing-word-count-sort="5306">
+<div class="quarto-post image-right" data-index="1" data-categories="b3RoZXItdG9waWNz" data-listing-date-sort="1617832800000" data-listing-file-modified-sort="1795375526448" data-listing-date-modified-sort="1795302000000" data-listing-reading-time-sort="39" data-listing-word-count-sort="7626">
 <div class="thumbnail"><a href="./posts/pearcey_basis/index.html" class="no-external">
 
-<img loading="lazy" src="./posts/pearcey_basis/images/eigenvalue_distribution_15_6.png" class="thumbnail-image">
+<img loading="lazy" src="./posts/pearcey_basis/images/thumbnail.png" class="thumbnail-image">
 
 </a></div>
 <div class="body">
@@ -701,7 +700,7 @@ Apr 8, 2021
     <div class="nav-footer-right">
       <ul class="footer-items list-unstyled">
     <li class="nav-item compact">
-    <a class="nav-link" href="https://www.linkedin.com/in/alexey-tochin-40717989/?locale=en_US">
+    <a class="nav-link" href="https://www.linkedin.com/in/alexey-tochin-40717989/">
       <i class="bi bi-linkedin" role="img" aria-label="LinkedIn">
 </i> 
     </a>
@@ -720,7 +719,7 @@ Apr 8, 2021
   </li>  
     <li class="nav-item compact">
     <a class="nav-link" href="mailto:Alexey.Tochin@gmail.com">
-      <i class="bi bi-envelope" role="img" aria-label="e-mail">
+      <i class="bi bi-envelope" role="img" aria-label="Email">
 </i> 
     </a>
   </li>  
